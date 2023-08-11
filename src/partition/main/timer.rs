@@ -5,7 +5,7 @@ use b3_stable_structures::{BoundedStorable, GrowFailed, Storable};
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
-use crate::{partition::DefaultVMHeap, timestamp::NanoTimeStamp};
+use crate::{partition::DefaultVMHeap, NanoTimeStamp};
 
 use super::MainPartition;
 

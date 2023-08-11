@@ -1,10 +1,8 @@
 #[cfg(test)]
 mod test {
     use crate::{
-        partition::{
-            main::timer::TimerEntry, with_partition_manager_mut, MainPartition, PartitionManager,
-        },
-        timestamp::NanoTimeStamp,
+        partition::{main::timer::TimerEntry, with_partition_manager_mut, MainPartition},
+        NanoTimeStamp,
     };
     use b3_stable_structures::Memory;
 
@@ -51,9 +49,7 @@ mod test {
 
     #[test]
     fn test_timer_partition() {
-        let mut partition_manager = PartitionManager::init();
-
-        let mut main_partition = MainPartition::init(&mut partition_manager);
+        let mut main_partition = with_partition_manager_mut(|pm| MainPartition::init(pm));
 
         let timer = main_partition.timer();
 

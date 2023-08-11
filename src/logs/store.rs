@@ -51,7 +51,7 @@ macro_rules! log {
         // Print the message for convenience for local development (e.g. integration tests)
         println!("{}", &message);
         (&$crate::logs::MAIN_LOG).append($crate::logs::LogEntry {
-            timestamp: $crate::logs::now(),
+            timestamp: $crate::NanoTimeStamp::now(),
             message,
             file: std::file!(),
             line: std::line!(),
@@ -134,5 +134,5 @@ pub fn export_log() -> Vec<LogEntry> {
 /// assert_eq!(entries.len(), 1);
 /// ```
 pub fn export_log_messages() -> Vec<String> {
-    MAIN_LOG.with(|log| log.borrow().iter().map(|entry| entry.to_string()).collect())
+    with_log(|log| log.iter().map(|entry| entry.to_string()).collect())
 }

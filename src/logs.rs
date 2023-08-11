@@ -1,3 +1,4 @@
+use crate::NanoTimeStamp;
 use candid::CandidType;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -14,7 +15,7 @@ mod test;
 /// An entry in the canister log.
 #[derive(CandidType, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct LogEntry {
-    pub timestamp: u64,
+    pub timestamp: NanoTimeStamp,
     // The index of this entry starting from the last canister upgrade.
     pub counter: u64,
     pub message: String,
@@ -106,34 +107,4 @@ impl Sink for &'static GlobalBuffer {
     fn append(&self, entry: LogEntry) {
         self.with(|cell| cell.borrow_mut().append(entry))
     }
-}
-
-mod private {
-    #[cfg(target_arch = "wasm32")]
-    #[link(wasm_import_module = "ic0")]
-    extern "C" {
-        pub fn time() -> u64;
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    pub fn timestamp() -> u64 {
-        unsafe { time() }
-    }
-
-    #[cfg(not(target_arch = "wasm32"))]
-    pub fn timestamp() -> u64 {
-        use std::time::SystemTime;
-
-        match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
-            Ok(d) => d.as_nanos() as u64,
-            Err(_) => panic!("SystemTime before UNIX EPOCH!"),
-        }
-    }
-}
-
-/// Returns the current time as a number of nanoseconds passed since the Unix
-/// epoch.
-#[doc(hidden)]
-pub fn now() -> u64 {
-    private::timestamp()
 }

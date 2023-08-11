@@ -58,6 +58,9 @@ pub mod release;
 pub mod types;
 pub mod wasm;
 
+mod timestamp;
+pub use timestamp::*;
+
 mod ledger;
 pub use ledger::*;
 

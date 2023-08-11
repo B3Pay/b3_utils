@@ -36,11 +36,12 @@ mod test {
     #[test]
     fn test_log_buffer() {
         use crate::logs::LogBuffer;
+        use crate::NanoTimeStamp;
 
         let mut buffer = LogBuffer::with_capacity(2);
 
         buffer.append(LogEntry {
-            timestamp: 0,
+            timestamp: NanoTimeStamp(0),
             counter: 0,
             message: "Hello, world!".to_string(),
             file: "foo.rs",
@@ -48,7 +49,7 @@ mod test {
         });
 
         buffer.append(LogEntry {
-            timestamp: 1,
+            timestamp: NanoTimeStamp(1),
             counter: 1,
             message: "Hello, world!".to_string(),
             file: "foo.rs",
@@ -56,7 +57,7 @@ mod test {
         });
 
         buffer.append(LogEntry {
-            timestamp: 2,
+            timestamp: NanoTimeStamp(2),
             counter: 2,
             message: "Hello, world!".to_string(),
             file: "foo.rs",

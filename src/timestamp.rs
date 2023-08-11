@@ -3,9 +3,9 @@ use std::fmt;
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
-#[cfg(test)]
+#[cfg(not(target_arch = "wasm32"))]
 use crate::mocks::time_mock as ic_timestamp;
-#[cfg(not(test))]
+#[cfg(target_arch = "wasm32")]
 use ic_cdk::api::time as ic_timestamp;
 
 mod test;
