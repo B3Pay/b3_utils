@@ -6,8 +6,10 @@ use super::StableMemory;
 mod test;
 
 pub mod backup;
-pub mod store;
 pub mod timer;
+
+mod store;
+pub use store::*;
 
 use backup::MainBackupType;
 use timer::MainTimerType;
