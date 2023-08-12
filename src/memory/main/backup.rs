@@ -2,7 +2,7 @@ use std::borrow::BorrowMut;
 
 use b3_stable_structures::{writer::Writer, Memory};
 
-use crate::partition::DefaultVM;
+use crate::memory::DefaultVM;
 
 use super::MainPartition;
 

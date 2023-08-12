@@ -1,7 +1,7 @@
 use b3_stable_structures::Memory;
 
 use super::types::PartitionDetail;
-use super::Partition;
+use super::StableMemory;
 
 mod test;
 
@@ -26,10 +26,10 @@ impl MainPartition {
     /// The events_data and events_index partitions are used to store the events of the canister.
     ///
     /// The backup partition is initialized with the value "[PartitionManager]: initialized!".
-    pub fn init(partition_manager: &mut Partition) -> Self {
+    pub fn init(partition_manager: &mut StableMemory) -> Self {
         let backup = partition_manager.create("__backup", 0).unwrap();
 
-        let timer = partition_manager.init_heap("__timer", 1).unwrap();
+        let timer = partition_manager.init_min_heap("__timer", 1).unwrap();
 
         Self { backup, timer }
     }
