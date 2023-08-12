@@ -1,22 +1,46 @@
 #[cfg(test)]
 mod tests {
-    use crate::partition::PartitionManager;
+    use crate::partition::{with_partition, with_partition_mut, Partition};
 
     #[test]
-    fn test_partition_manager() {
-        let mut partition_manager = PartitionManager::init();
+    fn test_init_partition() {
+        with_partition(|partition| {
+            assert_eq!(partition.partitions.len(), 0);
+        });
+    }
 
-        let partition = "test_partition";
-        partition_manager.create_partition(partition, 13).unwrap();
+    #[test]
+    fn test_create_partition() {
+        with_partition_mut(|partition| {
+            let partition1 = partition.create("test", 1);
 
-        let id = partition_manager.get_partition(partition).unwrap();
+            assert!(partition1.is_ok());
+
+            let partition2 = partition.create("test", 2);
+
+            assert!(partition2.is_err());
+
+            let partition3 = partition.create("test2", 1);
+
+            assert!(partition3.is_err());
+        });
+    }
+
+    #[test]
+    fn test_partition() {
+        let mut partition = Partition::init();
+
+        let partition_name = "test_partition";
+        partition.create(partition_name, 13).unwrap();
+
+        let id = partition.partition(partition_name).unwrap();
 
         assert_eq!(id, 13);
 
-        let partition = "test_partition2";
-        partition_manager.create_partition(partition, 14).unwrap();
+        let partition_name = "test_partition2";
+        partition.create(partition_name, 14).unwrap();
 
-        let id = partition_manager.get_partition(partition).unwrap();
+        let id = partition.partition(partition_name).unwrap();
 
         assert_eq!(id, 14);
     }
@@ -24,7 +48,7 @@ mod tests {
     #[test]
     fn test_partition_loop() {
         // find duplicates
-        let mut partition_manager = PartitionManager::init();
+        let mut partition = Partition::init();
 
         #[rustfmt::skip]
         let words = [
@@ -61,25 +85,21 @@ mod tests {
         ];
 
         for (i, word) in words.iter().enumerate() {
-            partition_manager
-                .create_partition(&word, (i) as u8)
-                .unwrap();
+            partition.create(&word, (i) as u8).unwrap();
 
-            let id = partition_manager.get_partition(word).unwrap();
+            let id = partition.partition(word).unwrap();
 
             assert_eq!(id, (i) as u8);
         }
 
-        println!("Partitions: {}", partition_manager.partitions.len())
+        println!("Partitions: {}", partition.partitions.len())
     }
 
     #[test]
     fn test_stable_vec() {
-        let mut partition_manager = PartitionManager::init();
-        let partition = "test_partition";
-        let vec = partition_manager
-            .init_stable_vec::<u32>(partition, 10)
-            .unwrap();
+        let mut partition = Partition::init();
+
+        let vec = partition.init_vec::<u32>("test_partition", 10).unwrap();
 
         vec.push(&1).unwrap();
         vec.push(&2).unwrap();
@@ -94,10 +114,9 @@ mod tests {
 
     #[test]
     fn test_stable_map() {
-        let mut partition_manager = PartitionManager::init();
-        let mut map = partition_manager
-            .init_stable_map::<u32, u32>("test", 13)
-            .unwrap();
+        let mut partition = Partition::init();
+
+        let mut map = partition.init_map::<u32, u32>("test", 13).unwrap();
 
         map.insert(1, 1);
         map.insert(2, 2);
@@ -112,11 +131,9 @@ mod tests {
 
     #[test]
     fn test_stable_heap() {
-        let mut partition_manager = PartitionManager::init();
-        let partition = "test_partition";
-        let mut heap = partition_manager
-            .init_stable_heap::<u32>(partition, 10)
-            .unwrap();
+        let mut partition = Partition::init();
+
+        let mut heap = partition.init_heap::<u32>("test_partition", 10).unwrap();
 
         heap.push(&1).unwrap();
         heap.push(&2).unwrap();
@@ -131,12 +148,9 @@ mod tests {
 
     #[test]
     fn test_stable_log() {
-        let mut partition_manager = PartitionManager::init();
+        let mut partition = Partition::init();
 
-        let partition = "test_partition";
-        let log = partition_manager
-            .init_stable_log::<u32>(partition, 10, 11)
-            .unwrap();
+        let log = partition.init_log::<u32>("test_partition", 10, 11).unwrap();
 
         log.append(&1).unwrap();
         log.append(&2).unwrap();
@@ -151,15 +165,10 @@ mod tests {
 
     #[test]
     fn test_stable_heap_with_stable_vec() {
-        let mut partition_manager = PartitionManager::init();
-        let partition = "test_partition";
-        let partition1 = "test_partition1";
-        let mut heap = partition_manager
-            .init_stable_heap::<u32>(partition, 10)
-            .unwrap();
-        let vec = partition_manager
-            .init_stable_vec::<u32>(partition1, 11)
-            .unwrap();
+        let mut partition = Partition::init();
+
+        let mut heap = partition.init_heap::<u32>("test_partition", 10).unwrap();
+        let vec = partition.init_vec::<u32>("test_partition1", 11).unwrap();
 
         vec.push(&1).unwrap();
         vec.push(&2).unwrap();

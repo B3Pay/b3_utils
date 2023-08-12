@@ -8,7 +8,7 @@ use std::collections::HashMap;
 mod test;
 
 pub mod error;
-use error::PartitionManagerError;
+use error::PartitionError;
 
 mod main;
 pub use main::*;
@@ -16,18 +16,15 @@ pub use main::*;
 mod store;
 pub use store::*;
 
-use self::types::{
-    DefaultVM, DefaultVMCell, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec,
-};
-
 pub mod types;
+use types::{DefaultVM, DefaultVMCell, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec};
 
-pub struct PartitionManager {
+pub struct Partition {
     memory_manager: MemoryManager<DefaultMemoryImpl>,
     partitions: HashMap<String, u8>,
 }
 
-impl PartitionManager {
+impl Partition {
     pub fn init() -> Self {
         let memory_manager = MemoryManager::init(DefaultMemoryImpl::default());
         let partitions = HashMap::new();
@@ -38,21 +35,15 @@ impl PartitionManager {
         }
     }
 
-    pub fn create_partition(
-        &mut self,
-        name: &str,
-        id: u8,
-    ) -> Result<DefaultVM, PartitionManagerError> {
+    pub fn create(&mut self, name: &str, id: u8) -> Result<DefaultVM, PartitionError> {
         let partitions = self.partitions.borrow_mut();
 
         match partitions.get(name) {
-            Some(_) => return Err(PartitionManagerError::PartitionExists),
+            Some(_) => return Err(PartitionError::PartitionExists),
             None => {
                 for (memory_name, memory_id) in partitions.iter() {
                     if *memory_id == id {
-                        return Err(PartitionManagerError::IdAlreadyUsed(
-                            memory_name.to_string(),
-                        ));
+                        return Err(PartitionError::IdAlreadyUsed(memory_name.to_string()));
                     }
                 }
 
@@ -61,23 +52,21 @@ impl PartitionManager {
         }
 
         let memory = self
-            .get_memory(name)
-            .ok_or(PartitionManagerError::UnableToCreateMemory(
-                name.to_string(),
-            ))?;
+            .memory(name)
+            .ok_or(PartitionError::UnableToCreateMemory(name.to_string()))?;
 
         Ok(memory)
     }
 
-    pub fn get_partition(&self, name: &str) -> Option<u8> {
-        self.partitions.get(name).copied()
+    pub fn partition(&self, name: &str) -> Option<u8> {
+        self.partitions.get(name).cloned()
     }
 
     pub fn partitions(&self) -> &HashMap<String, u8> {
         &self.partitions
     }
 
-    pub fn get_memory(&self, name: &str) -> Option<DefaultVM> {
+    pub fn memory(&self, name: &str) -> Option<DefaultVM> {
         let memory_id = self.partitions.get(name)?;
 
         let vm = self.memory_manager.get(MemoryId::new(*memory_id));
@@ -89,64 +78,59 @@ impl PartitionManager {
         &self.memory_manager
     }
 
-    pub fn init_stable_vec<T: Storable + BoundedStorable>(
+    pub fn init_vec<T: Storable + BoundedStorable>(
         &mut self,
         name: &str,
         id: u8,
-    ) -> Result<DefaultVMVec<T>, PartitionManagerError> {
-        let memory = self.create_partition(name, id)?;
+    ) -> Result<DefaultVMVec<T>, PartitionError> {
+        let memory = self.create(name, id)?;
 
-        StableVec::init(memory)
-            .map_err(|e| PartitionManagerError::UnableToCreateMemory(e.to_string()))
+        StableVec::init(memory).map_err(|e| PartitionError::UnableToCreateMemory(e.to_string()))
     }
 
-    pub fn init_stable_map<
-        K: Ord + Storable + BoundedStorable + Clone,
-        V: Storable + BoundedStorable,
-    >(
+    pub fn init_map<K: Ord + Storable + BoundedStorable + Clone, V: Storable + BoundedStorable>(
         &mut self,
         name: &str,
         id: u8,
-    ) -> Result<DefaultVMMap<K, V>, PartitionManagerError> {
-        let memory = self.create_partition(name, id)?;
+    ) -> Result<DefaultVMMap<K, V>, PartitionError> {
+        let memory = self.create(name, id)?;
 
         let map = StableBTreeMap::init(memory);
 
         Ok(map)
     }
 
-    pub fn init_stable_heap<T: Ord + Storable + BoundedStorable>(
+    pub fn init_heap<T: Ord + Storable + BoundedStorable>(
         &mut self,
         name: &str,
         id: u8,
-    ) -> Result<DefaultVMHeap<T>, PartitionManagerError> {
-        let memory = self.create_partition(name, id)?;
+    ) -> Result<DefaultVMHeap<T>, PartitionError> {
+        let memory = self.create(name, id)?;
 
-        DefaultVMHeap::init(memory)
-            .map_err(|e| PartitionManagerError::UnableToCreateMemory(e.to_string()))
+        DefaultVMHeap::init(memory).map_err(|e| PartitionError::UnableToCreateMemory(e.to_string()))
     }
 
-    pub fn init_stable_log<T: Storable>(
+    pub fn init_log<T: Storable>(
         &mut self,
         name: &str,
         index_id: u8,
         data_id: u8,
-    ) -> Result<DefaultVMLog<T>, PartitionManagerError> {
-        let index_memory = self.create_partition(&format!("{}_index", name), index_id)?;
-        let data_memory = self.create_partition(&format!("{}_data", name), data_id)?;
+    ) -> Result<DefaultVMLog<T>, PartitionError> {
+        let index_memory = self.create(&format!("{}_index", name), index_id)?;
+        let data_memory = self.create(&format!("{}_data", name), data_id)?;
 
         StableLog::init(index_memory, data_memory)
-            .map_err(|e| PartitionManagerError::UnableToCreateMemory(e.to_string()))
+            .map_err(|e| PartitionError::UnableToCreateMemory(e.to_string()))
     }
 
-    pub fn init_stable_cell<T: Storable + Default>(
+    pub fn init_cell<T: Storable + Default>(
         &mut self,
         name: &str,
         id: u8,
-    ) -> Result<DefaultVMCell<T>, PartitionManagerError> {
-        let memory = self.create_partition(name, id)?;
+    ) -> Result<DefaultVMCell<T>, PartitionError> {
+        let memory = self.create(name, id)?;
 
         StableCell::init(memory, T::default())
-            .map_err(|e| PartitionManagerError::UnableToCreateMemory(e.to_string()))
+            .map_err(|e| PartitionError::UnableToCreateMemory(e.to_string()))
     }
 }
