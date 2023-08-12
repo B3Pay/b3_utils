@@ -6,21 +6,22 @@ use super::StableMemory;
 mod test;
 
 pub mod backup;
+pub mod store;
 pub mod timer;
 
 use backup::MainBackupType;
 use timer::MainTimerType;
 
-pub struct MainPartition {
+pub struct BasePartition {
     backup: MainBackupType,
     timer: MainTimerType,
 }
 
-impl MainPartition {
+impl BasePartition {
     /// Initializes the core partition.
     /// The core partition is composed of 3 sub-partitions:
     /// - __backup 0
-    /// - __timer 3
+    /// - __timer 1
     ///
     /// The backup partition is used to store the backup state of the canister.
     /// The events_data and events_index partitions are used to store the events of the canister.
@@ -34,7 +35,7 @@ impl MainPartition {
         Self { backup, timer }
     }
 
-    pub fn partitions_details(&self) -> Vec<PartitionDetail> {
+    pub fn details(&self) -> Vec<PartitionDetail> {
         vec![self.backup_details(), self.timer_details()]
     }
 

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{memory::DefaultVMHeap, NanoTimeStamp};
 
-use super::MainPartition;
+use super::BasePartition;
 
 pub type MainTimerType = DefaultVMHeap<TimerEntry>;
 
@@ -17,7 +17,7 @@ pub struct TimerEntry {
     pub id: u64,
 }
 
-impl MainPartition {
+impl BasePartition {
     pub fn timer(&self) -> &MainTimerType {
         &self.timer
     }
