@@ -10,7 +10,6 @@ readme = "./README.md"
 serde = { version = "1.0", features = ["derive"] }
 candid = "0.9"
 ic-cdk = "0.10"
-
 hex = "0.4"
 easy-hasher = "2.2"
 serde_bytes = "0.11"
