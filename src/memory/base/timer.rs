@@ -69,7 +69,7 @@ impl Storable for TimerEntry {
         bytes[0..8].copy_from_slice(&time_bytes);
         bytes[8..16].copy_from_slice(&id_bytes);
 
-        Cow::Owned(bytes)
+        bytes.into()
     }
 
     fn from_bytes(bytes: Cow<[u8]>) -> Self {
@@ -93,8 +93,10 @@ mod tests {
         let bytes = entry.to_bytes();
         assert_eq!(bytes.len(), size_of::<TimerEntry>());
 
-        let entry_from_bytes = TimerEntry::from_bytes(Cow::Borrowed(&bytes));
+        let entry_from_bytes = TimerEntry::from_bytes(bytes);
 
         assert_eq!(entry, entry_from_bytes);
+        assert_eq!(entry_from_bytes.time, 1234567890.into());
+        assert_eq!(entry_from_bytes.id, 9876543210);
     }
 }

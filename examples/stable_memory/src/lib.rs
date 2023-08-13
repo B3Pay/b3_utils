@@ -4,7 +4,7 @@ use b3_utils::memory::base::{timer::TimerEntry, with_base_partition, with_base_p
 use b3_utils::memory::types::{
     BoundedStorable, DefaultVMHeap, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
 };
-use b3_utils::memory::{with_stable_memory_mut, StableMemory};
+use b3_utils::memory::{with_stable_memory, with_stable_memory_mut};
 use b3_utils::NanoTimeStamp;
 use candid::{candid_method, CandidType};
 use ciborium::de::from_reader;
@@ -17,10 +17,6 @@ use std::collections::HashMap;
 use std::io::Cursor;
 
 const MAX_OPERATION_SIZE: u32 = 100;
-
-thread_local! {
-    static STABLE_MEMORY: RefCell<StableMemory> = RefCell::new(StableMemory::init())
-}
 
 thread_local! {
     static MAP: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("map", 10).unwrap()));
@@ -262,7 +258,7 @@ fn get_partition() -> HashMap<String, u8> {
     USERS.with(|_| {});
     STATE.with(|_| {});
 
-    STABLE_MEMORY.with(|pm| pm.borrow().partitions().clone())
+    with_stable_memory(|pm| pm.partitions().clone())
 }
 
 #[query]
