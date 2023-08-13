@@ -14,4 +14,4 @@ candid = "0.9"
 ic-cdk = "0.10"
 ic0 = "0.18"
 serde = { version = "1.0", features = ["derive"] }
-b3_utils = { path = "../../" }
+b3_utils = { workspace = true }
