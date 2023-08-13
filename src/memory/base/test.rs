@@ -1,10 +1,7 @@
 #[cfg(test)]
 mod test {
     use crate::{
-        memory::{
-            base::{timer::TimerEntry, with_base_partition},
-            with_base_partition_mut,
-        },
+        memory::base::{timer::TimerEntry, with_base_partition, with_base_partition_mut},
         NanoTimeStamp,
     };
     use b3_stable_structures::Memory;
@@ -14,6 +11,7 @@ mod test {
         with_base_partition(|base_partition| {
             assert_eq!(base_partition.backup_details().len, 0);
             assert_eq!(base_partition.timer_details().len, 0);
+            assert_eq!(base_partition.details().len(), 2);
         });
     }
 
@@ -24,27 +22,13 @@ mod test {
 
             assert_eq!(backup.size(), 0);
 
-            let mut state_bytes = vec![0u8; 4];
+            let state_bytes = [1, 2, 3, 4].to_vec();
 
-            state_bytes.copy_from_slice(&[1, 2, 3, 4]);
-
-            base_partition.set_backup(state_bytes);
+            base_partition.set_backup(state_bytes.clone());
 
             let backup = base_partition.backup();
 
             assert_eq!(backup.size(), 1);
-
-            let mut len_bytes = [0u8; 4];
-            backup.read(0, &mut len_bytes);
-            let state_len = u32::from_le_bytes(len_bytes);
-
-            assert_eq!(state_len, 4);
-
-            let mut state_bytes = vec![0; state_len as usize];
-            backup.read(4, &mut state_bytes);
-
-            println!("{:?}", state_bytes);
-            println!("{:?}", base_partition.get_backup());
 
             assert_eq!(state_bytes, base_partition.get_backup());
         });

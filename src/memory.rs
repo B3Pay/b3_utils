@@ -10,8 +10,7 @@ mod test;
 pub mod error;
 use error::StableMemoryError;
 
-mod base;
-pub use base::*;
+pub mod base;
 
 mod store;
 pub use store::*;
