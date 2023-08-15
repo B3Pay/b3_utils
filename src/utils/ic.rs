@@ -17,5 +17,5 @@ pub async fn ic_canister_status(
 }
 
 pub fn revert<T, E: Display>(err: E) -> T {
-    ic_cdk::trap(&format!("Error::{}", err));
+    ic_cdk::trap(&format!("{}", err));
 }
