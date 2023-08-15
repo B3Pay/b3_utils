@@ -50,5 +50,6 @@ service : () -> {
   schedule_task : (nat64, nat64) -> ();
   sum_and_log : (nat64, nat64) -> (nat64);
   sum_and_log_sub : (nat64, nat64) -> (Result_1);
+  sum_and_log_sub_with_require : (nat64, nat64) -> (Result_1);
   update_state : (State) -> ();
 }

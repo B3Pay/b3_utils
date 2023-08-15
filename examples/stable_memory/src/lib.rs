@@ -5,7 +5,7 @@ use b3_utils::memory::types::{
 };
 use b3_utils::memory::{with_stable_memory, with_stable_memory_mut};
 use b3_utils::{export_log, export_log_messages_page, LogEntry};
-use b3_utils::{require, NanoTimeStamp};
+use b3_utils::{require, require_log, NanoTimeStamp};
 use candid::{candid_method, CandidType};
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
@@ -267,6 +267,18 @@ pub fn sub(x: u64, y: u64) -> Result<u64, String> {
     }
 
     Ok(x.saturating_sub(y))
+}
+
+#[update]
+#[candid_method(update)]
+fn sum_and_log_sub_with_require(x: u64, y: u64) -> Result<u64, String> {
+    require_log!(x >= y, "y({}) must be less than x({})", y, x);
+
+    let result = x.saturating_sub(y);
+
+    log!("sum_and_log_sub_with_require: {} - {} = {}", x, y, result);
+
+    Ok(result)
 }
 
 #[query]

@@ -41,8 +41,6 @@ impl fmt::Display for LogEntry {
 /// ```
 /// use b3_utils::{log, export_log};
 ///
-/// // Keep up to 100 last messages.
-///
 /// fn sum_and_log(x: u64, y: u64) -> u64 {
 ///    let result = x.saturating_add(y);
 ///    log!("{} + {} = {}", x, y, result);
@@ -88,8 +86,8 @@ macro_rules! log {
 /// assert_eq!(sum_and_log(1, 2), Ok(3));
 ///
 /// match sum_and_log(100, 2) {
-///    Ok(_) => panic!("Should have failed"),
-///    Err(e) => assert_eq!(e, "Result is too big: 102"),
+///     Ok(_) => panic!("Should have failed"),
+///     Err(e) => assert_eq!(e, "Result is too big: 102"),
 /// }
 ///
 /// assert_eq!(export_log()[0].message, "Result is too big: 102");
@@ -99,7 +97,34 @@ macro_rules! log {
 macro_rules! require_log {
     ($condition:expr, $($msg:tt)*) => {
         if !$condition {
+            $crate::log!($($msg)*);
+
             return $crate::report(format!($($msg)*));
         }
     };
+}
+
+#[cfg(test)]
+mod test_utils {
+    use crate::{export_log, require_log};
+
+    #[test]
+    fn test_log() {
+        fn sum_and_log(x: u64, y: u64) -> Result<u64, String> {
+            let result = x.saturating_add(y);
+            require_log!(result < 100, "Result is too big: {}", result);
+
+            Ok(result)
+        }
+
+        assert_eq!(sum_and_log(1, 2), Ok(3));
+
+        match sum_and_log(100, 2) {
+            Ok(_) => panic!("Should have failed"),
+            Err(e) => assert_eq!(e, "Result is too big: 102"),
+        }
+
+        assert_eq!(export_log()[0].message, "Result is too big: 102");
+        assert_eq!(export_log()[0].counter, 1);
+    }
 }

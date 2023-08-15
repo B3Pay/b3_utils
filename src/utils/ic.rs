@@ -2,7 +2,7 @@ use ic_cdk::api::management_canister::{
     main::{canister_status, CanisterStatusResponse},
     provisional::{CanisterId, CanisterIdRecord},
 };
-use std::fmt::Display;
+use std::fmt;
 
 use crate::error::HelperError;
 
@@ -16,6 +16,10 @@ pub async fn ic_canister_status(
     Ok(status)
 }
 
-pub fn revert<T, E: Display>(err: E) -> T {
+pub fn revert<T, E: fmt::Display>(err: E) -> T {
     ic_cdk::trap(&format!("{}", err));
+}
+
+pub fn report<T, E: fmt::Display>(err: E) -> Result<T, String> {
+    Err(format!("{}", err))
 }
