@@ -1,0 +1,18 @@
+type EncryptedNote = record { id : nat; encrypted_text : text };
+type GetCiphertextError = variant { notSynced; notFound };
+type Result = variant { ok : text; err : GetCiphertextError };
+service : {
+  add_note : (text) -> ();
+  delete_note : (nat) -> ();
+  get_ciphertext : (text) -> (Result) query;
+  get_devices : () -> (vec record { text; text }) query;
+  get_notes : () -> (vec EncryptedNote) query;
+  get_unsynced_pubkeys : () -> (vec text) query;
+  is_seeded : () -> (bool) query;
+  register_device : (text, text) -> (bool);
+  remove_device : (text) -> ();
+  seed : (text, text) -> ();
+  submit_ciphertexts : (vec record { text; text }) -> ();
+  update_note : (EncryptedNote) -> ();
+  whoami : () -> (text) query;
+}
