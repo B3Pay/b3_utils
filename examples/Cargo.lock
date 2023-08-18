@@ -837,6 +837,7 @@ dependencies = [
  "ic-types",
  "lazy_static",
  "serde",
+ "serde_bytes",
  "serde_json",
 ]
 

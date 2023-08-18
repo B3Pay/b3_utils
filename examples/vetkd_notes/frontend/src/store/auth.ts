@@ -1,148 +1,119 @@
-import { get, writable } from 'svelte/store';
-import { BackendActor, createActor } from '../lib/actor';
-import { AuthClient } from '@dfinity/auth-client';
-import { CryptoService } from '../lib/crypto';
-import { addNotification, showError } from './notifications';
-import { sleep } from '../lib/sleep';
-import type { JsonnableDelegationChain } from '@dfinity/identity/lib/cjs/identity/delegation';
-import { navigateTo } from 'svelte-router-spa';
+import { AuthClient } from "@dfinity/auth-client"
+import { navigateTo } from "svelte-router-spa"
+import { get, writable } from "svelte/store"
+import { BackendActor, createActor } from "../lib/actor"
+import { CryptoService } from "../lib/crypto"
+import { showError } from "./notifications"
 
 export type AuthState =
   | {
-      state: 'initializing-auth';
+      state: "initializing-auth"
     }
   | {
-      state: 'anonymous';
-      actor: BackendActor;
-      client: AuthClient;
+      state: "anonymous"
+      actor: BackendActor
+      client: AuthClient
     }
   | {
-      state: 'initializing-crypto';
-      actor: BackendActor;
-      client: AuthClient;
+      state: "initializing-crypto"
+      actor: BackendActor
+      client: AuthClient
     }
   | {
-      state: 'synchronizing';
-      actor: BackendActor;
-      client: AuthClient;
+      state: "synchronizing"
+      actor: BackendActor
+      client: AuthClient
     }
   | {
-      state: 'initialized';
-      actor: BackendActor;
-      client: AuthClient;
-      crypto: CryptoService;
+      state: "initialized"
+      actor: BackendActor
+      client: AuthClient
+      crypto: CryptoService
     }
   | {
-      state: 'error';
-      error: string;
-    };
+      state: "error"
+      error: string
+    }
 
 export const auth = writable<AuthState>({
-  state: 'initializing-auth',
-});
+  state: "initializing-auth"
+})
 
 async function initAuth() {
-  const client = await AuthClient.create();
+  const client = await AuthClient.create()
   if (await client.isAuthenticated()) {
-    authenticate(client);
+    authenticate(client)
   } else {
     auth.update(() => ({
-      state: 'anonymous',
+      state: "anonymous",
       actor: createActor(),
-      client,
-    }));
+      client
+    }))
   }
 }
 
-initAuth();
+initAuth()
 
 export function login() {
-  const currentAuth = get(auth);
+  const currentAuth = get(auth)
 
-  if (currentAuth.state === 'anonymous') {
+  if (currentAuth.state === "anonymous") {
     currentAuth.client.login({
       maxTimeToLive: BigInt(1800) * BigInt(1_000_000_000),
       identityProvider:
-        process.env.DFX_NETWORK === 'ic'
-          ? 'https://identity.ic0.app/#authorize'
-          : `http://${process.env.INTERNET_IDENTITY_CANISTER_ID}.localhost:8000/#authorize`,
-      // `http://localhost:8000?canisterId=${process.env.INTERNET_IDENTITY_CANISTER_ID}#authorize`,
-      onSuccess: () => authenticate(currentAuth.client),
-    });
+        process.env.DFX_NETWORK === "ic"
+          ? "https://identity.ic0.app/#authorize"
+          : "http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080/#authorize",
+      onSuccess: () => authenticate(currentAuth.client)
+    })
   }
 }
 
 export async function logout() {
-  const currentAuth = get(auth);
+  const currentAuth = get(auth)
 
-  if (currentAuth.state === 'initialized') {
-    currentAuth.crypto.logout();
-    await currentAuth.client.logout();
+  if (currentAuth.state === "initialized") {
+    currentAuth.crypto.logout()
+    await currentAuth.client.logout()
     auth.update(() => ({
-      state: 'anonymous',
+      state: "anonymous",
       actor: createActor(),
-      client: currentAuth.client,
-    }));
-    navigateTo('/');
+      client: currentAuth.client
+    }))
+    navigateTo("/")
   }
 }
 
 export async function authenticate(client: AuthClient) {
-  handleSessionTimeout();
-
   try {
     const actor = createActor({
       agentOptions: {
-        identity: client.getIdentity(),
-      },
-    });
+        identity: client.getIdentity()
+      }
+    })
 
     auth.update(() => ({
-      state: 'initializing-crypto',
+      state: "initializing-crypto",
       actor,
-      client,
-    }));
+      client
+    }))
 
-    const cryptoService = new CryptoService(actor);
-    await cryptoService
-      .init()
-      .catch((e) => {
-        console.log(e);
-        showError(e, 'Could not initialize crypto service');
-      });
+    const cryptoService = new CryptoService(actor)
+    await cryptoService.init().catch(e => {
+      console.log(e)
+      showError(e, "Could not initialize crypto service")
+    })
 
     auth.update(() => ({
-      state: 'initialized',
+      state: "initialized",
       actor,
       client,
-      crypto: cryptoService,
-    }));
+      crypto: cryptoService
+    }))
   } catch (e) {
     auth.update(() => ({
-      state: 'error',
-      error: e.message || 'An error occurred',
-    }));
+      state: "error",
+      error: e.message || "An error occurred"
+    }))
   }
-}
-
-// set a timer when the II session will expire and log the user out
-function handleSessionTimeout() {
-  // upon login the localstorage items may not be set, wait for next tick
-  setTimeout(() => {
-    try {
-      const delegation = JSON.parse(
-        window.localStorage.getItem('ic-delegation')
-      ) as JsonnableDelegationChain;
-
-      const expirationTimeMs =
-        Number.parseInt(delegation.delegations[0].delegation.expiration, 16) /
-        1000000;
-
-      setTimeout(() => {
-        logout();
-      }, expirationTimeMs - Date.now());
-    } catch {
-      console.error('Could not handle delegation expiry.');
-    }
-  });
 }

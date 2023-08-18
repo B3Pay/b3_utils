@@ -49,8 +49,12 @@ export async function refreshNotes(
   // did we get logged out?
   if (!cryptoService.isInitialized()) return
 
-  const notes = await decryptNotes(encryptedNotes, cryptoService)
-  updateNotes(notes)
+  try {
+    const notes = await decryptNotes(encryptedNotes, cryptoService)
+    updateNotes(notes)
+  } catch (e) {
+    console.log(e, "Could not decrypt notes.")
+  }
 }
 
 export async function addNote(
@@ -89,7 +93,7 @@ auth.subscribe(async $auth => {
         await refreshNotes($auth.actor, $auth.crypto).catch(e =>
           showError(e, "Could not poll notes.")
         )
-      }, 3000)
+      }, 10000)
     } catch {
       notesStore.set({
         state: "error"

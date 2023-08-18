@@ -5,7 +5,8 @@ import {
   HttpAgent,
   HttpAgentOptions
 } from "@dfinity/agent"
-import { ENCRYPTED_NOTES_CANISTER_ID, _SERVICE, idlFactory } from "./backend"
+import { ENCRYPTED_NOTES_CANISTER_ID, _SERVICE } from "./backend"
+import { idlFactory } from "./idlFactory"
 
 export type BackendActor = ActorSubclass<_SERVICE>
 

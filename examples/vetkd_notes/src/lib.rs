@@ -1,35 +1,26 @@
 use candid::{candid_method, CandidType, Principal};
+use http::{HttpRequest, HttpResponse, HttpResponseBuilder};
+use ic_cdk::api::call::{CallResult, RejectionCode};
 use ic_cdk::api::caller as caller_api;
 use ic_cdk::storage;
 use ic_cdk_macros::*;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
-use std::collections::btree_map::Entry::{Occupied, Vacant};
 use std::collections::BTreeMap;
-use std::mem;
+
+mod types;
+use types::*;
+mod http;
+
+const VERIFY_KEY: [u8; 96] = [
+    148, 21, 69, 193, 240, 64, 108, 58, 60, 123, 70, 9, 217, 16, 60, 228, 83, 52, 196, 161, 181,
+    228, 201, 167, 155, 137, 140, 203, 86, 105, 79, 210, 201, 98, 15, 186, 240, 172, 64, 135, 70,
+    29, 144, 59, 242, 65, 212, 247, 20, 8, 172, 152, 10, 41, 97, 107, 23, 150, 121, 50, 58, 177,
+    93, 196, 13, 211, 174, 54, 60, 166, 229, 253, 3, 55, 221, 46, 93, 108, 82, 187, 105, 34, 239,
+    39, 28, 132, 165, 20, 127, 61, 130, 58, 157, 132, 52, 148,
+];
 
 type PrincipalName = String;
-type PublicKey = String;
-type Ciphertext = String;
-type DeviceAlias = String;
-
-#[derive(Clone, CandidType, Deserialize)]
-pub enum GetCiphertextError {
-    // Ensure API types in [encrypted_notes_rust.did] are named exactly as specified below
-    #[serde(rename = "notFound")]
-    NotFound,
-    #[serde(rename = "notSynced")]
-    NotSynced,
-}
-
-#[derive(Clone, CandidType, Deserialize)]
-pub enum Result {
-    // Ensure API types in [encrypted_notes_rust.did] are named exactly as specified below
-    #[serde(rename = "err")]
-    Err(GetCiphertextError),
-    #[serde(rename = "ok")]
-    Ok(Ciphertext),
-}
 
 /// Deriving CandidType or implementing it is necessary for
 /// almost everything IC - if you want your structs to
@@ -49,21 +40,9 @@ struct CanisterState {
     // During canister upgrades, this field contains a stable representation of the value stored in [NEXT_NOTE]
     counter: u128,
     // We use a BTreeMap vice a HashMap for deterministic ordering.
-    notes: BTreeMap<PrincipalName, Vec<EncryptedNote>>,
-    user_store: BTreeMap<Principal, UserStore>,
-}
-
-#[derive(Clone, CandidType, Serialize, Deserialize, Default)]
-pub struct UserStore {
+    notes: BTreeMap<u128, EncryptedNote>,
     // We use a BTreeMap vice a HashMap for deterministic ordering.
-    device_list: BTreeMap<DeviceAlias, PublicKey>,
-    ciphertext_list: BTreeMap<PublicKey, Ciphertext>,
-}
-
-impl UserStore {
-    pub fn new() -> Self {
-        Self::default()
-    }
+    user_notes: BTreeMap<PrincipalName, Vec<u128>>,
 }
 
 // WASM is single-threaded by nature. [RefCell] and [thread_local!] are used despite being not totally safe primitives.
@@ -76,25 +55,19 @@ thread_local! {
     // To ensure that our canister does not exceed this limit, we restrict memory usage to at most 2 GB because
     // up to 2x memory may be needed for data serialization during canister upgrades. Therefore, we aim to support
     // up to 1,000 users, each storing up to 2 MB of data.
-    // 1) One half of this data is reserved for device management:
-    //     DEVICES_PER_USER = (MAX_CYPHERTEXT_LENGTH + MAX_PUBLIC_KEY_LENGTH + MAX_DEVICE_ALIAS_LENGTH) x (4 bytes per char) x MAX_DEVICES_PER_USER
-    //     1 MB = 40,700 x 4 x 6 = 976,800
-    // 2) Another half is reserved for storing the notes:
+    // The data is reserved for storing the notes:
     //     NOTES_PER_USER = MAX_NOTES_PER_USER x MAX_NOTE_CHARS x (4 bytes per char)
-    //     1 MB = 500 x 500 x 4 = 1,000,000
+    //     2 MB = 500 x 1000 x 4 = 2,000,000
 
     // Define dapp limits - important for security assurance
     static MAX_USERS: usize = 1_000;
     static MAX_NOTES_PER_USER: usize = 500;
-    static MAX_DEVICES_PER_USER: usize = 6;
-    static MAX_NOTE_CHARS: usize = 500;
-    static MAX_DEVICE_ALIAS_LENGTH: usize = 200;
-    static MAX_PUBLIC_KEY_LENGTH: usize = 500;
-    static MAX_CYPHERTEXT_LENGTH: usize = 40_000;
+    static MAX_NOTE_CHARS: usize = 1000;
 
     pub static NEXT_NOTE: RefCell<u128> = RefCell::new(1);
-    pub static NOTES_BY_USER: RefCell<BTreeMap<PrincipalName, Vec<EncryptedNote>>> = RefCell::new(BTreeMap::new());
-    pub static USER_KEYS: RefCell<BTreeMap<Principal, UserStore>> = RefCell::new(BTreeMap::new());
+    pub static NOTES: RefCell<BTreeMap<u128, EncryptedNote>> = RefCell::new(BTreeMap::new());
+    pub static USER_NOTES: RefCell<BTreeMap<PrincipalName, Vec<u128>>> = RefCell::new(BTreeMap::new());
+    pub static USER_VETKD: RefCell<BTreeMap<PrincipalName, Vec<u8>>> = RefCell::new(BTreeMap::new());
 }
 
 /// Unlike Motoko, the caller identity is not built into Rust.
@@ -144,13 +117,7 @@ fn whoami() -> String {
 
 /// Returns the current number of users.
 fn user_count() -> usize {
-    NOTES_BY_USER.with(|notes_ref| notes_ref.borrow().keys().len())
-}
-
-/// Check if this user has been registered
-/// Note: [register_device] must be each user's very first update call.
-fn is_user_registered(principal: Principal) -> bool {
-    USER_KEYS.with(|user_keys_ref| user_keys_ref.borrow().contains_key(&principal))
+    NOTES.with(|notes_ref| notes_ref.borrow().keys().len())
 }
 
 /// Check that a note identifier is sane. This is needed since we use finite-
@@ -164,18 +131,42 @@ fn is_id_sane(id: u128) -> bool {
 /// Panics:
 ///     [caller] is the anonymous identity
 ///     [caller] is not a registered user
+#[query(name = "get_user_notes")]
+#[candid_method(query)]
+fn get_user_notes() -> Vec<EncryptedNote> {
+    let user = caller();
+    let user_str = user.to_string();
+
+    let note_ids = USER_NOTES.with(|notes_ref| {
+        let reader = notes_ref.borrow();
+        reader.get(&user_str).cloned().unwrap_or_default()
+    });
+
+    NOTES.with(|notes_ref| {
+        let reader = notes_ref.borrow();
+        note_ids
+            .iter()
+            .map(|note_id| reader.get(note_id).unwrap())
+            .cloned()
+            .collect()
+    })
+}
+
 #[query(name = "get_notes")]
 #[candid_method(query)]
 fn get_notes() -> Vec<EncryptedNote> {
-    let user = caller();
-    assert!(is_user_registered(user));
-    let user_str = user.to_string();
-    NOTES_BY_USER.with(|notes_ref| {
-        notes_ref
-            .borrow()
-            .get(&user_str)
-            .cloned()
-            .unwrap_or_default()
+    NOTES.with(|notes_ref| {
+        let reader = notes_ref.borrow();
+        reader.values().cloned().collect()
+    })
+}
+
+#[query(name = "get_note")]
+#[candid_method(query)]
+fn get_note(id: u128) -> Option<EncryptedNote> {
+    NOTES.with(|notes_ref| {
+        let reader = notes_ref.borrow();
+        reader.get(&id).cloned()
     })
 }
 
@@ -193,16 +184,21 @@ fn get_notes() -> Vec<EncryptedNote> {
 #[candid_method(update)]
 fn delete_note(note_id: u128) {
     let user = caller();
-    assert!(is_user_registered(user));
     assert!(is_id_sane(note_id));
 
     let user_str = user.to_string();
-    // shared ownership borrowing
-    NOTES_BY_USER.with(|notes_ref| {
+    USER_NOTES.with(|notes_ref| {
         let mut writer = notes_ref.borrow_mut();
-        if let Some(v) = writer.get_mut(&user_str) {
-            v.retain(|item| item.id != note_id);
-        }
+        writer
+            .get_mut(&user_str)
+            .expect("user not found")
+            .retain(|id| *id != note_id);
+    });
+
+    // shared ownership borrowing
+    NOTES.with(|notes_ref| {
+        let mut writer = notes_ref.borrow_mut();
+        writer.remove(&note_id);
     });
 }
 
@@ -215,25 +211,16 @@ fn delete_note(note_id: u128) {
 #[update(name = "update_note")]
 #[candid_method(update)]
 fn update_note(note: EncryptedNote) {
-    let user = caller();
-    assert!(is_user_registered(user));
-    assert!(note.encrypted_text.chars().count() <= MAX_NOTE_CHARS.with(|mnc| mnc.clone()));
+    assert!(note.encrypted_text.chars().count() <= MAX_NOTE_CHARS.with(|mnc| *mnc));
     assert!(is_id_sane(note.id));
 
-    let user_str = user.to_string();
-    NOTES_BY_USER.with(|notes_ref| {
+    NOTES.with(|notes_ref| {
         let mut writer = notes_ref.borrow_mut();
-        if let Some(old_note) = writer
-            .get_mut(&user_str)
-            .and_then(|notes| notes.iter_mut().find(|n| n.id == note.id))
-        {
-            old_note.encrypted_text = note.encrypted_text;
-        }
-    })
+        writer.insert(note.id, note);
+    });
 }
 
-/// Add new note for this [caller]. Note: this function may be called only by
-/// those users that have at least one device registered via [register_device].
+/// Add new note for this [caller].
 ///      [note]: (encrypted) content of this note
 ///
 /// Returns:
@@ -243,12 +230,12 @@ fn update_note(note: EncryptedNote) {
 ///      [caller] is not a registered user
 ///      [note] exceeds [MAX_NOTE_CHARS]
 ///      User already has [MAX_NOTES_PER_USER] notes
+///      [note] would be for a new user and [MAX_USERS] is exceeded
 #[update(name = "add_note")]
 #[candid_method(update)]
 fn add_note(note: String) {
     let user = caller();
-    assert!(is_user_registered(user));
-    assert!(note.chars().count() <= MAX_NOTE_CHARS.with(|mnc| mnc.clone()));
+    assert!(note.chars().count() <= MAX_NOTE_CHARS.with(|mnc| *mnc));
 
     let user_str = user.to_string();
     let note_id = NEXT_NOTE.with(|counter_ref| {
@@ -257,284 +244,25 @@ fn add_note(note: String) {
         *writer
     });
 
-    NOTES_BY_USER.with(|notes_ref| {
+    NOTES.with(|notes_ref| {
         let mut writer = notes_ref.borrow_mut();
-        let user_notes = writer
-            .get_mut(&user_str)
-            .expect(&format!("detected registered user {} w/o allocated notes", user_str)[..]);
+        writer.insert(
+            note_id,
+            EncryptedNote {
+                id: note_id,
+                encrypted_text: note,
+            },
+        );
+    });
+
+    USER_NOTES.with(|notes_ref| {
+        let mut writer = notes_ref.borrow_mut();
+        let user_notes = writer.entry(user_str).or_insert_with(Vec::new);
 
         assert!(user_notes.len() < MAX_NOTES_PER_USER.with(|mnpu| mnpu.clone()));
 
-        user_notes.push(EncryptedNote {
-            id: note_id,
-            encrypted_text: note,
-        });
+        user_notes.push(note_id);
     });
-}
-
-/// Associate a public key with a device ID.
-/// Returns:
-///      `true` iff device is *newly* registered, ie. [alias] has not been
-///      registered for this user before.
-/// Panics:
-///      [caller] is the anonymous identity
-///      [alias] exceeds [MAX_DEVICE_ALIAS_LENGTH]
-///      [pk] exceeds [MAX_PUBLIC_KEY_LENGTH]
-///      While registering new user's device:
-///          There are already [MAX_USERS] users while we need to register a new user
-///          This user already has notes despite not having any registered devices
-///      This user already has [MAX_DEVICES_PER_USER] registered devices.
-#[update(name = "register_device")]
-#[candid_method(update)]
-fn register_device(alias: DeviceAlias, pk: PublicKey) -> bool {
-    let caller = caller();
-    assert!(MAX_DEVICE_ALIAS_LENGTH.with(|mdal| alias.len() <= mdal.clone()));
-    assert!(MAX_PUBLIC_KEY_LENGTH.with(|mpkl| pk.len() <= mpkl.clone()));
-
-    USER_KEYS.with(|user_keys_ref| {
-        let mut writer = user_keys_ref.borrow_mut();
-        match writer.entry(caller) {
-            Vacant(empty_store_entry) => {
-                // caller unknown ==> check invariants
-                // A. can we add a new user?
-                assert!(MAX_USERS.with(|mu| user_count() < mu.clone()));
-                // B. this caller does not have notes
-                let principal_name = caller.to_string();
-                assert!(NOTES_BY_USER
-                    .with(|notes_ref| !notes_ref.borrow().contains_key(&principal_name)));
-
-                // ... then initialize the following:
-                // 1) a new [UserStore] instance in [USER_KEYS]
-                empty_store_entry.insert({
-                    let mut dl = BTreeMap::new();
-                    dl.insert(alias, pk);
-                    UserStore {
-                        device_list: dl,
-                        ciphertext_list: BTreeMap::new(),
-                    }
-                });
-                // 2) a new [Vec<EncryptedNote>] entry in [NOTES_BY_USER]
-                NOTES_BY_USER
-                    .with(|notes_ref| notes_ref.borrow_mut().insert(principal_name, vec![]));
-
-                // finally, indicate accept
-                true
-            }
-            Occupied(mut store_entry) => {
-                // caller is a registered user
-                let store = store_entry.get_mut();
-                let inv = MAX_DEVICES_PER_USER.with(|mdpu| store.device_list.len() < mdpu.clone());
-                match store.device_list.entry(alias) {
-                    Occupied(_) => {
-                        // device alias already registered ==> indicate reject
-                        false
-                    }
-                    Vacant(empty_device_entry) => {
-                        // device not yet registered ==> check that user did not exceed limits
-                        assert!(inv);
-                        // all good ==> register device
-                        empty_device_entry.insert(pk);
-                        // indicate accept
-                        true
-                    }
-                }
-            }
-        }
-    })
-}
-
-/// Remove this user's device with given [alias]
-///
-/// Panics:
-///      [caller] is the anonymous identity
-///      [caller] is not a registered user
-///      [alias] exceeds [MAX_DEVICE_ALIAS_LENGTH]
-///      [caller] has only one registered device (which we refuse to remove)
-#[update(name = "remove_device")]
-#[candid_method(update)]
-fn remove_device(alias: DeviceAlias) {
-    let user = caller();
-    assert!(is_user_registered(user));
-    assert!(MAX_DEVICE_ALIAS_LENGTH.with(|mdal| alias.len() <= mdal.clone()));
-
-    USER_KEYS.with(|user_keys_ref| {
-        let mut writer = user_keys_ref.borrow_mut();
-        if let Some(user_store) = writer.get_mut(&user) {
-            assert!(user_store.device_list.len() > 1);
-
-            let pub_key = user_store.device_list.remove(&alias);
-            if let Some(pk) = pub_key {
-                // the device may or may not have an associated Ciphertext at this point
-                user_store.ciphertext_list.remove(&pk);
-            }
-        }
-    });
-}
-
-/// Returns:
-///      Future vector of all (device, public key) pairs for this user's registered devices.
-///
-///      See also [get_notes] and "Queries vs. Updates"
-/// Panics:
-///      [caller] is the anonymous identity
-///      [caller] is not a registered user
-#[query(name = "get_devices")]
-#[candid_method(query)]
-fn get_devices() -> Vec<(DeviceAlias, PublicKey)> {
-    let user = caller();
-    assert!(is_user_registered(user));
-
-    USER_KEYS.with(|user_keys_ref| {
-        let reader = user_keys_ref.borrow_mut();
-        match reader.get(&user) {
-            Some(v) => {
-                let out = v
-                    .device_list
-                    .iter()
-                    .map(|(key, value)| (key.clone(), value.clone()))
-                    .collect::<Vec<(DeviceAlias, PublicKey)>>();
-                out
-            }
-            None => Vec::new(),
-        }
-    })
-}
-
-/// Returns:
-///      Future vector of all public keys that are not already associated with a device.
-///
-///      See also [get_notes] and "Queries vs. Updates"
-/// Panics:
-///      [caller] is the anonymous identity
-///      [caller] is not a registered user
-#[query(name = "get_unsynced_pubkeys")]
-#[candid_method(query)]
-fn get_unsynced_pubkeys() -> Vec<PublicKey> {
-    let user = caller();
-    assert!(is_user_registered(user));
-
-    USER_KEYS.with(|user_keys_ref| {
-        let reader = user_keys_ref.borrow();
-        reader.get(&caller()).map_or_else(Vec::new, |v| {
-            v.device_list
-                .values()
-                .filter(|value| !v.ciphertext_list.contains_key(*value))
-                .cloned()
-                .collect::<Vec<PublicKey>>()
-        })
-    })
-}
-
-/// Returns:
-///      `true` iff the user has at least one public key.
-///
-///      See also [get_notes] and "Queries vs. Updates"
-/// Panics:
-///      [caller] is the anonymous identity
-///      [caller] is not a registered user
-#[query(name = "is_seeded")]
-#[candid_method(query)]
-fn is_seeded() -> bool {
-    let user = caller();
-    assert!(is_user_registered(user));
-
-    USER_KEYS.with(|user_keys_ref| {
-        let reader = user_keys_ref.borrow();
-        reader
-            .get(&user)
-            .map_or(false, |v| !v.ciphertext_list.is_empty())
-    })
-}
-
-/// Fetch the private key associated with this public key.
-/// See also [get_notes] and "Queries vs. Updates"
-/// Returns:
-///      Future of Ciphertext result
-/// Traps:
-///      [caller] is the anonymous identity
-///      [caller] is not a registered user
-///      [pk] exceeds [MAX_PUBLIC_KEY_LENGTH]
-#[query(name = "get_ciphertext")]
-#[candid_method(query)]
-fn get_ciphertext(pk: PublicKey) -> Result {
-    let user = caller();
-    assert!(is_user_registered(user));
-    assert!(MAX_PUBLIC_KEY_LENGTH.with(|mpkl| pk.len() <= mpkl.clone()));
-
-    USER_KEYS.with(|user_keys_ref| {
-        let reader = user_keys_ref.borrow();
-        if let Some(store) = reader.get(&user) {
-            if !is_known_public_key(store, &pk) {
-                Result::Err(GetCiphertextError::NotFound)
-            } else if let Some(ciphertext) = store.ciphertext_list.get(&pk) {
-                Result::Ok(ciphertext.to_string())
-            } else {
-                Result::Err(GetCiphertextError::NotSynced)
-            }
-        } else {
-            Result::Err(GetCiphertextError::NotFound)
-        }
-    })
-}
-
-// Returns `true` iff [store.device_list] contains provided public key [pk].
-fn is_known_public_key(store: &UserStore, pk: &str) -> bool {
-    return store.device_list.values().any(|value| *value == pk);
-}
-
-/// Store a vector of public keys and associated private keys.
-/// Considers only public keys matching those of a registered device.
-/// Does not overwrite key-value pairs that already exist.
-///
-/// Traps:
-///      [caller] is the anonymous identity
-///      [caller] is not a registered user
-///      Length of [Ciphertexts] exceeds [MAX_DEVICES_PER_USER]
-///      User is trying to save a known device's Ciphertext exceeding [MAX_CYPHERTEXT_LENGTH]
-#[update(name = "submit_ciphertexts")]
-#[candid_method(update)]
-fn submit_ciphertexts(ciphertexts: Vec<(PublicKey, Ciphertext)>) {
-    let user = caller();
-    assert!(is_user_registered(user));
-    assert!(MAX_DEVICES_PER_USER.with(|mdpu| ciphertexts.len() <= mdpu.clone()));
-
-    USER_KEYS.with(|user_keys_ref| {
-        let mut writer = user_keys_ref.borrow_mut();
-        if let Some(store) = writer.get_mut(&user) {
-            for (pk, ct) in ciphertexts {
-                if is_known_public_key(store, &pk) {
-                    assert!(MAX_CYPHERTEXT_LENGTH.with(|mcl| ct.len() <= mcl.clone()));
-                    store.ciphertext_list.entry(pk).or_insert(ct);
-                }
-            }
-        }
-    })
-}
-
-/// Store a public key and associated private key in an empty user store.
-/// This function is a no-op if the user already has at least one public key stored.
-///
-/// Traps:
-///      [caller] is the anonymous identity
-///      [caller] is not a registered user
-///      [pk] exceeds [MAX_PUBLIC_KEY_LENGTH]
-///      [ct] exceeding [MAX_CYPHERTEXT_LENGTH]
-#[update]
-#[candid_method(update)]
-fn seed(pk: PublicKey, ct: Ciphertext) {
-    let user = caller();
-    assert!(is_user_registered(user));
-    assert!(MAX_PUBLIC_KEY_LENGTH.with(|mpkl| pk.len() <= mpkl.clone()));
-    assert!(MAX_CYPHERTEXT_LENGTH.with(|mcl| ct.len() <= mcl.clone()));
-
-    USER_KEYS.with(|user_keys_ref| {
-        let mut writer = user_keys_ref.borrow_mut();
-        if let Some(store) = writer.get_mut(&user) {
-            if is_known_public_key(store, &pk) && store.ciphertext_list.is_empty() {
-                store.ciphertext_list.insert(pk, ct);
-            }
-        }
-    })
 }
 
 /// Hooks in these macros will produce a `function already defined` error
@@ -548,19 +276,27 @@ fn pre_upgrade() {
         let reader = counter_ref.borrow();
         *reader
     });
-    NOTES_BY_USER.with(|notes_ref| {
-        USER_KEYS.with(|user_keys_ref| {
-            let old_state = CanisterState {
-                notes: mem::take(&mut notes_ref.borrow_mut()),
-                counter: copied_counter,
-                user_store: mem::take(&mut user_keys_ref.borrow_mut()),
-            };
-            // storage::stable_save is the API used to write canister state out.
-            // More explicit error handling *can* be useful, but if we fail to read out/in stable memory on upgrade
-            // it means the data won't be accessible to the canister in any way.
-            storage::stable_save((old_state,)).unwrap();
-        })
+    let copied_notes: BTreeMap<u128, EncryptedNote> = NOTES.with(|notes_ref| {
+        let reader = notes_ref.borrow();
+        reader.clone()
     });
+
+    let copied_user_notes: BTreeMap<PrincipalName, Vec<u128>> = USER_NOTES.with(|notes_ref| {
+        let reader = notes_ref.borrow();
+        reader.clone()
+    });
+
+    let states = CanisterState {
+        counter: copied_counter,
+        notes: copied_notes,
+        user_notes: copied_user_notes,
+    };
+
+    // storage::stable_save is how to write your canister state out to stable memory
+    // The unwrap here is safe because the only way to get a Err back from storage::stable_save
+    // is if the stable memory is full, which is not possible because we have a 4GB limit
+    // on stable memory and we are only using 2GB.
+    storage::stable_save((states,)).unwrap();
 }
 
 #[post_upgrade]
@@ -570,15 +306,228 @@ fn post_upgrade() {
     // Same thing with the unwrap here. For this canister there's nothing to do
     // in the event of a memory read out/in failure.
     let (old_state,): (CanisterState,) = storage::stable_restore().unwrap();
-    NOTES_BY_USER.with(|notes_ref| {
-        NEXT_NOTE.with(|counter_ref| {
-            USER_KEYS.with(|user_keys_ref| {
-                *notes_ref.borrow_mut() = old_state.notes;
-                *counter_ref.borrow_mut() = old_state.counter;
-                *user_keys_ref.borrow_mut() = old_state.user_store;
-            })
-        })
+
+    USER_NOTES.with(|notes_ref| {
+        *notes_ref.borrow_mut() = old_state.user_notes.clone();
     });
+
+    NOTES.with(|notes_ref| {
+        NEXT_NOTE.with(|counter_ref| {
+            *notes_ref.borrow_mut() = old_state.notes;
+            *counter_ref.borrow_mut() = old_state.counter;
+        });
+    });
+}
+
+const VETKD_SYSTEM_API_CANISTER_ID: &str = "br5f7-7uaaa-aaaaa-qaaca-cai";
+
+/// Results can be cached.
+#[update]
+#[candid_method(update)]
+async fn app_vetkd_public_key(derivation_path: Vec<Vec<u8>>) -> String {
+    let request = VetKDPublicKeyRequest {
+        canister_id: None,
+        derivation_path,
+        key_id: bls12_381_test_key_1(),
+    };
+
+    let (response,): (VetKDPublicKeyReply,) = ic_cdk::api::call::call(
+        vetkd_system_api_canister_id(),
+        "vetkd_public_key",
+        (request,),
+    )
+    .await
+    .expect("call to vetkd_public_key failed");
+
+    hex::encode(response.public_key)
+}
+
+#[query]
+#[candid_method(query)]
+async fn symmetric_key_verification_key() -> String {
+    hex::encode(VERIFY_KEY)
+}
+
+#[update]
+#[candid_method(update)]
+async fn encrypted_symmetric_key_for_caller(encryption_public_key: Vec<u8>) -> String {
+    let request = VetKDEncryptedKeyRequest {
+        derivation_id: ic_cdk::caller().as_slice().to_vec(),
+        public_key_derivation_path: vec![b"symmetric_key".to_vec()],
+        key_id: bls12_381_test_key_1(),
+        encryption_public_key,
+    };
+
+    let (response,): (VetKDEncryptedKeyReply,) = ic_cdk::api::call::call(
+        vetkd_system_api_canister_id(),
+        "vetkd_encrypted_key",
+        (request,),
+    )
+    .await
+    .expect("call to vetkd_encrypted_key failed");
+
+    hex::encode(response.encrypted_key)
+}
+
+#[query]
+#[candid_method(query)]
+async fn get_user_using_symmetric_key(
+    encrypted_symmetric_key_string: String,
+) -> CallResult<String> {
+    let encrypted_symmetric_key = hex::decode(encrypted_symmetric_key_string)
+        .map_err(|_| (RejectionCode::CanisterError, "Invalid hex".to_string()))?;
+
+    USER_VETKD
+        .with(|notes_ref| {
+            let reader = notes_ref.borrow();
+            reader
+                .iter()
+                .find(|(_, encrypted_symmetric_key2)| {
+                    encrypted_symmetric_key == **encrypted_symmetric_key2
+                })
+                .map(|(principal_name, _)| principal_name)
+                .cloned()
+        })
+        .ok_or_else(|| {
+            (
+                RejectionCode::CanisterError,
+                "No user found for encrypted symmetric key".to_string(),
+            )
+        })
+}
+
+#[query]
+#[candid_method(query)]
+async fn encrypted_symmetric_key_for_caller_string() -> CallResult<String> {
+    USER_VETKD
+        .with(|notes_ref| {
+            let reader = notes_ref.borrow();
+            reader
+                .get(&caller_api().to_string())
+                .map(|encrypted_symmetric_key| hex::encode(encrypted_symmetric_key))
+        })
+        .ok_or_else(|| {
+            (
+                RejectionCode::CanisterError,
+                "No key found for caller".to_string(),
+            )
+        })
+}
+
+#[query(name = "encryptedSymmetricKeyForCaller")]
+#[candid_method(query, rename = "encryptedSymmetricKeyForCaller")]
+async fn encrypted_symmetric_key_for_caller2() -> CallResult<Vec<u8>> {
+    USER_VETKD
+        .with(|notes_ref| {
+            let reader = notes_ref.borrow();
+            reader.get(&caller_api().to_string()).cloned()
+        })
+        .ok_or_else(|| {
+            (
+                RejectionCode::CanisterError,
+                "No key found for caller".to_string(),
+            )
+        })
+}
+
+#[update(name = "setEncryptedSymmetricKeyForCaller")]
+#[candid_method(update, rename = "setEncryptedSymmetricKeyForCaller")]
+async fn set_encrypted_symmetric_key_for_caller(encrypted_symmetric_key: Vec<u8>) {
+    USER_VETKD.with(|notes_ref| {
+        let mut writer = notes_ref.borrow_mut();
+        writer.insert(caller_api().to_string(), encrypted_symmetric_key);
+    });
+}
+
+fn bls12_381_test_key_1() -> VetKDKeyId {
+    VetKDKeyId {
+        curve: VetKDCurve::Bls12_381,
+        name: "test_key_1".to_string(),
+    }
+}
+
+fn vetkd_system_api_canister_id() -> CanisterId {
+    use std::str::FromStr;
+    CanisterId::from_str(VETKD_SYSTEM_API_CANISTER_ID).expect("failed to create canister ID")
+}
+
+#[query]
+#[candid_method(query)]
+fn http_request(req: HttpRequest) -> HttpResponse {
+    if req.path() == "/login" {
+        let body = r#"
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Password Encryption</title>
+    </head>
+    <body>
+        <h1>Enter Password</h1>
+        <input type="password" id="password" />
+        <button onclick="encrypt()">Encrypt</button>
+        <script>
+            async function encrypt() {
+                const password = document.getElementById('password').value;
+
+                const encoder = new TextEncoder();
+                const data = encoder.encode(password);
+
+                const keyData = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+
+                const key = await window.crypto.subtle.importKey(
+                    'raw',
+                    keyData,
+                    'AES-GCM',
+                    false,
+                    ['encrypt', 'decrypt']
+                );
+                const iv = window.crypto.getRandomValues(new Uint8Array(12));
+                const encryptedData = await window.crypto.subtle.encrypt(
+                    {
+                        name: 'AES-GCM',
+                        iv: iv
+                    },
+                    key,
+                    data
+                );
+                const encryptedBase64 = btoa(String.fromCharCode(...new Uint8Array(encryptedData)));
+
+                console.log('Encrypted Password:', encryptedBase64);
+
+                // Send the encrypted password to the Rust endpoint
+                const response = await fetch('/handle_encrypted_password', {
+                    method: 'POST',
+                    body: JSON.stringify({ encryptedPassword: encryptedBase64 }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            
+                // Handle the response from the Rust endpoint
+                const result = await response.text();
+                console.log('Server Response:', result);
+            }
+        </script>
+    </body>
+    </html>
+    "#;
+
+        HttpResponseBuilder::ok()
+            .header("Content-Type", "text/html; charset=utf-8")
+            .with_body_and_content_length(body)
+            .build()
+    } else if req.path() == "/handle_encrypted_password" {
+        let body = req.body_as_text();
+
+        HttpResponseBuilder::ok()
+            .header("Content-Type", "text/html; charset=utf-8")
+            .with_body_and_content_length(body)
+            .build()
+    } else {
+        HttpResponseBuilder::not_found().build()
+    }
 }
 
 #[cfg(test)]
@@ -589,12 +538,6 @@ mod tests {
     #[test]
     fn test_user_count_succeeds() {
         assert_eq!(user_count(), 0);
-    }
-
-    #[test]
-    fn test_is_user_registered_succeeds() {
-        let is_registered = is_user_registered(Principal::anonymous());
-        assert!(!is_registered);
     }
 
     #[test]

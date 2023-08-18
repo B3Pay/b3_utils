@@ -18,7 +18,16 @@ const path = require("path")
 function initCanisterIds() {
   let localCanisters, localIiCanister, prodCanisters, canisters
   try {
-    localCanisters = require(path.resolve(".dfx", "local", "canister_ids.json"))
+    let localCanistersPath = path.resolve(
+      "..",
+      "..",
+      ".dfx",
+      "local",
+      "canister_ids.json"
+    )
+    console.log(localCanistersPath)
+
+    localCanisters = require(localCanistersPath)
   } catch (error) {
     console.log("No local canister_ids.json found. Continuing production")
   }
@@ -41,6 +50,8 @@ function initCanisterIds() {
   return { canisterIds, network }
 }
 const { canisterIds, network } = initCanisterIds()
+
+console.log("Canister IDs:", canisterIds)
 
 function serve(exposeHost) {
   let server
