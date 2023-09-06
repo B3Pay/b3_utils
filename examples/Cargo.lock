@@ -28,7 +28,7 @@ checksum = "6f774a9328c6e5419e28cfeec35e4c2f4ad2cf4bdc44b72528a78176ddd2dc20"
 
 [[package]]
 name = "b3_utils"
-version = "0.2.8"
+version = "0.2.9"
 dependencies = [
  "b3-stable-structures",
  "candid",
