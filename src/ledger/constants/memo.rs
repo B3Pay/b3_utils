@@ -1,4 +1,4 @@
-use crate::types::TransferMemo;
+use crate::ledger::types::TransferMemo;
 
 pub const CANISTER_CREATE_MEMO: TransferMemo = TransferMemo(0x41455243);
 

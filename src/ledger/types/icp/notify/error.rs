@@ -1,4 +1,4 @@
-use crate::{currency::ICPToken, types::TransferBlockIndex};
+use crate::{ledger::currency::ICPToken, ledger::types::TransferBlockIndex};
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 use std::fmt;

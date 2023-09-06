@@ -1,9 +1,10 @@
 mod error;
 pub use error::*;
 
-use crate::currency::ICPToken;
-use crate::types::{TransferBlockIndex, TransferMemo};
-use crate::{AccountIdentifier, Subaccount};
+use crate::ledger::currency::ICPToken;
+use crate::ledger::types::{TransferBlockIndex, TransferMemo};
+use crate::ledger::AccountIdentifier;
+use crate::Subaccount;
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 

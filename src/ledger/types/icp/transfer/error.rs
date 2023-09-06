@@ -1,5 +1,5 @@
-use crate::currency::ICPToken;
-use crate::types::TransferBlockIndex;
+use crate::ledger::currency::ICPToken;
+use crate::ledger::types::TransferBlockIndex;
 
 use candid::CandidType;
 use serde::{Deserialize, Serialize};

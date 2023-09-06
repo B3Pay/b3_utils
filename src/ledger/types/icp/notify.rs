@@ -2,7 +2,7 @@ mod error;
 
 pub use error::*;
 
-use crate::{types::CanisterId, types::TransferBlockIndex};
+use crate::{ledger::types::TransferBlockIndex, types::CanisterId};
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 

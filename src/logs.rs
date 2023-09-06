@@ -39,7 +39,7 @@ impl fmt::Display for LogEntry {
 ///
 /// # Example
 /// ```
-/// use b3_utils::{log, export_log};
+/// use b3_utils::{logs::export_log, log};
 ///
 /// fn sum_and_log(x: u64, y: u64) -> u64 {
 ///    let result = x.saturating_add(y);
@@ -54,17 +54,17 @@ impl fmt::Display for LogEntry {
 #[macro_export]
 macro_rules! log {
     ($message:expr $(,$args:expr)* $(,)*) => {{
-        use $crate::Sink;
+        use $crate::logs::Sink;
         let message = std::format!($message $(,$args)*);
         // Print the message for convenience for local development (e.g. integration tests)
         println!("{}", &message);
-        (&$crate::MAIN_LOG).append($crate::LogEntry {
+        (&$crate::logs::MAIN_LOG).append($crate::logs::LogEntry {
             timestamp: $crate::NanoTimeStamp::now(),
             message,
             file: std::file!(),
             line: std::line!(),
             version: env!("CARGO_PKG_VERSION"),
-            counter: $crate::counter::log_increment()
+            counter: $crate::logs::counter::log_increment()
         });
     }}
 }
@@ -74,7 +74,7 @@ macro_rules! log {
 ///
 /// # Example
 /// ```
-/// use b3_utils::{require_log, export_log};
+/// use b3_utils::{logs::export_log, require_log};
 ///
 /// fn sum_and_log(x: u64, y: u64) -> Result<u64, String> {
 ///     let result = x.saturating_add(y);
@@ -106,7 +106,7 @@ macro_rules! require_log {
 
 #[cfg(test)]
 mod test_utils {
-    use crate::{export_log, require_log};
+    use crate::{logs::export_log, require_log};
 
     #[test]
     fn test_log() {

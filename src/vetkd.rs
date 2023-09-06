@@ -1,4 +1,6 @@
 mod error;
+
+pub mod pairing;
 pub use error::*;
 
 mod types;
@@ -8,7 +10,7 @@ pub use types::*;
 mod config;
 pub use config::*;
 
-use crate::{constants::MANAGMENT_CANISTER_ID, Environment, Subaccount};
+use crate::{constants::MANAGMENT_CANISTER_ID, environment::Environment, Subaccount};
 
 pub struct VetKD(Subaccount);
 

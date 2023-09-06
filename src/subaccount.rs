@@ -1,10 +1,5 @@
-use crate::{
-    constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER},
-    ledger::AccountIdentifier,
-    ledger::ICRCAccount,
-    types::UserId,
-    Environment,
-};
+use super::constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
+use crate::environment::Environment;
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
@@ -429,14 +424,6 @@ impl Subaccount {
 
     pub fn derivation_path(&self) -> Vec<Vec<u8>> {
         vec![self.0.to_vec()]
-    }
-
-    pub fn account_identifier(&self, owner: UserId) -> AccountIdentifier {
-        AccountIdentifier::new(owner, self.clone())
-    }
-
-    pub fn icrc_account(&self, owner: UserId) -> ICRCAccount {
-        ICRCAccount::new(owner, Some(self.clone()))
     }
 }
 

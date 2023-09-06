@@ -4,7 +4,7 @@ use std::fmt;
 
 mod test;
 
-use crate::constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
+use super::constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
 
 #[derive(CandidType, Deserialize, Serialize, Clone, PartialEq, Default, Debug)]
 pub enum Environment {

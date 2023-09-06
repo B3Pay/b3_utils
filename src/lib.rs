@@ -3,6 +3,19 @@
 //! `b3_utils` is a Rust library designed to simplify the development of applications and wallets on the Internet Computer. It provides utility functions and types for handling various operations such as transfers, tokens, timestamps, and more.
 //!
 //! ## Features
+//!
+//! - `vetkd`: Enables functionality related to vetkd. Includes dependencies `ic_bls12_381`, `sha2`, and `subtle`.
+//! - `stable_memory`: Enables stable memory features. Includes the `b3-stable-structures` dependency.
+//! - `logging`: Enables logging functionality.
+//! - `ledger`: Enables ledger-related functionalities.
+//!
+//! To enable a feature, add it to your `Cargo.toml` like so:
+//!
+//! ```toml
+//! [dependencies]
+//! my_library = { version = "0.1", features = ["vetkd", "logging"] }
+//! ```
+//! ## Modules
 //!  
 //! - **Account** - Create and manage accounts.
 //! - **Constants** - Constants used by the library.
@@ -24,7 +37,7 @@
 //! Here's a simple example of how to create a new [icrc1 account](https://internetcomputer.org/docs/current/developer-docs/integrations/icrc-1/) :
 //!
 //! ```rust
-//! use b3_utils::ICRCAccount;
+//! use b3_utils::ledger::ICRCAccount;
 //! use b3_utils::Subaccount;
 //! use b3_utils::Environment;
 //! use candid::Principal;
@@ -45,27 +58,37 @@
 //!
 //! ## License
 //!
-//! This project is licensed under the [MIT License](LICENSE).
+//! This project is licensed under the MIT License.
 
 pub mod constants;
 pub mod error;
-pub mod memory;
 pub mod mocks;
 pub mod nonce;
 pub mod owner;
 pub mod release;
 pub mod types;
-pub mod vetkd;
 pub mod wasm;
 
 mod timestamp;
 pub use timestamp::*;
 
-mod ledger;
-pub use ledger::*;
+mod subaccount;
+pub use subaccount::*;
+
+mod environment;
+pub use environment::*;
 
 mod utils;
 pub use utils::*;
 
-mod logs;
-pub use logs::*;
+#[cfg(feature = "ledger")]
+pub mod ledger;
+
+#[cfg(feature = "logging")]
+pub mod logs;
+
+#[cfg(feature = "stable_memory")]
+pub mod memory;
+
+#[cfg(feature = "vetkd")]
+pub mod vetkd;

@@ -1,6 +1,9 @@
 #[cfg(test)]
 mod test {
-    use crate::{mocks::id_mock, Environment, ICRCAccount, Subaccount};
+    use crate::{
+        mocks::id_mock,
+        {Environment, Subaccount},
+    };
 
     #[test]
     fn test_production_subaccount() {
@@ -121,8 +124,10 @@ mod test {
         assert_eq!(subaccount.to_hex(), "aa0000000000000001");
     }
 
+    #[cfg(feature = "ledger")]
     #[test]
     fn test_account_and_subaccount_with_loop() {
+        use crate::{ledger::AccountIdentifier, ledger::ICRCAccount, types::UserId};
         for i in 0..30 {
             let env = match i % 3 {
                 0 => Environment::Production,

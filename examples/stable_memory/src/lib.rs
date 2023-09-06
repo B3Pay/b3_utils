@@ -1,11 +1,10 @@
-use b3_utils::log;
+use b3_utils::logs::{export_log, export_log_messages_page, LogEntry};
 use b3_utils::memory::base::{timer::TimerEntry, with_base_partition, with_base_partition_mut};
 use b3_utils::memory::types::{
     BoundedStorable, DefaultVMHeap, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
 };
 use b3_utils::memory::{with_stable_memory, with_stable_memory_mut};
-use b3_utils::{export_log, export_log_messages_page, LogEntry};
-use b3_utils::{require, require_log, NanoTimeStamp};
+use b3_utils::{log, require, require_log, NanoTimeStamp};
 use candid::{candid_method, CandidType};
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;

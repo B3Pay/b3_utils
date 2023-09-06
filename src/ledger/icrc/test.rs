@@ -2,7 +2,7 @@
 mod tests {
     use candid::Principal;
 
-    use crate::{Environment, ICRCAccount, Subaccount};
+    use crate::{ledger::ICRCAccount, Environment, Subaccount};
 
     #[test]
     fn test_account_display() {
