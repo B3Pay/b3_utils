@@ -5,7 +5,7 @@ use b3_utils::memory::types::{
 };
 use b3_utils::memory::{with_stable_memory, with_stable_memory_mut};
 use b3_utils::{log, require, require_log, NanoTimeStamp, Subaccount};
-use candid::{candid_method, CandidType};
+use candid::CandidType;
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
 
@@ -109,26 +109,22 @@ impl Storable for ProcessedOperation {
 }
 
 #[init]
-#[candid_method(init)]
 fn init() {
     log!("init: {}", ic_cdk::api::id());
 }
 
 #[query]
-#[candid_method(query)]
 fn get_operation(id: u64) -> Option<ProcessedOperation> {
     VEC.with(|p| p.borrow().get(id))
 }
 
 #[update]
-#[candid_method(update)]
 fn append_operation(operation: ProcessedOperation) -> Result<(), String> {
     VEC.with(|p| p.borrow_mut().push(&operation))
         .map_err(|e| e.to_string())
 }
 
 #[query]
-#[candid_method(query)]
 fn get_operations_range(start: u64, end: u64) -> Vec<ProcessedOperation> {
     let mut operations = Vec::new();
     VEC.with(|p| {
@@ -144,7 +140,6 @@ fn get_operations_range(start: u64, end: u64) -> Vec<ProcessedOperation> {
 }
 
 #[query]
-#[candid_method(query)]
 fn get_operations_range_with_state(start: u64, end: u64) -> (Vec<ProcessedOperation>, Vec<User>) {
     let mut operations = Vec::new();
     VEC.with(|p| {
@@ -167,7 +162,6 @@ fn get_operations_range_with_state(start: u64, end: u64) -> (Vec<ProcessedOperat
 }
 
 #[update]
-#[candid_method(update)]
 fn add_user(user: User) -> Option<User> {
     USERS.with(|s| {
         let mut state = s.borrow_mut();
@@ -177,7 +171,6 @@ fn add_user(user: User) -> Option<User> {
 }
 
 #[update]
-#[candid_method(update)]
 fn add_user_with_operation(user: User, operation: ProcessedOperation) {
     USERS.with(|s| {
         let mut state = s.borrow_mut();
@@ -188,7 +181,6 @@ fn add_user_with_operation(user: User, operation: ProcessedOperation) {
 }
 
 #[update]
-#[candid_method(update)]
 fn update_state(state: State) {
     STATE.with(|s| {
         *s.borrow_mut() = state;
@@ -196,13 +188,11 @@ fn update_state(state: State) {
 }
 
 #[query]
-#[candid_method(query)]
 fn get_state() -> State {
     STATE.with(|s| s.borrow().clone())
 }
 
 #[query]
-#[candid_method(query)]
 fn get_users() -> Vec<User> {
     USERS.with(|s| {
         let state = s.borrow();
@@ -212,7 +202,6 @@ fn get_users() -> Vec<User> {
 }
 
 #[query]
-#[candid_method(query)]
 fn get_user_len() -> u64 {
     USERS.with(|s| {
         let state = s.borrow();
@@ -222,25 +211,21 @@ fn get_user_len() -> u64 {
 }
 
 #[query]
-#[candid_method(query)]
 fn get_timers() -> Vec<TimerEntry> {
     with_base_partition(|s| s.get_timer())
 }
 
 #[query]
-#[candid_method(query)]
 fn print_log_entries() -> Vec<LogEntry> {
     export_log()
 }
 
 #[query]
-#[candid_method(query)]
 fn print_log_entries_page(page: usize, page_size: Option<usize>) -> Vec<String> {
     export_log_messages_page(page, page_size)
 }
 
 #[update]
-#[candid_method(update)]
 fn sum_and_log(x: u64, y: u64) -> u64 {
     let result = x.saturating_add(y);
 
@@ -250,7 +235,6 @@ fn sum_and_log(x: u64, y: u64) -> u64 {
 }
 
 #[update]
-#[candid_method(update)]
 fn sum_and_log_sub(x: u64, y: u64) -> Result<u64, String> {
     require!(x >= y, "y({}) must be less than x({})", y, x);
 
@@ -270,7 +254,6 @@ pub fn sub(x: u64, y: u64) -> Result<u64, String> {
 }
 
 #[update]
-#[candid_method(update)]
 fn sum_and_log_sub_with_require(x: u64, y: u64) -> Result<u64, String> {
     require_log!(x >= y, "y({}) must be less than x({})", y, x);
 
@@ -282,7 +265,6 @@ fn sum_and_log_sub_with_require(x: u64, y: u64) -> Result<u64, String> {
 }
 
 #[query]
-#[candid_method(query)]
 fn get_partition() -> HashMap<String, u8> {
     MAP.with(|_| {});
     VEC.with(|_| {});
@@ -294,7 +276,6 @@ fn get_partition() -> HashMap<String, u8> {
 }
 
 #[query]
-#[candid_method(query)]
 fn get_partition_details() -> Vec<PartitionDetail> {
     let mut details = Vec::new();
 
@@ -328,7 +309,6 @@ fn get_partition_details() -> Vec<PartitionDetail> {
 }
 
 #[query]
-#[candid_method(query)]
 fn get_backup_memory() -> Vec<u8> {
     with_base_partition(|core_partition| core_partition.get_backup())
 }
@@ -366,7 +346,6 @@ fn post_upgrade() {
 }
 
 #[update]
-#[candid_method(update)]
 fn schedule_task(after_sec: u64, id: u64) {
     let time = NanoTimeStamp::now().add_secs(after_sec);
 
@@ -412,23 +391,4 @@ fn reschedule() {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use candid::export_service;
-
-    #[test]
-    fn generate_candid() {
-        use std::io::Write;
-
-        let mut file = std::fs::File::create("./candid.did").unwrap();
-
-        export_service!();
-
-        let candid = __export_service();
-
-        file.write_all(candid.as_bytes()).unwrap();
-
-        assert!(true);
-    }
-}
+ic_cdk::export_candid!();

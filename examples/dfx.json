@@ -2,11 +2,14 @@
   "version": 1,
   "canisters": {
     "stable_memory": {
-      "type": "rust",
+      "candid": "stable_memory/stable_memory.did",
       "package": "stable_memory",
-      "candid": "stable_memory/candid.did",
+      "type": "custom",
+      "wasm": "target/wasm32-unknown-unknown/release/stable_memory-opt.wasm",
+      "build": "sh build.sh stable_memory stable_memory",
       "declarations": {
-        "output": "stable_memory/declarations/stable_memory"
+        "output": "frontend/declarations/stable_memory",
+        "node_compatibility": true
       }
     },
     "vetkd_system_api": {

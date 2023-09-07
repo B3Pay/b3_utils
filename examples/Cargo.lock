@@ -21,19 +21,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "b3-stable-structures"
-version = "0.5.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f774a9328c6e5419e28cfeec35e4c2f4ad2cf4bdc44b72528a78176ddd2dc20"
-
-[[package]]
 name = "b3_utils"
 version = "0.3.5"
 dependencies = [
- "b3-stable-structures",
  "candid",
  "hex",
  "ic-cdk",
+ "ic-stable-structures",
  "serde",
  "serde_bytes",
 ]
@@ -276,6 +270,14 @@ dependencies = [
  "serde",
  "serde_tokenstream",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "ic-stable-structures"
+version = "0.5.6"
+source = "git+https://github.com/lwshang/stable-structures.git?branch=lwshang/update_cdk#e1b7a93a08484dcf7ba7c66600f5c6b0b84f63cc"
+dependencies = [
+ "ic0",
 ]
 
 [[package]]

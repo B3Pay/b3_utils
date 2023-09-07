@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 use std::mem::size_of;
 
-use b3_stable_structures::{BoundedStorable, GrowFailed, Storable};
 use candid::CandidType;
+use ic_stable_structures::{BoundedStorable, GrowFailed, Storable};
 use serde::{Deserialize, Serialize};
 
 use crate::{memory::DefaultVMHeap, NanoTimeStamp};
