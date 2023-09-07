@@ -461,7 +461,7 @@ impl From<Principal> for Subaccount {
 
 impl From<[u8; 32]> for Subaccount {
     fn from(bytes: [u8; 32]) -> Self {
-        Self(bytes)
+        Subaccount(bytes)
     }
 }
 

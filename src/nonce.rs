@@ -23,6 +23,10 @@ impl Nonce {
         Self(from.unwrap_or(0))
     }
 
+    pub fn zero() -> Self {
+        Self(0)
+    }
+
     pub fn current(&self) -> Nonce {
         self.clone()
     }
@@ -40,5 +44,31 @@ impl Nonce {
         self.increment();
 
         self.current()
+    }
+}
+
+impl TryFrom<&[u8]> for Nonce {
+    type Error = std::array::TryFromSliceError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self(u64::from_le_bytes(value.try_into()?)))
+    }
+}
+
+impl From<u64> for Nonce {
+    fn from(value: u64) -> Self {
+        Self(value)
+    }
+}
+
+impl From<Nonce> for u64 {
+    fn from(value: Nonce) -> Self {
+        value.0
+    }
+}
+
+impl From<Nonce> for Vec<u8> {
+    fn from(value: Nonce) -> Self {
+        value.0.to_le_bytes().to_vec()
     }
 }

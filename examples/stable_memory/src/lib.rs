@@ -4,7 +4,7 @@ use b3_utils::memory::types::{
     BoundedStorable, DefaultVMHeap, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
 };
 use b3_utils::memory::{with_stable_memory, with_stable_memory_mut};
-use b3_utils::{log, require, require_log, NanoTimeStamp};
+use b3_utils::{log, require, require_log, NanoTimeStamp, Subaccount};
 use candid::{candid_method, CandidType};
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
@@ -21,6 +21,7 @@ thread_local! {
     static MAP: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("map", 10).unwrap()));
     static HEAP: RefCell<DefaultVMHeap<u64>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_min_heap("heap", 11).unwrap()));
     static USERS: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("users", 12).unwrap()));
+    static SUBACCOUNTS: RefCell<DefaultVMMap<Subaccount, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("subaccounts", 12).unwrap()));
     static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_vec("ledger", 13).unwrap()));
 
     static STATE: RefCell<State> = RefCell::new(State::default());
