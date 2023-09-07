@@ -3,7 +3,7 @@ pub use error::*;
 
 use ic_cdk::api::call::{call, call_with_payment};
 
-mod types;
+pub mod types;
 
 mod pairing;
 pub use pairing::*;
@@ -26,10 +26,6 @@ impl VetKD {
         self.0.environment()
     }
 
-    pub fn derivation_path(&self) -> Vec<Vec<u8>> {
-        self.0.derivation_path()
-    }
-
     pub fn derivation_id(&self) -> Vec<u8> {
         self.0.derivation_id()
     }
@@ -42,19 +38,17 @@ impl VetKD {
         self.config().key_id()
     }
 
-    pub fn key_id_with_cycles_and_path(&self) -> (VetKDKeyId, u64, Vec<Vec<u8>>) {
+    pub fn key_id_with_cycles(&self) -> (VetKDKeyId, u64) {
         let config = self.config();
 
-        (
-            config.key_id(),
-            config.sign_cycles(),
-            self.derivation_path(),
-        )
+        (config.key_id(), config.sign_cycles())
     }
 
-    pub async fn request_public_key(&self) -> Result<Vec<u8>, VetKDError> {
+    pub async fn request_public_key(
+        &self,
+        derivation_path: Vec<Vec<u8>>,
+    ) -> Result<Vec<u8>, VetKDError> {
         let key_id = self.key_id();
-        let derivation_path = self.derivation_path();
 
         let request = VetKDPublicKeyRequest {
             canister_id: None,
@@ -72,10 +66,10 @@ impl VetKD {
 
     pub async fn request_encrypted_key(
         &self,
+        public_key_derivation_path: Vec<Vec<u8>>,
         encryption_public_key: Vec<u8>,
     ) -> Result<Vec<u8>, VetKDError> {
         let key_id = self.key_id();
-        let public_key_derivation_path = self.derivation_path();
         let derivation_id = self.derivation_id();
 
         let request = VetKDEncryptedKeyRequest {
