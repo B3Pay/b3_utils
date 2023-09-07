@@ -11,11 +11,18 @@ pub use pairing::*;
 mod config;
 pub use config::*;
 
-use crate::{constants::MANAGMENT_CANISTER_ID, environment::Environment, Subaccount};
+use crate::{environment::Environment, types::CanisterId, Subaccount};
 
 use self::types::*;
 
-pub struct VetKD(Subaccount);
+/// TODO: Replace with the real MANAGMENT_CANISTER_ID from crate::constants
+/// this is the canister id of an unsafe VETKD
+/// canister, it is used for testing purposes only
+/// and should be replaced with the MANAGE_CANISTER_ID
+const MANAGMENT_CANISTER_ID: CanisterId =
+    CanisterId::from_text("wfdtj-lyaaa-aaaap-abakq-cai").unwrap();
+
+pub struct VetKD(pub Subaccount);
 
 impl VetKD {
     pub fn new(subaccount: Subaccount) -> Self {
@@ -44,6 +51,43 @@ impl VetKD {
         (config.key_id(), config.sign_cycles())
     }
 
+    pub async fn request_encrypted_key(
+        &self,
+        public_key_derivation_path: Vec<Vec<u8>>,
+        encryption_public_key: Vec<u8>,
+    ) -> Result<Vec<u8>, VetKDError> {
+        let key_id = self.key_id();
+        let derivation_id = self.derivation_id();
+
+        let request = VetKDEncryptedKeyRequest {
+            derivation_id,
+            public_key_derivation_path,
+            key_id,
+            encryption_public_key,
+        };
+
+        let (res,): (VetKDEncryptedKeyReply,) =
+            call_with_payment(MANAGMENT_CANISTER_ID, "vetkd_encrypted_key", (request,), 0)
+                .await
+                .map_err(|e| VetKDError::CallError(e.1))?;
+
+        Ok(res.encrypted_key)
+    }
+}
+
+pub struct VetKDManagement(pub Option<CanisterId>);
+
+impl VetKDManagement {
+    pub fn config(&self) -> VetKDConfig {
+        let canister_id = self.0.unwrap_or(ic_cdk::id());
+
+        Subaccount::from(canister_id).environment().into()
+    }
+
+    pub fn key_id(&self) -> VetKDKeyId {
+        self.config().key_id()
+    }
+
     pub async fn request_public_key(
         &self,
         derivation_path: Vec<Vec<u8>>,
@@ -51,7 +95,7 @@ impl VetKD {
         let key_id = self.key_id();
 
         let request = VetKDPublicKeyRequest {
-            canister_id: None,
+            canister_id: self.0,
             derivation_path,
             key_id,
         };
@@ -66,11 +110,11 @@ impl VetKD {
 
     pub async fn request_encrypted_key(
         &self,
+        derivation_id: Vec<u8>,
         public_key_derivation_path: Vec<Vec<u8>>,
         encryption_public_key: Vec<u8>,
     ) -> Result<Vec<u8>, VetKDError> {
         let key_id = self.key_id();
-        let derivation_id = self.derivation_id();
 
         let request = VetKDEncryptedKeyRequest {
             derivation_id,
