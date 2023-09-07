@@ -1,16 +1,19 @@
 mod error;
-
-pub mod pairing;
 pub use error::*;
 
-mod types;
 use ic_cdk::api::call::{call, call_with_payment};
-pub use types::*;
+
+mod types;
+
+mod pairing;
+pub use pairing::*;
 
 mod config;
 pub use config::*;
 
 use crate::{constants::MANAGMENT_CANISTER_ID, environment::Environment, Subaccount};
+
+use self::types::*;
 
 pub struct VetKD(Subaccount);
 
@@ -49,7 +52,7 @@ impl VetKD {
         )
     }
 
-    pub async fn verification_key(&self) -> Result<Vec<u8>, VetKDError> {
+    pub async fn request_public_key(&self) -> Result<Vec<u8>, VetKDError> {
         let key_id = self.key_id();
         let derivation_path = self.derivation_path();
 
@@ -67,7 +70,7 @@ impl VetKD {
         Ok(res.public_key)
     }
 
-    pub async fn encrypted_key(
+    pub async fn request_encrypted_key(
         &self,
         encryption_public_key: Vec<u8>,
     ) -> Result<Vec<u8>, VetKDError> {

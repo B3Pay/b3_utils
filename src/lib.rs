@@ -15,22 +15,6 @@
 //! [dependencies]
 //! my_library = { version = "0.1", features = ["vetkd", "logging"] }
 //! ```
-//! ## Modules
-//!  
-//! - **Account** - Create and manage accounts.
-//! - **Constants** - Constants used by the library.
-//! - **Currency** - Currency types and conversion functions.
-//! - **Environment** - Environment types and conversion functions.
-//! - **Error** - Error types and conversion functions.
-//! - **Owner** - Owner types and conversion functions.
-//! - **Release** - Release types and conversion functions.
-//! - **Subaccount** - Subaccount types and conversion functions.
-//! - **System** - System types and conversion functions.
-//! - **Timestamp** - Timestamp types and conversion functions.
-//! - **Types** - Types used by the library.
-//! - **Utils** - Utility functions.
-//! - **Wallet** - Wallet types and conversion functions.
-//! - **Wasm** - Wasm types and conversion functions.
 //!
 //! ## Examples
 //!
