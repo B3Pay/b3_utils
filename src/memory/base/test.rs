@@ -4,7 +4,7 @@ mod test {
         memory::base::{timer::TimerEntry, with_base_partition, with_base_partition_mut},
         NanoTimeStamp,
     };
-    use ic_stable_structures::Memory;
+    use b3_stable_structures::Memory;
 
     #[test]
     fn test_init_main_partition() {

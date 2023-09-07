@@ -1,6 +1,6 @@
 use std::borrow::BorrowMut;
 
-use ic_stable_structures::{writer::Writer, Memory};
+use b3_stable_structures::{writer::Writer, Memory};
 
 use crate::memory::DefaultVM;
 

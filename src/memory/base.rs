@@ -1,4 +1,4 @@
-use ic_stable_structures::Memory;
+use b3_stable_structures::Memory;
 
 use super::types::PartitionDetail;
 use super::StableMemory;

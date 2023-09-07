@@ -1,5 +1,5 @@
-use ic_stable_structures::memory_manager::{MemoryId, MemoryManager};
-use ic_stable_structures::{
+use b3_stable_structures::memory_manager::{MemoryId, MemoryManager};
+use b3_stable_structures::{
     BoundedStorable, DefaultMemoryImpl, StableBTreeMap, StableCell, StableLog, StableVec, Storable,
 };
 use std::borrow::BorrowMut;
@@ -17,8 +17,6 @@ pub use store::*;
 
 pub mod types;
 use types::{DefaultVM, DefaultVMCell, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec};
-
-use self::types::{CellInitError, LogInitError};
 
 pub struct StableMemory {
     memory_manager: MemoryManager<DefaultMemoryImpl>,
@@ -125,7 +123,7 @@ impl StableMemory {
         let data_memory = self.create(&format!("{}_data", name), data_id)?;
 
         StableLog::init(index_memory, data_memory)
-            .map_err(|e| StableMemoryError::UnableToCreateMemory(LogInitError(e).to_string()))
+            .map_err(|e| StableMemoryError::UnableToCreateMemory(e.to_string()))
     }
 
     pub fn init_cell<T: Storable + Default>(
@@ -136,6 +134,6 @@ impl StableMemory {
         let memory = self.create(name, id)?;
 
         StableCell::init(memory, T::default())
-            .map_err(|e| StableMemoryError::UnableToCreateMemory(CellInitError(e).to_string()))
+            .map_err(|e| StableMemoryError::UnableToCreateMemory(e.to_string()))
     }
 }
