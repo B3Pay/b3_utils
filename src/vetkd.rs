@@ -19,8 +19,10 @@ use self::types::*;
 /// this is the canister id of an unsafe VETKD
 /// canister, it is used for testing purposes only
 /// and should be replaced with the MANAGE_CANISTER_ID
-const MANAGMENT_CANISTER_ID: CanisterId =
-    CanisterId::from_text("wfdtj-lyaaa-aaaap-abakq-cai").unwrap();
+fn vetkd_system_api_canister_id() -> CanisterId {
+    CanisterId::from_text("wfdtj-lyaaa-aaaap-abakq-cai")
+        .expect("Error::Failed to create canister ID")
+}
 
 pub struct VetKD(pub Subaccount);
 
@@ -66,10 +68,14 @@ impl VetKD {
             encryption_public_key,
         };
 
-        let (res,): (VetKDEncryptedKeyReply,) =
-            call_with_payment(MANAGMENT_CANISTER_ID, "vetkd_encrypted_key", (request,), 0)
-                .await
-                .map_err(|e| VetKDError::CallError(e.1))?;
+        let (res,): (VetKDEncryptedKeyReply,) = call_with_payment(
+            vetkd_system_api_canister_id(),
+            "vetkd_encrypted_key",
+            (request,),
+            0,
+        )
+        .await
+        .map_err(|e| VetKDError::CallError(e.1))?;
 
         Ok(res.encrypted_key)
     }
@@ -100,10 +106,13 @@ impl VetKDManagement {
             key_id,
         };
 
-        let (res,): (VetKDPublicKeyReply,) =
-            call(MANAGMENT_CANISTER_ID, "vetkd_public_key", (request,))
-                .await
-                .map_err(|e| VetKDError::CallError(e.1))?;
+        let (res,): (VetKDPublicKeyReply,) = call(
+            vetkd_system_api_canister_id(),
+            "vetkd_public_key",
+            (request,),
+        )
+        .await
+        .map_err(|e| VetKDError::CallError(e.1))?;
 
         Ok(res.public_key)
     }
@@ -123,10 +132,14 @@ impl VetKDManagement {
             encryption_public_key,
         };
 
-        let (res,): (VetKDEncryptedKeyReply,) =
-            call_with_payment(MANAGMENT_CANISTER_ID, "vetkd_encrypted_key", (request,), 0)
-                .await
-                .map_err(|e| VetKDError::CallError(e.1))?;
+        let (res,): (VetKDEncryptedKeyReply,) = call_with_payment(
+            vetkd_system_api_canister_id(),
+            "vetkd_encrypted_key",
+            (request,),
+            0,
+        )
+        .await
+        .map_err(|e| VetKDError::CallError(e.1))?;
 
         Ok(res.encrypted_key)
     }
