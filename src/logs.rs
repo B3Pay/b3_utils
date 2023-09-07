@@ -36,7 +36,14 @@ impl fmt::Display for LogEntry {
 }
 
 /// Adds a new record to a canister log buffer.
-///
+/// The maximum number of records is 1000.
+/// Older records are evicted.
+/// 
+/// The log is not resilient to canister upgrades.
+/// 
+/// The log is exported by calling `export_log()`.
+/// And it can be imported by calling `import_log()`.
+/// 
 /// # Example
 /// ```
 /// use b3_utils::{logs::export_log, log};
