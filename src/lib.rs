@@ -64,10 +64,7 @@ pub mod constants;
 pub mod error;
 pub mod mocks;
 pub mod nonce;
-pub mod owner;
-pub mod release;
 pub mod types;
-pub mod wasm;
 
 mod timestamp;
 pub use timestamp::*;
@@ -80,6 +77,12 @@ pub use environment::*;
 
 mod utils;
 pub use utils::*;
+
+#[cfg(feature = "owner")]
+pub mod owner;
+
+#[cfg(feature = "wasm")]
+pub mod wasm;
 
 #[cfg(feature = "ledger")]
 pub mod ledger;

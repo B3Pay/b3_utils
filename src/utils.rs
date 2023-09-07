@@ -1,7 +1,7 @@
-mod hasher;
+mod encoder;
 mod ic;
 
-pub use hasher::*;
+pub use encoder::*;
 pub use ic::*;
 
 #[macro_export]
