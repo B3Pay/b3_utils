@@ -47,7 +47,6 @@ mod tests {
 
     #[test]
     fn test_partition_loop() {
-        // find duplicates
         let mut stable_memory = StableMemory::init();
 
         #[rustfmt::skip]

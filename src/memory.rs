@@ -11,6 +11,7 @@ pub mod error;
 use error::StableMemoryError;
 
 pub mod base;
+pub mod timer;
 
 mod store;
 pub use store::*;

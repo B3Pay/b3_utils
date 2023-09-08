@@ -20,7 +20,12 @@ type ProcessedOperation = record {
 type Result = variant { Ok; Err : text };
 type Result_1 = variant { Ok : nat64; Err : text };
 type State = record { ledger : vec nat8 };
-type TimerEntry = record { id : nat64; time : nat64 };
+type Task = variant {
+  SumAndLogSub : record { nat64; nat64 };
+  SumAndLogSubWithRequire : record { nat64; nat64 };
+  SumAndLog : record { nat64; nat64 };
+};
+type TaskTimerEntry = record { task : Task; time : nat64 };
 type User = record {
   id : nat64;
   name : text;
@@ -42,12 +47,12 @@ service : () -> {
   get_partition : () -> (vec record { text; nat8 }) query;
   get_partition_details : () -> (vec PartitionDetail) query;
   get_state : () -> (State) query;
-  get_timers : () -> (vec TimerEntry) query;
+  get_timers : () -> (vec TaskTimerEntry) query;
   get_user_len : () -> (nat64) query;
   get_users : () -> (vec User) query;
   print_log_entries : () -> (vec LogEntry) query;
   print_log_entries_page : (nat64, opt nat64) -> (vec text) query;
-  schedule_task : (nat64, nat64) -> ();
+  schedule_task : (nat64, Task) -> ();
   sum_and_log : (nat64, nat64) -> (nat64);
   sum_and_log_sub : (nat64, nat64) -> (Result_1);
   sum_and_log_sub_with_require : (nat64, nat64) -> (Result_1);

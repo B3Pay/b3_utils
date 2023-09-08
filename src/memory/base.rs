@@ -6,17 +6,14 @@ use super::StableMemory;
 mod test;
 
 pub mod backup;
-pub mod timer;
 
 mod store;
 pub use store::*;
 
 use backup::MainBackupType;
-use timer::MainTimerType;
 
 pub struct BasePartition {
     backup: MainBackupType,
-    timer: MainTimerType,
 }
 
 impl BasePartition {
@@ -30,26 +27,13 @@ impl BasePartition {
     pub fn init(partition_manager: &mut StableMemory) -> Self {
         let backup = partition_manager.create("__backup", 0).unwrap();
 
-        let timer = partition_manager.init_min_heap("__timer", 1).unwrap();
-
-        Self { backup, timer }
-    }
-
-    pub fn details(&self) -> Vec<PartitionDetail> {
-        vec![self.backup_details(), self.timer_details()]
+        Self { backup }
     }
 
     pub fn backup_details(&self) -> PartitionDetail {
         PartitionDetail {
             name: "__backup".to_string(),
             len: self.backup.size(),
-        }
-    }
-
-    pub fn timer_details(&self) -> PartitionDetail {
-        PartitionDetail {
-            name: "__timer".to_string(),
-            len: self.timer.len(),
         }
     }
 }

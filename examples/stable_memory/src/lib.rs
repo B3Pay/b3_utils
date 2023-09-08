@@ -1,5 +1,6 @@
 use b3_utils::logs::{export_log, export_log_messages_page, LogEntry};
-use b3_utils::memory::base::{timer::TimerEntry, with_base_partition, with_base_partition_mut};
+use b3_utils::memory::base::{with_base_partition, with_base_partition_mut};
+use b3_utils::memory::timer::{TaskTimerEntry, TaskTimerPartition};
 use b3_utils::memory::types::{
     BoundedStorable, DefaultVMHeap, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
 };
@@ -17,7 +18,33 @@ use std::io::Cursor;
 
 const MAX_OPERATION_SIZE: u32 = 100;
 
+#[derive(CandidType, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Serialize, Deserialize)]
+enum Task {
+    SumAndLog(u64, u64),
+    SumAndLogSub(u64, u64),
+    SumAndLogSubWithRequire(u64, u64),
+}
+
+impl Storable for Task {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        let mut bytes = vec![];
+        into_writer(&self, &mut bytes).unwrap();
+        std::borrow::Cow::Owned(bytes)
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        from_reader(&mut Cursor::new(&bytes)).unwrap()
+    }
+}
+
+impl BoundedStorable for Task {
+    const MAX_SIZE: u32 = 24;
+    const IS_FIXED_SIZE: bool = true;
+}
+
 thread_local! {
+    static TASK_TIMER: RefCell<TaskTimerPartition<Task>> = RefCell::new(with_stable_memory_mut(|pm| TaskTimerPartition::init(pm, 1)));
+
     static MAP: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("map", 10).unwrap()));
     static HEAP: RefCell<DefaultVMHeap<u64>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_min_heap("heap", 11).unwrap()));
     static USERS: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("users", 12).unwrap()));
@@ -25,6 +52,7 @@ thread_local! {
     static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_vec("ledger", 13).unwrap()));
 
     static STATE: RefCell<State> = RefCell::new(State::default());
+
 }
 
 #[derive(CandidType, PartialEq, Eq, Clone, Serialize, Deserialize)]
@@ -211,8 +239,12 @@ fn get_user_len() -> u64 {
 }
 
 #[query]
-fn get_timers() -> Vec<TimerEntry> {
-    with_base_partition(|s| s.get_timer())
+fn get_timers() -> Vec<TaskTimerEntry<Task>> {
+    TASK_TIMER.with(|s| {
+        let state = s.borrow();
+
+        state.get_timer()
+    })
 }
 
 #[query]
@@ -299,10 +331,10 @@ fn get_partition_details() -> Vec<PartitionDetail> {
         len: STATE.with(|s| s.borrow().ledger.len()) as u64,
     });
 
-    with_base_partition(|bp| {
-        bp.details().iter().for_each(|detail| {
-            details.push(detail.clone());
-        });
+    TASK_TIMER.with(|tt| {
+        let tt = tt.borrow();
+
+        details.push(tt.details());
     });
 
     details
@@ -346,45 +378,63 @@ fn post_upgrade() {
 }
 
 #[update]
-fn schedule_task(after_sec: u64, id: u64) {
+fn schedule_task(after_sec: u64, task: Task) {
     let time = NanoTimeStamp::now().add_secs(after_sec);
 
-    let timer = TimerEntry { id, time };
+    let timer = TaskTimerEntry { task, time };
 
-    with_base_partition_mut(|core_partition| core_partition.push_timer(&timer)).unwrap();
+    TASK_TIMER
+        .with(|tt| {
+            let mut tt = tt.borrow_mut();
+
+            tt.push_timer(&timer)
+        })
+        .unwrap();
 
     reschedule();
 }
 
 #[export_name = "canister_global_timer"]
 fn global_timer() {
-    while let Some(task_time) = with_base_partition(|core_partition| core_partition.peek_timer()) {
+    while let Some(task_time) = TASK_TIMER.with(|tt| {
+        let tt = tt.borrow();
+
+        tt.peek_timer()
+    }) {
         if task_time.time.in_future() {
             reschedule();
             return;
         }
-        with_base_partition_mut(|core_partition| core_partition.pop_timer());
+        TASK_TIMER.with(|tt| {
+            let mut tt = tt.borrow_mut();
+
+            tt.pop_timer()
+        });
 
         execute_task(task_time);
         reschedule();
     }
 }
 
-fn execute_task(timer: TimerEntry) {
-    log!("execute_task: {}", timer.id);
+fn execute_task(timer: TaskTimerEntry<Task>) {
+    log!("execute_task: {:?}", timer.task);
     log!("execute_task in : {}", timer.time);
 
     add_user(User {
-        id: timer.id,
-        name: format!("{}", timer.id),
-        email: format!("{}@test.com", timer.time),
+        id: timer.time.clone().into(),
+        name: format!("{:?}", timer.task),
+        email: format!("{}@test.com", timer.time.to_secs()),
         new_field: None,
         created_at: NanoTimeStamp::now(),
     });
 }
 
 fn reschedule() {
-    if let Some(task_time) = with_base_partition(|core_partition| core_partition.peek_timer()) {
+    if let Some(task_time) = TASK_TIMER.with(|tt| {
+        let tt = tt.borrow();
+
+        tt.peek_timer()
+    }) {
         unsafe {
             ic0::global_timer_set(task_time.time.into());
         }
