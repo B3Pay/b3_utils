@@ -7,7 +7,7 @@ pub use b3_stable_structures::{
     VectorMemory,
 };
 
-use crate::Subaccount;
+use crate::{nonce::Nonce, NanoTimeStamp, Subaccount};
 
 #[derive(CandidType, Clone, Debug)]
 pub struct PartitionDetail {
@@ -36,4 +36,34 @@ impl Storable for Subaccount {
 impl BoundedStorable for Subaccount {
     const IS_FIXED_SIZE: bool = true;
     const MAX_SIZE: u32 = 32;
+}
+
+impl Storable for NanoTimeStamp {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        self.to_le_bytes().to_vec().into()
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        NanoTimeStamp::from_le_bytes(bytes[0..8].try_into().unwrap())
+    }
+}
+
+impl BoundedStorable for NanoTimeStamp {
+    const IS_FIXED_SIZE: bool = true;
+    const MAX_SIZE: u32 = 8;
+}
+
+impl Storable for Nonce {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        self.to_le_bytes().to_vec().into()
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Nonce::from_le_bytes(bytes[0..8].try_into().unwrap())
+    }
+}
+
+impl BoundedStorable for Nonce {
+    const IS_FIXED_SIZE: bool = true;
+    const MAX_SIZE: u32 = 8;
 }

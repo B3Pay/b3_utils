@@ -18,6 +18,18 @@ use std::io::Cursor;
 
 const MAX_OPERATION_SIZE: u32 = 100;
 
+thread_local! {
+    static TASK_TIMER: RefCell<TaskTimerPartition<Task>> = RefCell::new(with_stable_memory_mut(|pm| TaskTimerPartition::init(pm, 1)));
+
+    static MAP: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("map", 10).unwrap()));
+    static HEAP: RefCell<DefaultVMHeap<u64>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_min_heap("heap", 11).unwrap()));
+    static USERS: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("users", 12).unwrap()));
+    static SUBACCOUNTS: RefCell<DefaultVMMap<Subaccount, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("subaccounts", 12).unwrap()));
+    static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_vec("ledger", 13).unwrap()));
+
+    static STATE: RefCell<State> = RefCell::new(State::default());
+}
+
 #[derive(CandidType, Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Serialize, Deserialize)]
 enum Task {
     SumAndLog(u64, u64),
@@ -40,19 +52,6 @@ impl Storable for Task {
 impl BoundedStorable for Task {
     const MAX_SIZE: u32 = 24;
     const IS_FIXED_SIZE: bool = true;
-}
-
-thread_local! {
-    static TASK_TIMER: RefCell<TaskTimerPartition<Task>> = RefCell::new(with_stable_memory_mut(|pm| TaskTimerPartition::init(pm, 1)));
-
-    static MAP: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("map", 10).unwrap()));
-    static HEAP: RefCell<DefaultVMHeap<u64>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_min_heap("heap", 11).unwrap()));
-    static USERS: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("users", 12).unwrap()));
-    static SUBACCOUNTS: RefCell<DefaultVMMap<Subaccount, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("subaccounts", 12).unwrap()));
-    static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_vec("ledger", 13).unwrap()));
-
-    static STATE: RefCell<State> = RefCell::new(State::default());
-
 }
 
 #[derive(CandidType, PartialEq, Eq, Clone, Serialize, Deserialize)]

@@ -23,6 +23,14 @@ impl Nonce {
         Self(from.unwrap_or(0))
     }
 
+    pub fn from_le_bytes(bytes: [u8; 8]) -> Self {
+        Nonce(u64::from_le_bytes(bytes))
+    }
+
+    pub fn to_le_bytes(&self) -> [u8; 8] {
+        self.0.to_le_bytes()
+    }
+
     pub fn zero() -> Self {
         Self(0)
     }
