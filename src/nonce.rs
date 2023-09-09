@@ -48,6 +48,14 @@ impl Nonce {
         self.0
     }
 
+    pub fn add(&self, other: u64) -> Self {
+        Self(self.0 + other)
+    }
+
+    pub fn sub(&self, other: u64) -> Self {
+        Self(self.0 - other)
+    }
+
     pub fn increment(&mut self) {
         self.0 += 1;
     }
