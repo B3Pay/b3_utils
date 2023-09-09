@@ -1,4 +1,7 @@
-use std::fmt;
+use std::{
+    fmt,
+    ops::{Add, Sub},
+};
 
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
@@ -54,6 +57,22 @@ impl Nonce {
         self.increment();
 
         self.current()
+    }
+}
+
+impl Add for Nonce {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self(self.0 + rhs.0)
+    }
+}
+
+impl Sub for Nonce {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self(self.0 - rhs.0)
     }
 }
 
