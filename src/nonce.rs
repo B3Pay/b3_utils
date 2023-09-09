@@ -68,22 +68,6 @@ impl Nonce {
     }
 }
 
-impl Add for Nonce {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Self(self.0 + rhs.0)
-    }
-}
-
-impl Sub for Nonce {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output {
-        Self(self.0 - rhs.0)
-    }
-}
-
 impl TryFrom<&[u8]> for Nonce {
     type Error = std::array::TryFromSliceError;
 
