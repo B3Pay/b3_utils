@@ -1,3 +1,5 @@
+use std::fmt;
+
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 mod test;
@@ -78,5 +80,11 @@ impl From<Nonce> for u64 {
 impl From<Nonce> for Vec<u8> {
     fn from(value: Nonce) -> Self {
         value.0.to_le_bytes().to_vec()
+    }
+}
+
+impl fmt::Display for Nonce {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }

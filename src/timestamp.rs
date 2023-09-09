@@ -10,7 +10,9 @@ use ic_cdk::api::time as ic_timestamp;
 
 mod test;
 
-#[derive(CandidType, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, Clone, Debug)]
+#[derive(
+    Default, CandidType, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, Clone, Debug,
+)]
 pub struct NanoTimeStamp(pub u64);
 
 impl NanoTimeStamp {
