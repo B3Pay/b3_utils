@@ -37,6 +37,15 @@ impl NanoTimeStamp {
         NanoTimeStamp(u64::from_le_bytes(bytes))
     }
 
+    pub fn elapsed(&self) -> Self {
+        let now = NanoTimeStamp::now();
+        if self > &now {
+            NanoTimeStamp(0)
+        } else {
+            NanoTimeStamp(now.0 - self.0)
+        }
+    }
+
     pub fn to_le_bytes(&self) -> [u8; 8] {
         self.0.to_le_bytes()
     }
