@@ -103,7 +103,7 @@ impl VetKDManagement {
         let key_id = self.key_id();
 
         let request = VetKDPublicKeyRequest {
-            canister_id: self.0,
+            canister_id: Some(self.0),
             derivation_path,
             key_id,
         };
