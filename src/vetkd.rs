@@ -81,13 +81,11 @@ impl VetKD {
     }
 }
 
-pub struct VetKDManagement(pub Option<CanisterId>);
+pub struct VetKDManagement(pub CanisterId);
 
 impl VetKDManagement {
     pub fn config(&self) -> VetKDConfig {
-        let canister_id = self.0.unwrap_or(ic_cdk::id());
-
-        Subaccount::from(canister_id).environment().into()
+        Subaccount::from(self.0).environment().into()
     }
 
     pub fn key_id(&self) -> VetKDKeyId {
