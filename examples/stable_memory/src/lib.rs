@@ -242,7 +242,7 @@ fn get_timers() -> Vec<TaskTimerEntry<Task>> {
     TASK_TIMER.with(|s| {
         let state = s.borrow();
 
-        state.get_timer()
+        state.get_timers()
     })
 }
 

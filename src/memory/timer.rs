@@ -37,15 +37,15 @@ impl<T: Ord + PartialOrd + Storable + BoundedStorable> TaskTimerPartition<T> {
         }
     }
 
-    pub fn timer(&self) -> &TaskTimerPartition<T> {
+    pub fn timers(&self) -> &TaskTimerPartition<T> {
         &self
     }
 
-    pub fn timer_mut(&mut self) -> &mut TaskTimerPartition<T> {
+    pub fn timers_mut(&mut self) -> &mut TaskTimerPartition<T> {
         self
     }
 
-    pub fn get_timer(&self) -> Vec<TaskTimerEntry<T>> {
+    pub fn get_timers(&self) -> Vec<TaskTimerEntry<T>> {
         self.0.iter().collect()
     }
 
