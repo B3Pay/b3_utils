@@ -84,6 +84,10 @@ impl VetKD {
 pub struct VetKDManagement(pub CanisterId);
 
 impl VetKDManagement {
+    pub fn new(canister_id: CanisterId) -> Self {
+        Self(canister_id)
+    }
+
     pub fn config(&self) -> VetKDConfig {
         Subaccount::from(self.0).environment().into()
     }
