@@ -1,81 +1,101 @@
+use std::borrow::BorrowMut;
+
 use b3_stable_structures::memory_manager::{MemoryId, MemoryManager};
 use b3_stable_structures::{
     BoundedStorable, DefaultMemoryImpl, StableBTreeMap, StableCell, StableLog, StableVec, Storable,
 };
-use std::borrow::BorrowMut;
-use std::collections::HashMap;
 
 mod test;
 
 pub mod error;
 use error::StableMemoryError;
 
-pub mod base;
+pub mod backup;
 pub mod timer;
 
 mod store;
 pub use store::*;
 
+pub mod partitions;
 pub mod types;
+
 use types::{DefaultVM, DefaultVMCell, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec};
+
+use self::backup::BackupPartition;
+use self::partitions::Partitions;
+use self::types::PartitionDetail;
 
 pub struct StableMemory {
     memory_manager: MemoryManager<DefaultMemoryImpl>,
-    partitions: HashMap<String, u8>,
+    backup: BackupPartition,
+    partitions: Partitions,
 }
 
 impl StableMemory {
     pub fn init() -> Self {
         let memory_manager = MemoryManager::init(DefaultMemoryImpl::default());
-        let partitions = HashMap::new();
+        let partitions_vm = memory_manager.get(MemoryId::new(255));
+        let partitions = Partitions::init(partitions_vm);
+
+        let backup_vm = memory_manager.get(MemoryId::new(0));
+        let backup = BackupPartition::init(backup_vm);
 
         Self {
             memory_manager,
             partitions,
+            backup,
         }
     }
 
     pub fn create(&mut self, name: &str, id: u8) -> Result<DefaultVM, StableMemoryError> {
         let partitions = self.partitions.borrow_mut();
+        let name = name.into();
 
-        match partitions.get(name) {
+        match partitions.get(&name) {
             Some(_) => return Err(StableMemoryError::PartitionExists),
             None => {
                 for (memory_name, memory_id) in partitions.iter() {
-                    if *memory_id == id {
+                    if memory_id == id {
                         return Err(StableMemoryError::IdAlreadyUsed(memory_name.to_string()));
                     }
                 }
 
-                partitions.insert(name.to_string(), id);
+                partitions.insert(name.clone(), id);
             }
         }
 
         let memory = self
-            .memory(name)
+            .memory(&name.to_string())
             .ok_or(StableMemoryError::UnableToCreateMemory(name.to_string()))?;
 
         Ok(memory)
     }
 
     pub fn partition(&self, name: &str) -> Option<u8> {
-        self.partitions.get(name).cloned()
+        self.partitions.get(&name.into())
     }
 
-    pub fn partitions(&self) -> &HashMap<String, u8> {
+    pub fn partitions(&self) -> &Partitions {
         &self.partitions
     }
 
     pub fn memory(&self, name: &str) -> Option<DefaultVM> {
-        let memory_id = self.partitions.get(name)?;
+        let memory_id = self.partitions.get(&name.into())?;
 
-        let vm = self.memory_manager.get(MemoryId::new(*memory_id));
+        let vm = self.memory_manager.get(MemoryId::new(memory_id));
 
         Some(vm)
     }
 
     pub fn memory_manager(&self) -> &MemoryManager<DefaultMemoryImpl> {
         &self.memory_manager
+    }
+
+    pub fn backup_details(&self) -> PartitionDetail {
+        PartitionDetail {
+            name: "__backup".to_string(),
+            len: self.backup.size(),
+        }
     }
 
     pub fn init_vec<T: Storable + BoundedStorable>(

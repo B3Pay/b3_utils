@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test {
-    use crate::memory::base::{with_base_partition, with_base_partition_mut};
+    use crate::memory::backup::{with_base_partition, with_base_partition_mut};
     use b3_stable_structures::Memory;
 
     #[test]

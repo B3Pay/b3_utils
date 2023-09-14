@@ -1,8 +1,8 @@
-use std::fmt;
-
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 mod test;
+
+pub mod traits;
 
 #[derive(
     CandidType,
@@ -62,37 +62,5 @@ impl Nonce {
         self.increment();
 
         self.current()
-    }
-}
-
-impl TryFrom<&[u8]> for Nonce {
-    type Error = std::array::TryFromSliceError;
-
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Self(u64::from_le_bytes(value.try_into()?)))
-    }
-}
-
-impl From<u64> for Nonce {
-    fn from(value: u64) -> Self {
-        Self(value)
-    }
-}
-
-impl From<Nonce> for u64 {
-    fn from(value: Nonce) -> Self {
-        value.0
-    }
-}
-
-impl From<Nonce> for Vec<u8> {
-    fn from(value: Nonce) -> Self {
-        value.0.to_le_bytes().to_vec()
-    }
-}
-
-impl fmt::Display for Nonce {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.0)
     }
 }

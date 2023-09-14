@@ -1,14 +1,16 @@
+use std::ops::Add;
+
 use super::constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
 use crate::environment::Environment;
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
-use std::{cmp, fmt, hash, mem::size_of, ops::Add, str::FromStr};
-
 pub mod error;
 mod test;
 
 pub use error::*;
+
+pub mod traits;
 
 impl Default for Subaccount {
     fn default() -> Self {
@@ -415,81 +417,12 @@ impl Subaccount {
 
         Subaccount::from_slice(&bytes)
     }
-}
 
-impl Subaccount {
     pub fn derivation_id(&self) -> Vec<u8> {
         self.0.to_vec()
     }
 
     pub fn derivation_path(&self) -> Vec<Vec<u8>> {
         vec![self.0.to_vec()]
-    }
-}
-
-impl Eq for Subaccount {}
-
-impl cmp::PartialOrd for Subaccount {
-    fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl cmp::Ord for Subaccount {
-    fn cmp(&self, other: &Self) -> cmp::Ordering {
-        self.0.cmp(&other.0)
-    }
-}
-
-impl hash::Hash for Subaccount {
-    fn hash<H: hash::Hasher>(&self, state: &mut H) {
-        self.0.hash(state);
-    }
-}
-
-impl From<Principal> for Subaccount {
-    fn from(principal: Principal) -> Self {
-        let mut subaccount = [0; size_of::<Subaccount>()];
-        let principal_id = principal.as_slice();
-
-        subaccount[0] = principal_id.len().try_into().unwrap();
-        subaccount[1..1 + principal_id.len()].copy_from_slice(principal_id);
-
-        Subaccount(subaccount)
-    }
-}
-
-impl From<[u8; 32]> for Subaccount {
-    fn from(bytes: [u8; 32]) -> Self {
-        Subaccount(bytes)
-    }
-}
-
-impl TryFrom<Vec<u8>> for Subaccount {
-    type Error = SubaccountError;
-
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        if value.len() != 32 {
-            return Err(SubaccountError::LengthError(value.len()));
-        }
-
-        let mut bytes = [0u8; 32];
-        bytes.copy_from_slice(&value);
-
-        Ok(Self(bytes))
-    }
-}
-
-impl FromStr for Subaccount {
-    type Err = SubaccountError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self::from_hex(s)?)
-    }
-}
-
-impl fmt::Display for Subaccount {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        hex::encode(&self.0).fmt(f)
     }
 }

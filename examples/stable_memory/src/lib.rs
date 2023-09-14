@@ -1,5 +1,5 @@
 use b3_utils::logs::{export_log, export_log_messages_page, LogEntry};
-use b3_utils::memory::base::{with_base_partition, with_base_partition_mut};
+use b3_utils::memory::backup::{with_base_partition, with_base_partition_mut};
 use b3_utils::memory::timer::{TaskTimerEntry, TaskTimerPartition};
 use b3_utils::memory::types::{
     BoundedStorable, DefaultVMHeap, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
