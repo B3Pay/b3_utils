@@ -5,9 +5,6 @@ use super::types::DefaultVM;
 
 mod test;
 
-mod store;
-pub use store::*;
-
 pub struct BackupPartition(DefaultVM);
 
 impl BackupPartition {

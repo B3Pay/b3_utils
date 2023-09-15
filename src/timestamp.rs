@@ -7,7 +7,7 @@ use crate::mocks::time_mock as ic_timestamp;
 use ic_cdk::api::time as ic_timestamp;
 
 mod test;
-pub mod traits;
+mod traits;
 
 #[derive(
     Default, CandidType, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, Clone, Debug,

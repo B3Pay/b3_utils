@@ -1,10 +1,11 @@
 use b3_utils::logs::{export_log, export_log_messages_page, LogEntry};
-use b3_utils::memory::backup::{with_base_partition, with_base_partition_mut};
 use b3_utils::memory::timer::{TaskTimerEntry, TaskTimerPartition};
 use b3_utils::memory::types::{
     BoundedStorable, DefaultVMHeap, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
 };
-use b3_utils::memory::{with_stable_memory, with_stable_memory_mut};
+use b3_utils::memory::{
+    with_backup_memory, with_backup_memory_mut, with_stable_memory, with_stable_memory_mut,
+};
 use b3_utils::{log, require, require_log, NanoTimeStamp, Subaccount};
 use candid::CandidType;
 use ciborium::de::from_reader;
@@ -16,7 +17,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::Cursor;
 
-const MAX_OPERATION_SIZE: u32 = 100;
+const MAX_OPERATION_SIZE: u32 = 200;
 
 thread_local! {
     static TASK_TIMER: RefCell<TaskTimerPartition<Task>> = RefCell::new(with_stable_memory_mut(|pm| TaskTimerPartition::init(pm, 1)));
@@ -24,8 +25,8 @@ thread_local! {
     static MAP: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("map", 10).unwrap()));
     static HEAP: RefCell<DefaultVMHeap<u64>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_min_heap("heap", 11).unwrap()));
     static USERS: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("users", 12).unwrap()));
-    static SUBACCOUNTS: RefCell<DefaultVMMap<Subaccount, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("subaccounts", 12).unwrap()));
-    static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_vec("ledger", 13).unwrap()));
+    static SUBACCOUNTS: RefCell<DefaultVMMap<Subaccount, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("subaccounts", 13).unwrap()));
+    static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_vec("ledger", 14).unwrap()));
 
     static STATE: RefCell<State> = RefCell::new(State::default());
 }
@@ -50,7 +51,7 @@ impl Storable for Task {
 }
 
 impl BoundedStorable for Task {
-    const MAX_SIZE: u32 = 24;
+    const MAX_SIZE: u32 = MAX_OPERATION_SIZE;
     const IS_FIXED_SIZE: bool = true;
 }
 
@@ -297,13 +298,15 @@ fn sum_and_log_sub_with_require(x: u64, y: u64) -> Result<u64, String> {
 
 #[query]
 fn get_partition() -> HashMap<String, u8> {
-    MAP.with(|_| {});
-    VEC.with(|_| {});
-    HEAP.with(|_| {});
-    USERS.with(|_| {});
-    STATE.with(|_| {});
+    with_stable_memory(|pm| {
+        let mut partitions = HashMap::new();
 
-    with_stable_memory(|pm| pm.partitions().clone())
+        for (name, id) in pm.partitions().iter() {
+            partitions.insert(name.to_string(), id);
+        }
+
+        partitions
+    })
 }
 
 #[query]
@@ -341,7 +344,7 @@ fn get_partition_details() -> Vec<PartitionDetail> {
 
 #[query]
 fn get_backup_memory() -> Vec<u8> {
-    with_base_partition(|core_partition| core_partition.get_backup())
+    with_backup_memory(|bp| bp.get_backup())
 }
 
 // A pre-upgrade hook for serializing the data stored on the heap.
@@ -357,7 +360,7 @@ fn pre_upgrade() {
     // Write the length of the serialized bytes to memory, followed by the
     // by the bytes themselves.
 
-    with_base_partition_mut(|core_partition| core_partition.set_backup(state_bytes));
+    with_backup_memory_mut(|backup| backup.set_backup(state_bytes));
 }
 
 // A post-upgrade hook for deserializing the data back into the heap.
@@ -365,7 +368,7 @@ fn pre_upgrade() {
 fn post_upgrade() {
     log!("post_upgrade: {}", ic_cdk::api::id());
 
-    let state_bytes = with_base_partition(|core_partition| core_partition.get_backup());
+    let state_bytes = with_backup_memory(|bp| bp.get_backup());
 
     log!("state_bytes: {}", state_bytes.len());
 

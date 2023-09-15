@@ -1,7 +1,7 @@
-mod key;
+mod name;
 
 use b3_stable_structures::btreemap::Iter;
-pub use key::*;
+pub use name::*;
 
 use super::types::{DefaultVM, DefaultVMMap};
 
