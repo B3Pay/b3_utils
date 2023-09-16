@@ -3,9 +3,9 @@ use std::{borrow::Cow, fmt};
 use b3_stable_structures::{BoundedStorable, Storable};
 
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
-pub struct LimitedString(String);
+pub struct PartitionName(String);
 
-impl From<String> for LimitedString {
+impl From<String> for PartitionName {
     fn from(value: String) -> Self {
         if value.len() > 20 {
             panic!("String too long!");
@@ -15,7 +15,7 @@ impl From<String> for LimitedString {
     }
 }
 
-impl From<&str> for LimitedString {
+impl From<&str> for PartitionName {
     fn from(value: &str) -> Self {
         if value.len() > 20 {
             panic!("String too long!");
@@ -25,13 +25,13 @@ impl From<&str> for LimitedString {
     }
 }
 
-impl fmt::Display for LimitedString {
+impl fmt::Display for PartitionName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.0.as_str())
     }
 }
 
-impl Storable for LimitedString {
+impl Storable for PartitionName {
     fn to_bytes(&self) -> Cow<[u8]> {
         Cow::Borrowed(self.0.as_bytes())
     }
@@ -41,7 +41,7 @@ impl Storable for LimitedString {
     }
 }
 
-impl BoundedStorable for LimitedString {
+impl BoundedStorable for PartitionName {
     const IS_FIXED_SIZE: bool = false;
     const MAX_SIZE: u32 = 20;
 }

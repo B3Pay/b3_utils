@@ -20,7 +20,7 @@ impl BackupPartition {
         &mut self.0
     }
 
-    pub fn size(&self) -> u64 {
+    pub fn len(&self) -> u64 {
         self.0.size()
     }
 
@@ -33,6 +33,14 @@ impl BackupPartition {
 
         // Read the bytes
         let state_bytes = self.read_backup(4, state_len);
+
+        state_bytes
+    }
+
+    pub fn read_backup(&self, offset: u64, len: u32) -> Vec<u8> {
+        let mut state_bytes = vec![0u8; len as usize];
+
+        self.0.read(offset, &mut state_bytes);
 
         state_bytes
     }
@@ -53,13 +61,5 @@ impl BackupPartition {
 
     pub fn clear_backup(&mut self) {
         self.set_backup(vec![])
-    }
-
-    pub fn read_backup(&self, offset: u64, len: u32) -> Vec<u8> {
-        let mut state_bytes = vec![0u8; len as usize];
-
-        self.0.read(offset, &mut state_bytes);
-
-        state_bytes
     }
 }

@@ -1,31 +1,26 @@
 #[cfg(test)]
 mod test {
-    use crate::memory::backup::{with_base_partition, with_base_partition_mut};
-    use b3_stable_structures::Memory;
+    use crate::memory::{with_backup_mem, with_backup_mem_mut};
 
     #[test]
     fn test_init_main_partition() {
-        with_base_partition(|base_partition| {
-            assert_eq!(base_partition.backup_details().len, 0);
+        with_backup_mem(|bp| {
+            assert_eq!(bp.len(), 0);
         });
     }
 
     #[test]
     fn test_core_backup_partition() {
-        with_base_partition_mut(|base_partition| {
-            let backup = base_partition.backup();
-
-            assert_eq!(backup.size(), 0);
+        with_backup_mem_mut(|backup| {
+            assert_eq!(backup.len(), 0);
 
             let state_bytes = [1, 2, 3, 4].to_vec();
 
-            base_partition.set_backup(state_bytes.clone());
+            backup.set_backup(state_bytes.clone());
 
-            let backup = base_partition.backup();
+            assert_eq!(backup.len(), 1);
 
-            assert_eq!(backup.size(), 1);
-
-            assert_eq!(state_bytes, base_partition.get_backup());
+            assert_eq!(state_bytes, backup.get_backup());
         });
     }
 }

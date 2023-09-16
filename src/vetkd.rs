@@ -1,7 +1,7 @@
 mod error;
 pub use error::*;
 
-use ic_cdk::{call, call_with_payment};
+use ic_cdk::api::call::{call, call_with_payment};
 
 pub mod types;
 
