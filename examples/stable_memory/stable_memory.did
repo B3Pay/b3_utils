@@ -8,7 +8,7 @@ type LogEntry = record {
 };
 type NewField = record { value : nat64 };
 type OperationStatus = variant { Fail; Success };
-type PartitionDetail = record { len : nat64; name : text };
+type PartitionDetail = record { id : nat8; name : text; size : nat64 };
 type ProcessedOperation = record {
   status : OperationStatus;
   method : text;
@@ -44,7 +44,6 @@ service : () -> {
       vec ProcessedOperation,
       vec User,
     ) query;
-  get_partition : () -> (vec record { text; nat8 }) query;
   get_partition_details : () -> (vec PartitionDetail) query;
   get_state : () -> (State) query;
   get_timers : () -> (vec TaskTimerEntry) query;

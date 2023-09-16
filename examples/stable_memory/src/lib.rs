@@ -1,10 +1,11 @@
 use b3_utils::logs::{export_log, export_log_messages_page, LogEntry};
-use b3_utils::memory::timer::{TaskTimerEntry, TaskTimerPartition};
+use b3_utils::memory::timer::{DefaultTaskTimer, TaskTimerEntry};
 use b3_utils::memory::types::{
-    BoundedStorable, DefaultVMHeap, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
+    BoundedStorable, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec, PartitionDetail,
+    Storable,
 };
 use b3_utils::memory::{
-    with_backup_memory, with_backup_memory_mut, with_stable_memory, with_stable_memory_mut,
+    init_stable_mem_cell, with_backup_mem, with_backup_mem_mut, with_stable_mem,
 };
 use b3_utils::{log, require, require_log, NanoTimeStamp, Subaccount};
 use candid::CandidType;
@@ -14,19 +15,19 @@ use ciborium::ser::into_writer;
 use ic_cdk::{init, post_upgrade, pre_upgrade, query, update};
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::io::Cursor;
 
 const MAX_OPERATION_SIZE: u32 = 200;
 
 thread_local! {
-    static TASK_TIMER: RefCell<TaskTimerPartition<Task>> = RefCell::new(with_stable_memory_mut(|pm| TaskTimerPartition::init(pm, 1)));
+    static TASK_TIMER: RefCell<DefaultTaskTimer<Task>> = init_stable_mem_cell("timer", 0).unwrap();
 
-    static MAP: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("map", 10).unwrap()));
-    static HEAP: RefCell<DefaultVMHeap<u64>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_min_heap("heap", 11).unwrap()));
-    static USERS: RefCell<DefaultVMMap<u64, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("users", 12).unwrap()));
-    static SUBACCOUNTS: RefCell<DefaultVMMap<Subaccount, User>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_btree_map("subaccounts", 13).unwrap()));
-    static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = RefCell::new(with_stable_memory_mut(|pm| pm.init_vec("ledger", 14).unwrap()));
+    static MAP: RefCell<DefaultVMMap<u64, User>> = init_stable_mem_cell("map", 10).unwrap();
+    static HEAP: RefCell<DefaultVMHeap<u64>> = init_stable_mem_cell("heap", 11).unwrap();
+    static USERS: RefCell<DefaultVMMap<u64, User>> = init_stable_mem_cell("users", 12).unwrap();
+    static SUBACCOUNTS: RefCell<DefaultVMMap<Subaccount, User>> = init_stable_mem_cell("subaccounts", 13).unwrap();
+    static STABLE_LOG: RefCell<DefaultVMLog<Subaccount>> = init_stable_mem_cell("logs", 14).unwrap();
+    static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = init_stable_mem_cell("ledger", 15).unwrap();
 
     static STATE: RefCell<State> = RefCell::new(State::default());
 }
@@ -263,6 +264,10 @@ fn sum_and_log(x: u64, y: u64) -> u64 {
 
     log!("sum_and_log: {} + {} = {}", x, y, result);
 
+    STABLE_LOG
+        .with(|s| s.borrow_mut().append(&Subaccount::from([0; 32])))
+        .unwrap();
+
     result
 }
 
@@ -297,54 +302,13 @@ fn sum_and_log_sub_with_require(x: u64, y: u64) -> Result<u64, String> {
 }
 
 #[query]
-fn get_partition() -> HashMap<String, u8> {
-    with_stable_memory(|pm| {
-        let mut partitions = HashMap::new();
-
-        for (name, id) in pm.partitions().iter() {
-            partitions.insert(name.to_string(), id);
-        }
-
-        partitions
-    })
-}
-
-#[query]
 fn get_partition_details() -> Vec<PartitionDetail> {
-    let mut details = Vec::new();
-
-    details.push(PartitionDetail {
-        name: "map".to_string(),
-        len: MAP.with(|m| m.borrow().len()) as u64,
-    });
-
-    details.push(PartitionDetail {
-        name: "vec".to_string(),
-        len: VEC.with(|v| v.borrow().len()) as u64,
-    });
-
-    details.push(PartitionDetail {
-        name: "users".to_string(),
-        len: USERS.with(|u| u.borrow().len()) as u64,
-    });
-
-    details.push(PartitionDetail {
-        name: "state".to_string(),
-        len: STATE.with(|s| s.borrow().ledger.len()) as u64,
-    });
-
-    TASK_TIMER.with(|tt| {
-        let tt = tt.borrow();
-
-        details.push(tt.details());
-    });
-
-    details
+    with_stable_mem(|pm| pm.partition_details())
 }
 
 #[query]
 fn get_backup_memory() -> Vec<u8> {
-    with_backup_memory(|bp| bp.get_backup())
+    with_backup_mem(|bp| bp.get_backup())
 }
 
 // A pre-upgrade hook for serializing the data stored on the heap.
@@ -360,7 +324,7 @@ fn pre_upgrade() {
     // Write the length of the serialized bytes to memory, followed by the
     // by the bytes themselves.
 
-    with_backup_memory_mut(|backup| backup.set_backup(state_bytes));
+    with_backup_mem_mut(|backup| backup.set_backup(state_bytes));
 }
 
 // A post-upgrade hook for deserializing the data back into the heap.
@@ -368,7 +332,7 @@ fn pre_upgrade() {
 fn post_upgrade() {
     log!("post_upgrade: {}", ic_cdk::api::id());
 
-    let state_bytes = with_backup_memory(|bp| bp.get_backup());
+    let state_bytes = with_backup_mem(|bp| bp.get_backup());
 
     log!("state_bytes: {}", state_bytes.len());
 
