@@ -40,6 +40,7 @@ where
 ///     message: "Hello, log!".to_string(),
 ///     file: "src/logs.rs",
 ///     line: 123,
+///     cycle: None,
 ///     version: env!("CARGO_PKG_VERSION"),
 ///     counter: 1,
 /// }]);
