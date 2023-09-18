@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "http_request",
     "stable_memory",
     "vetkd/src/vetkd_backend",
     "vetkd/src/system_api",

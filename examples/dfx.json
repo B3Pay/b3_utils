@@ -1,5 +1,12 @@
 {
   "canisters": {
+    "http_request": {
+      "type": "custom",
+      "wasm": "target/wasm32-unknown-unknown/release/http_request-opt.wasm",
+      "candid": "http_request/http_request.did",
+      "package": "http_request",
+      "build": "sh build.sh http_request http_request"
+    },
     "stable_memory": {
       "candid": "stable_memory/stable_memory.did",
       "package": "stable_memory",
