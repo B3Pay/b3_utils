@@ -16,7 +16,11 @@ easy-hasher = { version = "2.2", optional = true }
 sha2 = { version = "0.9", optional = true }
 subtle = { version = "2.5", optional = true }
 b3-stable-structures = { version = "0.5.9", optional = true }
-ic_bls12_381 = { version = "0.8",optional = true , default-features = false, features = ["pairings", "alloc", "experimental"] }
+ic_bls12_381 = { version = "0.8", optional = true, default-features = false, features = [
+    "pairings",
+    "alloc",
+    "experimental",
+] }
 
 [features]
 vetkd = ["ic_bls12_381", "sha2", "subtle"]

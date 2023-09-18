@@ -25,10 +25,7 @@ impl HttpCycleCost {
     }
 }
 
-fn calculate_cycle_cost(arg: &CanisterHttpRequestArgument, subnet_size: u128) -> u128 {
-    // Base cost and node count for a 13-node subnet
-    let base_for_13_nodes: u128 = 3_000_000 + 60_000 * 13;
-
+fn calculate_cycle_cost(arg: &CanisterHttpRequestArgument) -> u128 {
     // Calculate max_response_bytes, defaulting to 2 MiB if not provided
     let max_response_bytes = match arg.max_response_bytes {
         Some(ref n) => *n as u128,
@@ -38,12 +35,12 @@ fn calculate_cycle_cost(arg: &CanisterHttpRequestArgument, subnet_size: u128) ->
     // Encode the arguments to get their size
     let arg_raw = candid::utils::encode_args((arg,)).expect("Failed to encode arguments.");
 
-    // Calculate the variable cost based on request and response sizes
-    let variable_cost =
-        (arg_raw.len() as u128 + "http_request".len() as u128) * 400 + max_response_bytes * 800;
-
     // Scale the cost based on the subnet size
-    (base_for_13_nodes + variable_cost) * subnet_size / 13
+    (3_000_000u128
+        + 60_000u128 * 13
+        + (arg_raw.len() as u128 + "http_request".len() as u128) * 400
+        + max_response_bytes * 800)
+        * 13
 }
 
 #[update]
@@ -69,7 +66,7 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
         transform: Some(TransformContext::from_name("transform".to_owned(), vec![])),
     };
 
-    let cycle_cost = calculate_cycle_cost(&request, 13);
+    let cycle_cost = calculate_cycle_cost(&request);
 
     log!("Estimated cycle cost: {} cycles", cycle_cost);
 
