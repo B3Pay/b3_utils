@@ -1,6 +1,9 @@
 use std::ops::Mul;
 
-use b3_utils::{log, log_cycle};
+use b3_utils::{
+    log, log_cycle,
+    logs::{export_log, LogEntry},
+};
 use ic_cdk::{
     api::management_canister::http_request::{
         http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse,
@@ -138,6 +141,11 @@ fn transform(raw: TransformArgs) -> HttpResponse {
     }
 
     res
+}
+
+#[query]
+fn print_log_entries() -> Vec<LogEntry> {
+    export_log()
 }
 
 ic_cdk::export_candid!();
