@@ -1,5 +1,6 @@
 use std::ops::Mul;
 
+use b3_utils::{log, log_cycle};
 use ic_cdk::{
     api::management_canister::http_request::{
         http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse,
@@ -49,7 +50,7 @@ fn calculate_cycle_cost(arg: &CanisterHttpRequestArgument, subnet_size: u128) ->
 async fn http_post(url: String, json_string: String, max_response_bytes: u64) -> String {
     // Log cycle balance before the HTTP request
     let initial_balance = ic_cdk::api::canister_balance();
-    ic_cdk::println!("Initial cycle balance: {}", initial_balance);
+    log!("Initial cycle balance: {}", initial_balance);
 
     let request_headers = vec![HttpHeader {
         name: "Content-Type".to_string(),
@@ -70,23 +71,24 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
 
     let cycle_cost = calculate_cycle_cost(&request, 13);
 
-    ic_cdk::println!("Estimated cycle cost: {} cycles", cycle_cost);
+    log!("Estimated cycle cost: {} cycles", cycle_cost);
 
     // Log cycle balance after the HTTP request
-    let final_balance = ic_cdk::api::canister_balance();
-    ic_cdk::println!("Final cycle balance: {}", final_balance);
 
     let response = http_request(request, cycle_cost).await;
 
+    let final_balance = ic_cdk::api::canister_balance();
+    log!("Final cycle balance: {}", final_balance);
+
     // Log the cycle difference
-    ic_cdk::println!(
+    log!(
         "Cycles used for the HTTP request: {}",
         initial_balance - final_balance
     );
 
     match response {
         Ok((response,)) => {
-            ic_cdk::println!("reponse size: {}", response.body.len());
+            log_cycle!("reponse size: {}", response.body.len());
             String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
         }
         Err((r, m)) => {
