@@ -4,8 +4,18 @@ type HttpResponse = record {
   body : vec nat8;
   headers : vec HttpHeader;
 };
+type LogEntry = record {
+  counter : nat64;
+  file : text;
+  line : nat32;
+  cycle : opt nat;
+  version : text;
+  message : text;
+  timestamp : nat64;
+};
 type TransformArgs = record { context : vec nat8; response : HttpResponse };
 service : {
   http_post : (text, text, nat64) -> (text);
+  print_log_entries : () -> (vec LogEntry) query;
   transform : (TransformArgs) -> (HttpResponse) query;
 }
