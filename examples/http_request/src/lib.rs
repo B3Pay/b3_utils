@@ -1,5 +1,5 @@
 use b3_utils::{
-    log, log_cycle,
+    log_cycle,
     logs::{export_log, LogEntry},
 };
 use ic_cdk::{
@@ -11,13 +11,11 @@ use ic_cdk::{
 };
 
 mod cost;
-use cost::HttpCost;
+use cost::HttpsOutcallCost;
 
 #[update]
 async fn http_post(url: String, json_string: String, max_response_bytes: u64) -> String {
-    // Log cycle balance before the HTTP request
-    let initial_balance = ic_cdk::api::canister_balance();
-    log_cycle!("Initial cycle balance: {}", initial_balance);
+    log_cycle!("Calling http_post");
 
     let request_headers = vec![HttpHeader {
         name: "Content-Type".to_string(),
@@ -36,22 +34,13 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
         transform: Some(TransformContext::from_name("transform".to_owned(), vec![])),
     };
 
-    let cycle_cost = HttpCost::total(&request);
+    let cycle_cost = HttpsOutcallCost::total(&request);
 
-    log!("Estimated cycle cost: {} cycles", cycle_cost);
-
-    // Log cycle balance after the HTTP request
+    log_cycle!("calculated cycle cost: {}", cycle_cost);
 
     let response = http_request(request, cycle_cost).await;
 
-    let final_balance = ic_cdk::api::canister_balance();
-    log!("Final cycle balance: {}", final_balance);
-
-    // Log the cycle difference
-    log!(
-        "Cycles used for the HTTP request: {}",
-        initial_balance - final_balance
-    );
+    log_cycle!("After http_request");
 
     match response {
         Ok((response,)) => {
