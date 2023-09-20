@@ -14,18 +14,12 @@ impl HttpRequest {
     pub fn new(url: String) -> Self {
         Self(CanisterHttpRequestArgument {
             url,
-            max_response_bytes: Default::default(),
-            headers: Default::default(),
-            body: Default::default(),
+            headers: vec![],
             method: HttpMethod::GET,
+            max_response_bytes: None,
             transform: None,
+            body: None,
         })
-    }
-
-    /// Updates the URL.
-    pub fn url(mut self, url: &str) -> Self {
-        self.0.url = String::from(url);
-        self
     }
 
     /// A simple wrapper to assign the URL with the `GET` method.
@@ -35,16 +29,23 @@ impl HttpRequest {
 
     /// A simple wrapper to assign the URL with the `POST` method.
     /// The body is set to the `json_string` argument.
+    /// The `max_response_bytes` is set to the `max_response_bytes` argument.
+    /// The `max_response_bytes` argument is optional.
     /// The `Content-Type` header is set to `application/json`.
-    /// The `max_response_bytes` is set to 2 MiB.
-    pub fn post(self, json_string: &str) -> Self {
+    pub fn post(self, json_string: &str, max_response_bytes: Option<u64>) -> Self {
         self.method(HttpMethod::POST)
             .add_headers(vec![(
                 "Content-Type".to_string(),
                 "application/json".to_string(),
             )])
-            .max_response_bytes(2 * 1024 * 1024)
+            .max_response_bytes(max_response_bytes)
             .body(json_string)
+    }
+
+    /// Updates the URL.
+    pub fn url(mut self, url: &str) -> Self {
+        self.0.url = String::from(url);
+        self
     }
 
     /// Updates the HTTP method.
@@ -79,8 +80,8 @@ impl HttpRequest {
     }
 
     /// Updates the max_response_bytes of the request.
-    pub fn max_response_bytes(mut self, max_response_bytes: u64) -> Self {
-        self.0.max_response_bytes = Some(max_response_bytes);
+    pub fn max_response_bytes(mut self, max_response_bytes: Option<u64>) -> Self {
+        self.0.max_response_bytes = max_response_bytes;
         self
     }
 

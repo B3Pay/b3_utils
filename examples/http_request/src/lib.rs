@@ -58,9 +58,7 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
 async fn http_post_2(url: String, json_string: String, max_response_bytes: u64) -> String {
     log_cycle!("Calling http_post");
 
-    let request = HttpRequest::new(url.clone())
-        .post(&json_string)
-        .max_response_bytes(max_response_bytes);
+    let request = HttpRequest::new(url).post(&json_string, Some(max_response_bytes));
 
     let cycle_cost = request.calculate_cycle_cost();
 
