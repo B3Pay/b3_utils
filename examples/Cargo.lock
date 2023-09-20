@@ -54,7 +54,7 @@ dependencies = [
  "b3-stable-structures",
  "candid 0.9.6",
  "hex",
- "ic-cdk 0.10.0",
+ "ic-cdk 0.11.0",
  "ic_bls12_381",
  "serde",
  "serde_bytes",
@@ -493,7 +493,7 @@ version = "0.1.0"
 dependencies = [
  "b3_utils",
  "candid 0.9.6",
- "ic-cdk 0.10.0",
+ "ic-cdk 0.11.0",
  "serde",
  "serde_bytes",
  "serde_json",
@@ -526,6 +526,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ic-cdk"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e77fc251b01ac1beb78f288f84ab2e082d2355c93d06009f2fed0c076c920e9"
+dependencies = [
+ "candid 0.9.6",
+ "ic-cdk-macros 0.8.0",
+ "ic0",
+ "serde",
+ "serde_bytes",
+ "slotmap",
+]
+
+[[package]]
 name = "ic-cdk-macros"
 version = "0.6.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -544,6 +558,20 @@ name = "ic-cdk-macros"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "411c0dd4c149132b68e679274d397053332ee29996c6a541075895881916333b"
+dependencies = [
+ "candid 0.9.6",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_tokenstream",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "ic-cdk-macros"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "477caa59d9c02b8021429a15df8b385a4def87ee9ede1868e10b1d1bbdad0bb4"
 dependencies = [
  "candid 0.9.6",
  "proc-macro2",
@@ -601,9 +629,9 @@ dependencies = [
 
 [[package]]
 name = "ic0"
-version = "0.18.11"
+version = "0.18.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "576c539151d4769fb4d1a0c25c4108dd18facd04c5695b02cf2d226ab4e43aa5"
+checksum = "16efdbe5d9b0ea368da50aedbf7640a054139569236f1a5249deb5fd9af5a5d5"
 
 [[package]]
 name = "ic_bls12_381"
@@ -1200,6 +1228,15 @@ name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
+
+[[package]]
+name = "slotmap"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1e08e261d0e8f5c43123b7adf3e4ca1690d655377ac93a03b2c9d3e98de1342"
+dependencies = [
+ "version_check",
+]
 
 [[package]]
 name = "smallvec"

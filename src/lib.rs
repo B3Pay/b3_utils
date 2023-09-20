@@ -46,6 +46,7 @@
 
 pub mod constants;
 pub mod error;
+pub mod http;
 pub mod mocks;
 pub mod nonce;
 pub mod types;

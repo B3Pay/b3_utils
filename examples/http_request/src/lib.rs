@@ -1,4 +1,5 @@
 use b3_utils::{
+    http::{HttpRequest, HttpsOutcallCost},
     log_cycle,
     logs::{export_log, LogEntry},
 };
@@ -9,9 +10,6 @@ use ic_cdk::{
     },
     query, update,
 };
-
-mod cost;
-use cost::HttpsOutcallCost;
 
 #[update]
 async fn http_post(url: String, json_string: String, max_response_bytes: u64) -> String {
@@ -52,6 +50,34 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
                 "The http_request resulted in an error. RejectionCode: {:?}, Error: {:?}",
                 r, m
             )
+        }
+    }
+}
+
+#[update]
+async fn http_post_2(url: String, json_string: String, max_response_bytes: u64) -> String {
+    log_cycle!("Calling http_post");
+
+    let request = HttpRequest::new(url.clone())
+        .post(&json_string)
+        .max_response_bytes(max_response_bytes);
+
+    let cycle_cost = request.calculate_cycle_cost();
+
+    log_cycle!("calculated cycle cost: {}", cycle_cost);
+
+    // Using the send method
+    let response_result = request.send().await;
+
+    log_cycle!("After http_request");
+
+    match response_result {
+        Ok(response) => {
+            log_cycle!("response size: {}", response.body.len());
+            String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
+        }
+        Err(m) => {
+            format!("The http_request resulted in an error. Error: {:?}", m)
         }
     }
 }
