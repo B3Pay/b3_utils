@@ -1,3 +1,5 @@
+mod test;
+
 mod cost;
 pub use cost::*;
 

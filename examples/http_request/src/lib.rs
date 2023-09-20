@@ -53,8 +53,8 @@ async fn http_post_with_closure(
     // Using the send method
     let response_result = request
         .send_with_closure(|response| HttpResponse {
-            status: response.status.clone(),
-            body: response.body.clone(),
+            status: response.status,
+            body: response.body,
             headers: headers(),
             ..Default::default()
         })
@@ -76,8 +76,8 @@ async fn http_post_with_closure(
 #[query]
 fn new_transform(raw: TransformArgs) -> HttpResponse {
     HttpResponse {
-        status: raw.response.status.clone(),
-        body: raw.response.body.clone(),
+        status: raw.response.status,
+        body: raw.response.body,
         headers: headers(),
         ..Default::default()
     }
