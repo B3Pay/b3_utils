@@ -1,5 +1,3 @@
-use std::ops::Mul;
-
 use b3_utils::{
     log, log_cycle,
     logs::{export_log, LogEntry},
@@ -12,39 +10,8 @@ use ic_cdk::{
     query, update,
 };
 
-pub enum HttpCycleCost {
-    Base = 49_140_000,
-    PerByte = 5200,
-    PerKib = 104_000,
-}
-
-impl HttpCycleCost {
-    pub fn calculate(&self, bytes: u64) -> u64 {
-        match self {
-            HttpCycleCost::Base => Self::Base as u64,
-            HttpCycleCost::PerByte => bytes.mul(Self::PerByte as u64),
-            HttpCycleCost::PerKib => bytes.mul(Self::PerKib as u64),
-        }
-    }
-}
-
-fn calculate_cycle_cost(arg: &CanisterHttpRequestArgument) -> u128 {
-    // Calculate max_response_bytes, defaulting to 2 MiB if not provided
-    let max_response_bytes = match arg.max_response_bytes {
-        Some(ref n) => *n as u128,
-        None => 2 * 1024 * 1024, // default 2MiB
-    };
-
-    // Encode the arguments to get their size
-    let arg_raw = candid::utils::encode_args((arg,)).expect("Failed to encode arguments.");
-
-    // Scale the cost based on the subnet size
-    (3_000_000u128
-        + 60_000u128 * 13
-        + (arg_raw.len() as u128 + "http_request".len() as u128) * 400
-        + max_response_bytes * 800)
-        * 13
-}
+mod http;
+use http::HttpCycleCost;
 
 #[update]
 async fn http_post(url: String, json_string: String, max_response_bytes: u64) -> String {
@@ -69,7 +36,7 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
         transform: Some(TransformContext::from_name("transform".to_owned(), vec![])),
     };
 
-    let cycle_cost = calculate_cycle_cost(&request);
+    let cycle_cost = HttpCycleCost::calculate_cycle_cost(&request);
 
     log!("Estimated cycle cost: {} cycles", cycle_cost);
 
