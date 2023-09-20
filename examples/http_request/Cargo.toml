@@ -8,8 +8,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 candid = "0.9"
-ic-cdk = { version = "0.11", features = ["transform-closure"] }
 serde = "1.0"
 serde_json = "1.0"
 serde_bytes = "0.11"
+ic-cdk = { workspace = true }
 b3_utils = { workspace = true, features = ["logging", "stable_memory"] }

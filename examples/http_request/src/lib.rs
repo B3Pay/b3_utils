@@ -1,61 +1,15 @@
 use b3_utils::{
-    http::{HttpRequest, HttpsOutcallCost},
+    http::HttpRequest,
     log_cycle,
     logs::{export_log, LogEntry},
 };
 use ic_cdk::{
-    api::management_canister::http_request::{
-        http_request, CanisterHttpRequestArgument, HttpHeader, HttpMethod, HttpResponse,
-        TransformArgs, TransformContext,
-    },
+    api::management_canister::http_request::{HttpHeader, HttpResponse, TransformArgs},
     query, update,
 };
 
 #[update]
 async fn http_post(url: String, json_string: String, max_response_bytes: u64) -> String {
-    log_cycle!("Calling http_post");
-
-    let request_headers = vec![HttpHeader {
-        name: "Content-Type".to_string(),
-        value: "application/json".to_string(),
-    }];
-
-    let json_utf8 = json_string.into_bytes();
-    let request_body = Some(json_utf8.clone());
-
-    let request = CanisterHttpRequestArgument {
-        url: url.clone(),
-        max_response_bytes: Some(max_response_bytes),
-        method: HttpMethod::POST,
-        headers: request_headers.clone(),
-        body: request_body,
-        transform: Some(TransformContext::from_name("transform".to_owned(), vec![])),
-    };
-
-    let cycle_cost = HttpsOutcallCost::total(&request);
-
-    log_cycle!("calculated cycle cost: {}", cycle_cost);
-
-    let response = http_request(request, cycle_cost).await;
-
-    log_cycle!("After http_request");
-
-    match response {
-        Ok((response,)) => {
-            log_cycle!("reponse size: {}", response.body.len());
-            String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
-        }
-        Err((r, m)) => {
-            format!(
-                "The http_request resulted in an error. RejectionCode: {:?}, Error: {:?}",
-                r, m
-            )
-        }
-    }
-}
-
-#[update]
-async fn http_post_2(url: String, json_string: String, max_response_bytes: u64) -> String {
     log_cycle!("Calling http_post");
 
     let request = HttpRequest::new(url).post(&json_string, Some(max_response_bytes));

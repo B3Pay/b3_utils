@@ -7,4 +7,5 @@ members = [
 ]
 
 [workspace.dependencies]
+ic-cdk = "0.10.0"
 b3_utils = { path = "../" }
