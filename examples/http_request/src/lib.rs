@@ -10,14 +10,14 @@ use ic_cdk::{
     query, update,
 };
 
-mod http;
-use http::HttpCycleCost;
+mod cost;
+use cost::HttpCost;
 
 #[update]
 async fn http_post(url: String, json_string: String, max_response_bytes: u64) -> String {
     // Log cycle balance before the HTTP request
     let initial_balance = ic_cdk::api::canister_balance();
-    log!("Initial cycle balance: {}", initial_balance);
+    log_cycle!("Initial cycle balance: {}", initial_balance);
 
     let request_headers = vec![HttpHeader {
         name: "Content-Type".to_string(),
@@ -36,7 +36,7 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
         transform: Some(TransformContext::from_name("transform".to_owned(), vec![])),
     };
 
-    let cycle_cost = HttpCycleCost::calculate_cycle_cost(&request);
+    let cycle_cost = HttpCost::total(&request);
 
     log!("Estimated cycle cost: {} cycles", cycle_cost);
 
