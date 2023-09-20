@@ -19,7 +19,46 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
     log_cycle!("calculated cycle cost: {}", cycle_cost);
 
     // Using the send method
-    let response_result = request.send().await;
+    let response_result = request
+        .transform_context("new_transform", None)
+        .send()
+        .await;
+
+    log_cycle!("After http_request");
+
+    match response_result {
+        Ok(response) => {
+            log_cycle!("response size: {}", response.body.len());
+            String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
+        }
+        Err(m) => {
+            format!("The http_request resulted in an error. Error: {:?}", m)
+        }
+    }
+}
+#[update]
+async fn http_post_with_closure(
+    url: String,
+    json_string: String,
+    max_response_bytes: u64,
+) -> String {
+    log_cycle!("Calling http_post");
+
+    let request = HttpRequest::new(url).post(&json_string, Some(max_response_bytes));
+
+    let cycle_cost = request.calculate_cycle_cost();
+
+    log_cycle!("calculated cycle cost: {}", cycle_cost);
+
+    // Using the send method
+    let response_result = request
+        .send_with_closure(|response| HttpResponse {
+            status: response.status.clone(),
+            body: response.body.clone(),
+            headers: headers(),
+            ..Default::default()
+        })
+        .await;
 
     log_cycle!("After http_request");
 
@@ -35,8 +74,22 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
 }
 
 #[query]
-fn transform(raw: TransformArgs) -> HttpResponse {
-    let headers = vec![
+fn new_transform(raw: TransformArgs) -> HttpResponse {
+    HttpResponse {
+        status: raw.response.status.clone(),
+        body: raw.response.body.clone(),
+        headers: headers(),
+        ..Default::default()
+    }
+}
+
+#[query]
+fn print_log_entries() -> Vec<LogEntry> {
+    export_log()
+}
+
+fn headers() -> Vec<HttpHeader> {
+    vec![
         HttpHeader {
             name: "Content-Security-Policy".to_string(),
             value: "default-src 'self'".to_string(),
@@ -61,25 +114,7 @@ fn transform(raw: TransformArgs) -> HttpResponse {
             name: "X-Content-Type-Options".to_string(),
             value: "nosniff".to_string(),
         },
-    ];
-
-    let mut res = HttpResponse {
-        status: raw.response.status.clone(),
-        body: raw.response.body.clone(),
-        headers,
-        ..Default::default()
-    };
-
-    if res.status == 200 {
-        res.body = raw.response.body;
-    }
-
-    res
-}
-
-#[query]
-fn print_log_entries() -> Vec<LogEntry> {
-    export_log()
+    ]
 }
 
 ic_cdk::export_candid!();

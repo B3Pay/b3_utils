@@ -10,14 +10,9 @@ did_file="$app_root/$package.did"
 cargo build --manifest-path="$app_root/Cargo.toml" \
     --target wasm32-unknown-unknown \
     --release \
-    --package "$package" --features "ic-cdk/wasi"
-
-wasmtime "./target/wasm32-unknown-unknown/release/$package.wasm" > $did_file
-
-cargo build --manifest-path="$app_root/Cargo.toml" \
-    --target wasm32-unknown-unknown \
-    --release \
     --package "$package"
+
+candid-extractor "./target/wasm32-unknown-unknown/release/$package.wasm" 2>/dev/null > $did_file
 
 ic-wasm "./target/wasm32-unknown-unknown/release/$package.wasm" \
     -o "./target/wasm32-unknown-unknown/release/$package.wasm" \
