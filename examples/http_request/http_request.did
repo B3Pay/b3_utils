@@ -15,8 +15,12 @@ type LogEntry = record {
 };
 type TransformArgs = record { context : vec nat8; response : HttpResponse };
 service : {
-  http_post : (text, text, nat64) -> (text);
+  get_transform : (TransformArgs) -> (HttpResponse) query;
+  head_transform : (TransformArgs) -> (HttpResponse) query;
+  http_get : (text, opt nat64) -> (text);
+  http_head : (text, opt nat64) -> (text);
+  http_post : (text, text, opt nat64) -> (text);
   http_post_with_closure : (text, text, nat64) -> (text);
-  new_transform : (TransformArgs) -> (HttpResponse) query;
+  post_transform : (TransformArgs) -> (HttpResponse) query;
   print_log_entries : () -> (vec LogEntry) query;
 }

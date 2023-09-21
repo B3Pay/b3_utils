@@ -19,7 +19,7 @@ mod tests {
 
     #[test]
     fn test_http_request_get() {
-        let request = HttpRequest::new("https://example.com".to_string()).get();
+        let request = HttpRequest::new("https://example.com".to_string()).get(None);
         assert_eq!(request.0.method, HttpMethod::GET);
     }
 

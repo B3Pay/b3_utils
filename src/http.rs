@@ -25,8 +25,21 @@ impl HttpRequest {
     }
 
     /// A simple wrapper to assign the URL with the `GET` method.
-    pub fn get(self) -> Self {
+    /// The `max_response_bytes` is set to the `max_response_bytes` argument.
+    /// The `max_response_bytes` argument is optional.
+    pub fn get(self, max_response_bytes: Option<u64>) -> Self {
         self.method(HttpMethod::GET)
+            .max_response_bytes(max_response_bytes)
+    }
+
+    /// A simple wrapper to assign the URL with the `HEAD` method.
+    /// The `max_response_bytes` is set to the `max_response_bytes` argument.
+    /// The `max_response_bytes` argument is optional.
+    /// The `HEAD` method is used to retrieve the headers of the response.
+    /// The body of the response is empty.
+    pub fn head(self, max_response_bytes: Option<u64>) -> Self {
+        self.method(HttpMethod::HEAD)
+            .max_response_bytes(max_response_bytes)
     }
 
     /// A simple wrapper to assign the URL with the `POST` method.

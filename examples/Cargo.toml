@@ -5,6 +5,7 @@ members = [
     "vetkd/src/vetkd_backend",
     "vetkd/src/system_api",
 ]
+resolver = "1"
 
 [workspace.dependencies]
 ic-cdk = "0.11.0"

@@ -9,10 +9,10 @@ use ic_cdk::{
 };
 
 #[update]
-async fn http_post(url: String, json_string: String, max_response_bytes: u64) -> String {
-    log_cycle!("Calling http_post");
+async fn http_get(url: String, max_response_bytes: Option<u64>) -> String {
+    log_cycle!("Calling http_get");
 
-    let request = HttpRequest::new(url).post(&json_string, Some(max_response_bytes));
+    let request = HttpRequest::new(url).get(max_response_bytes);
 
     let cycle_cost = request.calculate_cycle_cost();
 
@@ -20,7 +20,66 @@ async fn http_post(url: String, json_string: String, max_response_bytes: u64) ->
 
     // Using the send method
     let response_result = request
-        .transform_context("new_transform", None)
+        .transform_context("get_transform", None)
+        .send()
+        .await;
+
+    log_cycle!("After http_request");
+
+    match response_result {
+        Ok(response) => {
+            log_cycle!("response size: {}", response.body.len());
+            String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
+        }
+        Err(m) => {
+            format!("The http_request resulted in an error. Error: {:?}", m)
+        }
+    }
+}
+
+#[update]
+async fn http_head(url: String, max_response_bytes: Option<u64>) -> String {
+    log_cycle!("Calling http_head");
+
+    let request = HttpRequest::new(url).head(max_response_bytes);
+
+    let cycle_cost = request.calculate_cycle_cost();
+
+    log_cycle!("calculated cycle cost: {}", cycle_cost);
+
+    // Using the send method
+    let response_result = request
+        .transform_context("head_transform", None)
+        .send()
+        .await;
+
+    log_cycle!("After http_request");
+
+    match response_result {
+        Ok(response) => {
+            log_cycle!("response size: {}", response.body.len());
+
+            format!("{:?}", response)
+        }
+        Err(m) => {
+            format!("The http_request resulted in an error. Error: {:?}", m)
+        }
+    }
+}
+
+#[update]
+async fn http_post(url: String, json_string: String, max_response_bytes: Option<u64>) -> String {
+    log_cycle!("Calling http_post");
+
+    let request = HttpRequest::new(url).post(&json_string, max_response_bytes);
+
+    let cycle_cost = request.calculate_cycle_cost();
+
+    log_cycle!("calculated cycle cost: {}", cycle_cost);
+
+    // Using the send method
+    let response_result = request
+        .transform_context("post_transform", None)
         .send()
         .await;
 
@@ -74,7 +133,22 @@ async fn http_post_with_closure(
 }
 
 #[query]
-fn new_transform(raw: TransformArgs) -> HttpResponse {
+fn get_transform(raw: TransformArgs) -> HttpResponse {
+    HttpResponse {
+        status: raw.response.status,
+        body: raw.response.body,
+        headers: headers(),
+        ..Default::default()
+    }
+}
+
+#[query]
+fn head_transform(raw: TransformArgs) -> HttpResponse {
+    HttpResponse { ..raw.response }
+}
+
+#[query]
+fn post_transform(raw: TransformArgs) -> HttpResponse {
     HttpResponse {
         status: raw.response.status,
         body: raw.response.body,
