@@ -1,4 +1,4 @@
-use b3_stable_structures::{writer::Writer, Memory};
+use ic_stable_structures::{writer::Writer, Memory};
 use std::borrow::BorrowMut;
 
 use super::types::DefaultVM;

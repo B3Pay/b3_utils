@@ -42,7 +42,7 @@ async fn http_post_with_closure(
     json_string: String,
     max_response_bytes: u64,
 ) -> String {
-    log_cycle!("Calling http_post");
+    log_cycle!("Calling http_post_with_closure");
 
     let request = HttpRequest::new(url).post(&json_string, Some(max_response_bytes));
 

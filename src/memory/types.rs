@@ -1,8 +1,8 @@
 use candid::CandidType;
 
-pub use b3_stable_structures::{
+pub use ic_stable_structures::{
     cell::InitError as ExternalCellInitError, log::InitError as ExternalLogInitError,
-    memory_manager::VirtualMemory, BoundedStorable, DefaultMemoryImpl, FileMemory, Memory,
+    memory_manager::VirtualMemory, storable::Bound, DefaultMemoryImpl, FileMemory, Memory,
     RestrictedMemory, StableBTreeMap, StableCell, StableLog, StableMinHeap, StableVec, Storable,
     VectorMemory,
 };

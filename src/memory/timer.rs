@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use b3_stable_structures::{vec::InitError, BoundedStorable, GrowFailed, Storable};
 use candid::CandidType;
+use ic_stable_structures::{storable::Bound, vec::InitError, GrowFailed, Storable};
 use serde::{Deserialize, Serialize};
 
 use crate::{memory::DefaultVMHeap, NanoTimeStamp};
@@ -9,9 +9,7 @@ use crate::{memory::DefaultVMHeap, NanoTimeStamp};
 use super::types::DefaultVM;
 
 // Added the missing generic type parameter <T>
-pub struct DefaultTaskTimer<T: Ord + PartialOrd + Storable + BoundedStorable>(
-    DefaultVMHeap<TaskTimerEntry<T>>,
-);
+pub struct DefaultTaskTimer<T: Ord + PartialOrd + Storable>(DefaultVMHeap<TaskTimerEntry<T>>);
 
 #[derive(CandidType, Debug, PartialEq, Eq, Ord, Clone, Serialize, Deserialize)]
 pub struct TaskTimerEntry<T> {
@@ -19,8 +17,8 @@ pub struct TaskTimerEntry<T> {
     pub task: T,
 }
 
-// Added the missing generic type parameter <T> and the BoundedStorable trait bound
-impl<T: Ord + PartialOrd + Storable + BoundedStorable> DefaultTaskTimer<T> {
+// Added the missing generic type parameter <T>  trait bound
+impl<T: Ord + PartialOrd + Storable> DefaultTaskTimer<T> {
     pub fn init(vm: DefaultVM) -> Result<Self, InitError> {
         let task_timer = Self(DefaultVMHeap::init(vm)?);
 
@@ -67,12 +65,7 @@ where
     }
 }
 
-impl<T: Ord + PartialOrd + Storable + BoundedStorable> BoundedStorable for TaskTimerEntry<T> {
-    const IS_FIXED_SIZE: bool = false;
-    const MAX_SIZE: u32 = 8 + T::MAX_SIZE;
-}
-
-impl<T: Ord + PartialOrd + Storable + BoundedStorable> Storable for TaskTimerEntry<T> {
+impl<T: Ord + PartialOrd + Storable> Storable for TaskTimerEntry<T> {
     fn to_bytes(&self) -> Cow<[u8]> {
         let time_bytes = self.time.to_le_bytes();
         let task_bytes = self.task.to_bytes();
@@ -95,4 +88,9 @@ impl<T: Ord + PartialOrd + Storable + BoundedStorable> Storable for TaskTimerEnt
 
         Self { time, task }
     }
+
+    const BOUND: Bound = Bound::Bounded {
+        is_fixed_size: false,
+        max_size: 8 + T::BOUND.max_size(),
+    };
 }

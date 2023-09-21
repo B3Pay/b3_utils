@@ -4,11 +4,10 @@ use super::{
     types::{DefaultVM, DefaultVMCell, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec},
 };
 
-pub use b3_stable_structures::{
+pub use ic_stable_structures::{
     cell::InitError as ExternalCellInitError, log::InitError as ExternalLogInitError,
-    memory_manager::VirtualMemory, BoundedStorable, DefaultMemoryImpl, FileMemory, Memory,
-    RestrictedMemory, StableBTreeMap, StableCell, StableLog, StableMinHeap, StableVec, Storable,
-    VectorMemory,
+    memory_manager::VirtualMemory, DefaultMemoryImpl, FileMemory, Memory, RestrictedMemory,
+    StableBTreeMap, StableCell, StableLog, StableMinHeap, StableVec, Storable, VectorMemory,
 };
 
 #[rustfmt::skip]
@@ -32,7 +31,7 @@ pub trait InitMemory<T>: Sized {
     fn init(arg: InitMemoryArg) -> Result<Self, StableMemoryError>;
 }
 
-impl<T: Storable + BoundedStorable> InitMemory<DefaultVMVec<T>> for DefaultVMVec<T> {
+impl<T: Storable> InitMemory<DefaultVMVec<T>> for DefaultVMVec<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Vec
     }
@@ -47,9 +46,7 @@ impl<T: Storable + BoundedStorable> InitMemory<DefaultVMVec<T>> for DefaultVMVec
     }
 }
 
-impl<K: Ord + Storable + BoundedStorable + Clone, V: Storable + BoundedStorable>
-    InitMemory<DefaultVMMap<K, V>> for DefaultVMMap<K, V>
-{
+impl<K: Ord + Storable + Clone, V: Storable> InitMemory<DefaultVMMap<K, V>> for DefaultVMMap<K, V> {
     fn memory_type() -> MemoryType {
         MemoryType::Map
     }
@@ -93,7 +90,7 @@ impl<T: Storable + Default> InitMemory<DefaultVMCell<T>> for DefaultVMCell<T> {
     }
 }
 
-impl<T: Ord + Storable + BoundedStorable> InitMemory<DefaultVMHeap<T>> for DefaultVMHeap<T> {
+impl<T: Ord + Storable> InitMemory<DefaultVMHeap<T>> for DefaultVMHeap<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Heap
     }
@@ -108,9 +105,7 @@ impl<T: Ord + Storable + BoundedStorable> InitMemory<DefaultVMHeap<T>> for Defau
     }
 }
 
-impl<T: Ord + PartialOrd + Storable + BoundedStorable> InitMemory<DefaultTaskTimer<T>>
-    for DefaultTaskTimer<T>
-{
+impl<T: Ord + PartialOrd + Storable> InitMemory<DefaultTaskTimer<T>> for DefaultTaskTimer<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Timer
     }

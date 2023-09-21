@@ -34,7 +34,10 @@ impl fmt::Display for Nonce {
 }
 
 #[cfg(feature = "stable_memory")]
-impl b3_stable_structures::Storable for Nonce {
+use ic_stable_structures::storable::Bound;
+
+#[cfg(feature = "stable_memory")]
+impl ic_stable_structures::Storable for Nonce {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         self.to_le_bytes().to_vec().into()
     }
@@ -42,10 +45,9 @@ impl b3_stable_structures::Storable for Nonce {
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
         Nonce::from_le_bytes(bytes[0..8].try_into().unwrap())
     }
-}
 
-#[cfg(feature = "stable_memory")]
-impl b3_stable_structures::BoundedStorable for Nonce {
-    const IS_FIXED_SIZE: bool = true;
-    const MAX_SIZE: u32 = 8;
+    const BOUND: Bound = Bound::Bounded {
+        is_fixed_size: true,
+        max_size: 8,
+    };
 }

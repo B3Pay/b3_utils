@@ -21,22 +21,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "b3-stable-structures"
-version = "0.5.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e4a67ab992762c77e54f525f3a645f0becf673030d94938471ad91e77446efa"
-dependencies = [
- "ic0",
-]
-
-[[package]]
 name = "b3_utils"
 version = "0.3.12"
 dependencies = [
- "b3-stable-structures",
  "candid",
  "hex",
  "ic-cdk",
+ "ic-stable-structures",
  "ic_bls12_381",
  "serde",
  "serde_bytes",
@@ -399,6 +390,11 @@ source = "git+https://github.com/dfinity/ic#44241870f0e5e8616a9d10712507ffabf77c
 dependencies = [
  "sha3",
 ]
+
+[[package]]
+name = "ic-stable-structures"
+version = "0.6.0-beta.1"
+source = "git+https://github.com/b3hr4d/stable-structures?rev=7cca5850650d4f9c936fc7c09ca6af13b3911af2#7cca5850650d4f9c936fc7c09ca6af13b3911af2"
 
 [[package]]
 name = "ic0"

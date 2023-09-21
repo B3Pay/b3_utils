@@ -1,6 +1,6 @@
 use std::{borrow::Cow, fmt};
 
-use b3_stable_structures::{BoundedStorable, Storable};
+use ic_stable_structures::{storable::Bound, Storable};
 
 #[derive(Debug, Clone, PartialOrd, Ord, PartialEq, Eq)]
 pub struct PartitionName(String);
@@ -39,9 +39,9 @@ impl Storable for PartitionName {
     fn from_bytes(bytes: Cow<[u8]>) -> Self {
         Self(String::from_utf8_lossy(&bytes).into_owned())
     }
-}
 
-impl BoundedStorable for PartitionName {
-    const IS_FIXED_SIZE: bool = false;
-    const MAX_SIZE: u32 = 20;
+    const BOUND: Bound = Bound::Bounded {
+        is_fixed_size: false,
+        max_size: 20,
+    };
 }

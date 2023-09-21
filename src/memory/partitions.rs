@@ -1,6 +1,6 @@
 mod name;
 
-use b3_stable_structures::btreemap::Iter;
+use ic_stable_structures::btreemap::Iter;
 pub use name::*;
 
 use super::types::{DefaultVM, DefaultVMMap};

@@ -72,7 +72,10 @@ impl fmt::Display for Subaccount {
 }
 
 #[cfg(feature = "stable_memory")]
-impl b3_stable_structures::Storable for Subaccount {
+use ic_stable_structures::storable::Bound;
+
+#[cfg(feature = "stable_memory")]
+impl ic_stable_structures::Storable for Subaccount {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         self.0.to_bytes()
     }
@@ -80,10 +83,9 @@ impl b3_stable_structures::Storable for Subaccount {
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
         Subaccount::from_slice(&bytes).unwrap()
     }
-}
 
-#[cfg(feature = "stable_memory")]
-impl b3_stable_structures::BoundedStorable for Subaccount {
-    const IS_FIXED_SIZE: bool = true;
-    const MAX_SIZE: u32 = 32;
+    const BOUND: Bound = Bound::Bounded {
+        is_fixed_size: true,
+        max_size: 32,
+    };
 }

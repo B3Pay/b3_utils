@@ -1,8 +1,7 @@
 use b3_utils::logs::{export_log, export_log_messages_page, LogEntry};
 use b3_utils::memory::timer::{DefaultTaskTimer, TaskTimerEntry};
 use b3_utils::memory::types::{
-    BoundedStorable, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec, PartitionDetail,
-    Storable,
+    Bound, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
 };
 use b3_utils::memory::{
     init_stable_mem_cell, with_backup_mem, with_backup_mem_mut, with_stable_mem,
@@ -20,7 +19,7 @@ use std::io::Cursor;
 const MAX_OPERATION_SIZE: u32 = 200;
 
 thread_local! {
-    static TASK_TIMER: RefCell<DefaultTaskTimer<Task>> = init_stable_mem_cell("timer", 0).unwrap();
+    static TASK_TIMER: RefCell<DefaultTaskTimer<Task>> = init_stable_mem_cell("timer", 1).unwrap();
 
     static MAP: RefCell<DefaultVMMap<u64, User>> = init_stable_mem_cell("map", 10).unwrap();
     static HEAP: RefCell<DefaultVMHeap<u64>> = init_stable_mem_cell("heap", 11).unwrap();
@@ -49,11 +48,11 @@ impl Storable for Task {
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
         from_reader(&mut Cursor::new(&bytes)).unwrap()
     }
-}
 
-impl BoundedStorable for Task {
-    const MAX_SIZE: u32 = MAX_OPERATION_SIZE;
-    const IS_FIXED_SIZE: bool = true;
+    const BOUND: Bound = Bound::Bounded {
+        is_fixed_size: true,
+        max_size: MAX_OPERATION_SIZE,
+    };
 }
 
 #[derive(CandidType, PartialEq, Eq, Clone, Serialize, Deserialize)]
@@ -71,11 +70,6 @@ fn default_created_at() -> NanoTimeStamp {
     NanoTimeStamp::from(0)
 }
 
-impl BoundedStorable for User {
-    const MAX_SIZE: u32 = MAX_OPERATION_SIZE;
-    const IS_FIXED_SIZE: bool = false;
-}
-
 impl Storable for User {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         let mut bytes = vec![];
@@ -86,17 +80,17 @@ impl Storable for User {
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
         from_reader(&mut Cursor::new(&bytes)).unwrap()
     }
+
+    const BOUND: Bound = Bound::Bounded {
+        is_fixed_size: false,
+        max_size: MAX_OPERATION_SIZE,
+    };
 }
 
 #[derive(CandidType, PartialEq, Eq, PartialOrd, Ord, Clone, Serialize, Deserialize)]
 pub enum OperationStatus {
     Success,
     Fail,
-}
-
-impl BoundedStorable for ProcessedOperation {
-    const MAX_SIZE: u32 = MAX_OPERATION_SIZE;
-    const IS_FIXED_SIZE: bool = false;
 }
 
 #[derive(CandidType, PartialEq, Eq, PartialOrd, Ord, Clone, Serialize, Deserialize)]
@@ -135,6 +129,11 @@ impl Storable for ProcessedOperation {
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
         from_reader(&mut Cursor::new(&bytes)).unwrap()
     }
+
+    const BOUND: Bound = Bound::Bounded {
+        is_fixed_size: false,
+        max_size: MAX_OPERATION_SIZE,
+    };
 }
 
 #[init]

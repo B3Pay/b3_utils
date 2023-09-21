@@ -1,5 +1,5 @@
-use b3_stable_structures::memory_manager::{MemoryId, MemoryManager};
-use b3_stable_structures::{DefaultMemoryImpl, Memory};
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager};
+use ic_stable_structures::{DefaultMemoryImpl, Memory};
 
 mod test;
 
