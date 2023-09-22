@@ -43,24 +43,19 @@ impl HttpRequest {
     }
 
     /// A simple wrapper to assign the URL with the `POST` method.
-    /// The body is set to the `json_string` argument.
+    /// The body is set to the `body` argument.
     /// The `max_response_bytes` is set to the `max_response_bytes` argument.
     /// The `max_response_bytes` argument is optional.
-    /// The `Content-Type` header is set to `application/json`.
-    pub fn post(self, json_string: &str, max_response_bytes: Option<u64>) -> Self {
+    /// The Default `Content-Type` header is set to `application/json`.
+    /// The `Content-Type` header can be overwritten by using the `content_type` method.
+    pub fn post(self, body: &str, max_response_bytes: Option<u64>) -> Self {
         self.method(HttpMethod::POST)
             .add_headers(vec![(
                 "Content-Type".to_string(),
                 "application/json".to_string(),
             )])
             .max_response_bytes(max_response_bytes)
-            .body(json_string)
-    }
-
-    /// Updates the URL.
-    pub fn url(mut self, url: &str) -> Self {
-        self.0.url = String::from(url);
-        self
+            .body(body)
     }
 
     /// Updates the HTTP method.
@@ -83,6 +78,39 @@ impl HttpRequest {
                 name: name.to_string(),
                 value: value.to_string(),
             }));
+        self
+    }
+
+    /// Sets the Content-Type header for the request
+    pub fn content_type(mut self, content_type: &str) -> Self {
+        // Remove any existing Content-Type headers
+        self.0
+            .headers
+            .retain(|header| header.name != "Content-Type");
+
+        // Add the new Content-Type header
+        self.0.headers.push(HttpHeader {
+            name: "Content-Type".to_string(),
+            value: content_type.to_string(),
+        });
+
+        self
+    }
+
+    /// add query params to the URL
+    pub fn add_query_params(mut self, params: Vec<(String, String)>) -> Self {
+        let query_string = params
+            .into_iter()
+            .map(|(k, v)| format!("{}={}", k, v))
+            .collect::<Vec<String>>()
+            .join("&");
+
+        if self.0.url.contains('?') {
+            self.0.url.push_str("&");
+        } else {
+            self.0.url.push_str("?");
+        }
+        self.0.url.push_str(&query_string);
         self
     }
 

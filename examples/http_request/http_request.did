@@ -18,9 +18,24 @@ service : {
   get_transform : (TransformArgs) -> (HttpResponse) query;
   head_transform : (TransformArgs) -> (HttpResponse) query;
   http_get : (text, opt nat64) -> (text);
+  http_get_with_closure : (text, nat64) -> (text);
+  http_get_with_features : (
+      text,
+      opt nat64,
+      opt vec record { text; text },
+      opt vec record { text; text },
+    ) -> (text);
   http_head : (text, opt nat64) -> (text);
   http_post : (text, text, opt nat64) -> (text);
   http_post_with_closure : (text, text, nat64) -> (text);
+  http_post_with_features : (
+      text,
+      text,
+      opt nat64,
+      opt text,
+      opt vec record { text; text },
+      opt vec record { text; text },
+    ) -> (text);
   post_transform : (TransformArgs) -> (HttpResponse) query;
   print_log_entries : () -> (vec LogEntry) query;
 }

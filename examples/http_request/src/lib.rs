@@ -38,6 +38,87 @@ async fn http_get(url: String, max_response_bytes: Option<u64>) -> String {
 }
 
 #[update]
+async fn http_get_with_closure(url: String, max_response_bytes: u64) -> String {
+    log_cycle!("Calling http_get_with_closure");
+
+    let request = HttpRequest::new(url).get(Some(max_response_bytes));
+
+    let cycle_cost = request.calculate_cycle_cost();
+
+    log_cycle!("calculated cycle cost: {}", cycle_cost);
+
+    // Using the send method
+    let response_result = request
+        .send_with_closure(|response| HttpResponse {
+            status: response.status,
+            body: response.body,
+            headers: headers(),
+            ..Default::default()
+        })
+        .await;
+
+    log_cycle!("After http_request");
+
+    match response_result {
+        Ok(response) => {
+            log_cycle!("response size: {}", response.body.len());
+            String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
+        }
+        Err(m) => {
+            format!("The http_request resulted in an error. Error: {:?}", m)
+        }
+    }
+}
+
+#[update]
+async fn http_get_with_features(
+    url: String,
+    max_response_bytes: Option<u64>,
+    custom_headers: Option<Vec<(String, String)>>,
+    query_params: Option<Vec<(String, String)>>,
+) -> String {
+    log_cycle!("Calling http_get_with_features");
+
+    // Initialize the HttpRequest
+    let mut request = HttpRequest::new(url.clone());
+
+    // Add query parameters if provided
+    if let Some(params) = query_params {
+        request = request.add_query_params(params);
+    }
+
+    // Create a GET request
+    request = request.get(max_response_bytes);
+
+    // Add custom headers if provided
+    if let Some(headers) = custom_headers {
+        request = request.add_headers(headers);
+    }
+
+    // Calculate cycle cost
+    let cycle_cost = request.calculate_cycle_cost();
+    log_cycle!("Calculated cycle cost: {}", cycle_cost);
+
+    // Add a transform context and send the request
+    let response_result = request
+        .transform_context("get_transform", None)
+        .send()
+        .await;
+
+    log_cycle!("After http_request");
+
+    match response_result {
+        Ok(response) => {
+            log_cycle!("Response size: {}", response.body.len());
+            String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
+        }
+        Err(m) => {
+            format!("The http_request resulted in an error. Error: {:?}", m)
+        }
+    }
+}
+
+#[update]
 async fn http_head(url: String, max_response_bytes: Option<u64>) -> String {
     log_cycle!("Calling http_head");
 
@@ -95,6 +176,62 @@ async fn http_post(url: String, json_string: String, max_response_bytes: Option<
         }
     }
 }
+
+#[update]
+async fn http_post_with_features(
+    url: String,
+    json_string: String,
+    max_response_bytes: Option<u64>,
+    custom_content_type: Option<String>,
+    custom_headers: Option<Vec<(String, String)>>,
+    query_params: Option<Vec<(String, String)>>,
+) -> String {
+    log_cycle!("Calling http_post_with_features");
+
+    // Initialize the HttpRequest
+    let mut request = HttpRequest::new(url.clone());
+
+    // Add query parameters if provided
+    if let Some(params) = query_params {
+        request = request.add_query_params(params);
+    }
+
+    // Create a POST request
+    request = request.post(&json_string, max_response_bytes);
+
+    // Overwrite Content-Type if provided
+    if let Some(content_type) = custom_content_type {
+        request = request.content_type(&content_type);
+    }
+
+    // Add custom headers if provided
+    if let Some(headers) = custom_headers {
+        request = request.add_headers(headers);
+    }
+
+    // Calculate cycle cost
+    let cycle_cost = request.calculate_cycle_cost();
+    log_cycle!("Calculated cycle cost: {}", cycle_cost);
+
+    // Add a transform context and send the request
+    let response_result = request
+        .transform_context("post_transform", None)
+        .send()
+        .await;
+
+    log_cycle!("After http_request");
+
+    match response_result {
+        Ok(response) => {
+            log_cycle!("Response size: {}", response.body.len());
+            String::from_utf8(response.body).expect("Transformed response is not UTF-8 encoded.")
+        }
+        Err(m) => {
+            format!("The http_request resulted in an error. Error: {:?}", m)
+        }
+    }
+}
+
 #[update]
 async fn http_post_with_closure(
     url: String,
