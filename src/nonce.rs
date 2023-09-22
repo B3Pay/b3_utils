@@ -29,12 +29,12 @@ impl Nonce {
         Nonce(u64::from_le_bytes(bytes))
     }
 
-    pub fn to_le_bytes(&self) -> [u8; 8] {
-        self.0.to_le_bytes()
-    }
-
     pub fn zero() -> Self {
         Self(0)
+    }
+
+    pub fn to_le_bytes(&self) -> [u8; 8] {
+        self.0.to_le_bytes()
     }
 
     pub fn current(&self) -> Nonce {
@@ -58,7 +58,7 @@ impl Nonce {
     }
 
     /// increment the counter and return the new value
-    pub fn next(&mut self) -> Nonce {
+    pub fn next(&mut self) -> Self {
         self.increment();
 
         self.current()
