@@ -45,11 +45,11 @@ impl Nonce {
         self.0
     }
 
-    pub fn add(&self, other: u64) -> Self {
+    pub fn add_64(&self, other: u64) -> Self {
         Self(self.0 + other)
     }
 
-    pub fn sub(&self, other: u64) -> Self {
+    pub fn sub_64(&self, other: u64) -> Self {
         Self(self.0 - other)
     }
 
@@ -62,5 +62,12 @@ impl Nonce {
         self.increment();
 
         self.current()
+    }
+
+    /// increment the counter and return the new value
+    pub fn next_get(&mut self) -> u64 {
+        self.increment();
+
+        self.get()
     }
 }

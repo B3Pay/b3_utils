@@ -181,7 +181,7 @@ impl Subaccount {
             return "Default".to_string();
         }
 
-        let next_index = self.nonce().add(1).to_string();
+        let next_index = self.nonce().add(1);
 
         self.environment().to_name(next_index)
     }

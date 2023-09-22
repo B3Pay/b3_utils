@@ -37,7 +37,9 @@ impl Environment {
         }
     }
 
-    pub fn to_name(&self, counter: String) -> String {
+    pub fn to_name(&self, counter: u64) -> String {
+        let counter = counter.to_string();
+
         match self {
             Environment::Development => ["Development", "Account", &counter].join(" "),
             Environment::Production => ["Account", &counter].join(" "),

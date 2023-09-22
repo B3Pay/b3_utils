@@ -1,5 +1,22 @@
 use super::Nonce;
 use std::fmt;
+use std::ops::{Add, Sub};
+
+impl Add for Nonce {
+    type Output = Nonce;
+
+    fn add(self, other: Nonce) -> Nonce {
+        Nonce(self.0 + other.0)
+    }
+}
+
+impl Sub for Nonce {
+    type Output = Nonce;
+
+    fn sub(self, other: Nonce) -> Nonce {
+        Nonce(self.0.saturating_sub(other.0))
+    }
+}
 
 impl TryFrom<&[u8]> for Nonce {
     type Error = std::array::TryFromSliceError;
