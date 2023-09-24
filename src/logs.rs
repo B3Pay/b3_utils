@@ -1,6 +1,6 @@
 use crate::NanoTimeStamp;
 use candid::CandidType;
-
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
 pub mod counter;
@@ -14,7 +14,7 @@ pub use buffer::*;
 mod test;
 
 /// An entry in the canister log.
-#[derive(CandidType, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(CandidType, Deserialize, Serialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct LogEntry {
     pub timestamp: NanoTimeStamp,
     // The index of this entry starting from the last canister upgrade.
@@ -81,8 +81,48 @@ macro_rules! log {
         });
     }}
 }
-
-/// Adds a new record to a canister log buffer.
+/// Adds a new record to a canister log buffer and panics.
+/// The maximum number of records is 1000.
+/// Older records are evicted.
+///
+/// The log is not resilient to canister upgrades.
+///
+/// The log is exported by calling `export_log()`.
+/// And it can be imported by calling `import_log()`.
+///
+/// # Example
+/// ```
+/// use b3_utils::{logs::export_log, log_panic};
+///
+/// fn sum_and_log(x: u64, y: u64) -> u64 {
+///     let result = x.saturating_add(y);
+///     log_panic!("{} + {} = {}", x, y, result);
+///     result
+/// }
+///
+/// assert_eq!(sum_and_log(1, 2), 3);
+/// assert_eq!(export_log()[0].message, "1 + 2 = 3");
+/// assert_eq!(export_log()[0].counter, 1);
+/// ```
+#[macro_export]
+macro_rules! log_panic {
+    ($message:expr $(,$args:expr)* $(,)*) => {{
+        use $crate::logs::Sink;
+        let message = std::format!($message $(,$args)*);
+        // Print the message for convenience for local development (e.g. integration tests)
+        (&$crate::logs::MAIN_LOG).append($crate::logs::LogEntry {
+            timestamp: $crate::NanoTimeStamp::now(),
+            cycle: None,
+            message: message.clone(),
+            file: std::file!(),
+            line: std::line!(),
+            version: env!("CARGO_PKG_VERSION"),
+            counter: $crate::logs::counter::log_increment()
+        });
+        panic!("{}", &message);
+    }}
+}
+/// Adds a new record to a canister log buffer including the current cycle.
 /// The maximum number of records is 1000.
 /// Older records are evicted.
 ///
