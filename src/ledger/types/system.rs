@@ -22,14 +22,28 @@ pub struct Bug {
     pub canister_id: CanisterId,
 }
 
+impl Bug {
+    const MAX_STRING_LENGTH: u32 = 256; // Maximum characters in a String
+    const MAX_LOG_ENTRIES: u32 = 10;
+
+    // Calculating the maximum possible size for the `Bug` struct.
+    pub const MAX_SIZE: u32 = 24 + // Size of Vec<String> itself (logs)
+        (Self::MAX_LOG_ENTRIES * (24 + Self::MAX_STRING_LENGTH)) + // Maximum size of logs
+        (3 * (24 + Self::MAX_STRING_LENGTH)) + // Maximum size for name, description, and version
+        30; // size of CanisterId
+}
+
 #[cfg(feature = "stable_memory")]
 use crate::memory::types::{Bound, Storable};
 
 #[cfg(feature = "stable_memory")]
-impl<'de> Storable for Bug {
-    const BOUND: Bound = Bound::Unbounded;
+impl Storable for Bug {
+    const BOUND: Bound = Bound::Bounded {
+        max_size: Self::MAX_SIZE,
+        is_fixed_size: false, // Size is not fixed because of the Vec and Strings
+    };
 
-    fn from_bytes<'a>(bytes: Cow<'a, [u8]>) -> Self {
+    fn from_bytes(bytes: Cow<[u8]>) -> Self {
         Decode!(bytes.as_ref(), Self).unwrap()
     }
 
