@@ -4,10 +4,13 @@ use b3_utils::{
     memory::{
         init_stable_mem_refcell,
         timer::DefaultTaskTimer,
-        types::{DefaultVMMap, Storable},
+        types::{Bound, DefaultVMMap, Storable},
     },
     Subaccount,
 };
+use candid::CandidType;
+use candid::{decode_one, encode_one};
+use serde::{Deserialize, Serialize};
 
 thread_local! {
     static TASK_TIMER: RefCell<DefaultTaskTimer<Task>> = init_stable_mem_refcell("timer", 1).unwrap();
@@ -15,42 +18,32 @@ thread_local! {
     static USERS: RefCell<DefaultVMMap<u64, Subaccount>> = init_stable_mem_refcell("users", 2).unwrap();
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, CandidType, Deserialize, Serialize, Debug, PartialEq, Eq, PartialOrd, Ord)]
 enum Task {
-    AddUser(Principal),
+    AddUser(Subaccount),
     RemoveUser(u64),
 }
 
 impl Storable for Task {
-    fn to_bytes(&self) -> Vec<u8> {
-        match self {
-            Task::AddUser(principal) => {
-                let mut bytes = vec![0];
-                bytes.extend(principal.as_slice());
-                bytes
-            }
-            Task::RemoveUser(id) => {
-                let mut bytes = vec![1];
-                bytes.extend(id.to_be_bytes());
-                bytes
-            }
-        }
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        decode_one(&bytes).unwrap()
     }
 
-    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
-        match bytes[0] {
-            0 => Task::AddUser(Principal::from_slice(&bytes[1..])),
-            1 => Task::RemoveUser(u64::from_be_bytes([bytes[1], bytes[2], bytes[3], bytes[4]])),
-            _ => panic!("Invalid task type"),
-        }
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        encode_one(self).unwrap().into()
     }
+
+    const BOUND: Bound = Bound::Unbounded;
 }
 
 #[ic_cdk::update]
 fn add_user() {
     let principal = ic_cdk::caller();
 
-    TASK_TIMER.with(|task_timer| {
-        task_timer.borrow_mut().add_task(Task::AddUser(principal));
+    USERS.with(|users| {
+        let mut users = users.borrow_mut();
+        let user_id = users.len() as u64;
+
+        users.insert(user_id, principal.into());
     });
 }
