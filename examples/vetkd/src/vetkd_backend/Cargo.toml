@@ -13,4 +13,4 @@ candid = { workspace = true }
 ic-cdk = "0.11.0"
 serde = "1"
 hex = "0.4"
-b3_utils = { workspace = true, features = ["logging", "vetkd"] }
+b3_utils = { workspace = true, features = ["logging", "exprimental_vetkd"] }

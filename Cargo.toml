@@ -15,7 +15,7 @@ serde_bytes = "0.11"
 easy-hasher = { version = "2.2", optional = true }
 sha2 = { version = "0.9", optional = true }
 subtle = { version = "2.5", optional = true }
-ic-stable-structures = { git = "https://github.com/b3hr4d/stable-structures", rev = "7cca5850650d4f9c936fc7c09ca6af13b3911af2", optional = true }
+ic-stable-structures = { version = "0.6.0-beta.2", rev = "7cca5850650d4f9c936fc7c09ca6af13b3911af2", optional = true }
 ic_bls12_381 = { version = "0.8", optional = true, default-features = false, features = [
     "pairings",
     "alloc",
@@ -23,7 +23,7 @@ ic_bls12_381 = { version = "0.8", optional = true, default-features = false, fea
 ] }
 
 [features]
-vetkd = ["ic_bls12_381", "sha2", "subtle"]
+exprimental_vetkd = ["ic_bls12_381", "sha2", "subtle"]
 stable_memory = ["ic-stable-structures"]
 ledger = ["easy-hasher"]
 wasm = ["easy-hasher"]
