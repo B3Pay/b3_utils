@@ -12,7 +12,9 @@ type LogEntry = record {
   version : text;
   message : text;
   timestamp : nat64;
+  "variant" : LogVariant;
 };
+type LogVariant = variant { info; warn; error };
 type TransformArgs = record { context : vec nat8; response : HttpResponse };
 service : {
   get_transform : (TransformArgs) -> (HttpResponse) query;

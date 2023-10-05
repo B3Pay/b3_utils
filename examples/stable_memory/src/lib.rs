@@ -6,7 +6,7 @@ use b3_utils::memory::types::{
 use b3_utils::memory::{
     init_stable_mem_refcell, with_backup_mem, with_backup_mem_mut, with_stable_mem,
 };
-use b3_utils::{log, require, require_log, NanoTimeStamp, Subaccount};
+use b3_utils::{log, log_cycle, require, require_log, NanoTimeStamp, Subaccount};
 use candid::CandidType;
 use ciborium::de::from_reader;
 use ciborium::ser::into_writer;
@@ -382,16 +382,21 @@ fn global_timer() {
 }
 
 fn execute_task(timer: TaskTimerEntry<Task>) {
-    log!("execute_task: {:?}", timer.task);
-    log!("execute_task in : {}", timer.time);
+    log_cycle!("execute_task: {:?}", timer.task);
 
-    add_user(User {
-        id: timer.time.clone().into(),
-        name: format!("{:?}", timer.task),
-        email: format!("{}@test.com", timer.time.to_secs()),
-        new_field: None,
-        created_at: NanoTimeStamp::now(),
-    });
+    match timer.task {
+        Task::SumAndLog(x, y) => {
+            let _ = sum_and_log(x, y);
+        }
+        Task::SumAndLogSub(x, y) => {
+            let _ = sum_and_log_sub(x, y);
+        }
+        Task::SumAndLogSubWithRequire(x, y) => {
+            let _ = sum_and_log_sub_with_require(x, y);
+        }
+    }
+
+    log_cycle!("execute_task: done");
 }
 
 fn reschedule() {
