@@ -1,5 +1,12 @@
 {
   "canisters": {
+    "all_in_one": {
+      "type": "custom",
+      "wasm": "target/wasm32-unknown-unknown/release/all_in_one-opt.wasm",
+      "candid": "all_in_one/all_in_one.did",
+      "package": "all_in_one",
+      "build": "sh build.sh all_in_one all_in_one"
+    },
     "http_request": {
       "type": "custom",
       "wasm": "target/wasm32-unknown-unknown/release/http_request-opt.wasm",
@@ -36,7 +43,10 @@
       }
     },
     "vetkd_frontend": {
-      "dependencies": ["vetkd_backend", "vetkd_system_api"],
+      "dependencies": [
+        "vetkd_backend",
+        "vetkd_system_api"
+      ],
       "frontend": {
         "entrypoint": "vetkd/src/vetkd_frontend_js/src/index.html"
       },

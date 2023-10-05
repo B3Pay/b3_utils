@@ -1,16 +1,20 @@
 [package]
-name = "vetkd_backend"
+name = "all_in_one"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
+ic-cdk = { workspace = true }
 candid = { workspace = true }
-ic-cdk = "0.11.0"
-serde = "1"
-hex = "0.4"
-b3_utils = { workspace = true, features = ["logging", "vetkd"] }
+b3_utils = { workspace = true, features = [
+    "vetkd",
+    "stable_memory",
+    "ledger",
+    "wasm",
+    "logging",
+    "owner",
+] }

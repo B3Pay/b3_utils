@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 ciborium = "0.2"
-candid = "0.9"
+candid = { workspace = true }
 ic-cdk = { workspace = true }
 ic0 = "0.18.11"
 serde = { version = "1.0", features = ["derive"] }

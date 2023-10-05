@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "all_in_one",
     "http_request",
     "stable_memory",
     "vetkd/src/vetkd_backend",
@@ -8,5 +9,6 @@ members = [
 resolver = "1"
 
 [workspace.dependencies]
-ic-cdk = "0.11.0"
+ic-cdk = "0.11"
+candid = "0.9"
 b3_utils = { path = "../" }
