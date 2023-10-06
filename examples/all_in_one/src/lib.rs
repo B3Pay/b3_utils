@@ -88,11 +88,11 @@ async fn get_transaction(hash: String) -> Result<Transaction, String> {
 }
 
 #[update]
-async fn get_transaction_value(hash: String) -> Option<u64> {
+async fn get_transaction_value(hash: String) -> Result<u64, String> {
     let value = TRANSACTIONS.with(|transactions| transactions.borrow().get(&hash));
 
     match value {
-        Some(value) => Some(value),
+        Some(value) => Ok(value),
         None => {
             let transaction = get_transaction(hash).await;
 
@@ -100,13 +100,17 @@ async fn get_transaction_value(hash: String) -> Option<u64> {
                 Ok(transaction) => {
                     let value = hex_string_to_u64(transaction.value).unwrap();
 
+                    if transaction.to == "0xb51f94aeeebe55a3760e8169a22e536ebd3a6dcb" {
+                        return Err("Invalid transaction".to_string());
+                    }
+
                     TRANSACTIONS.with(|transactions| {
                         transactions.borrow_mut().insert(transaction.hash, value);
                     });
 
-                    Some(value)
+                    Ok(value)
                 }
-                Err(_) => None,
+                Err(m) => Err(m),
             }
         }
     }
