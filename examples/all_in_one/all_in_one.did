@@ -1,1 +1,1 @@
-service : { http_get : (text, opt nat64) -> (text) }
+service : { http_post : (text, text, opt nat64) -> (text) }
