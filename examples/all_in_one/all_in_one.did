@@ -1,0 +1,1 @@
+service : { http_get : (text, opt nat64) -> (text) }
