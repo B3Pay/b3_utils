@@ -34,6 +34,13 @@ impl TokenAmount {
         Self { amount, decimals }
     }
 
+    pub fn from_natural(amount: u64) -> Self {
+        Self {
+            amount: amount as u128,
+            decimals: 8,
+        }
+    }
+
     pub fn from_tokens(tokens: ICPToken) -> Self {
         Self {
             amount: tokens.e8s as u128,
