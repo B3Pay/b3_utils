@@ -10,6 +10,7 @@ dependencies = [
  "candid",
  "ic-cdk",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

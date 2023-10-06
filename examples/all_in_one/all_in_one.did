@@ -1,1 +1,7 @@
-service : { http_post : (text, text, opt nat64) -> (text) }
+service : {
+  get_transaction_count : () -> (nat64) query;
+  get_transaction_list : () -> (vec text) query;
+  get_transaction_list_with_value : () -> (vec record { text; nat64 }) query;
+  get_transaction_value : (text) -> (opt nat64);
+  get_transaction_value_sum : () -> (nat64) query;
+}
