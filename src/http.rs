@@ -13,9 +13,9 @@ pub struct HttpRequest(pub CanisterHttpRequestArgument);
 
 impl HttpRequest {
     /// Creates a new request to be built up by having
-    pub fn new(url: String) -> Self {
+    pub fn new<S: AsRef<str>>(url: S) -> Self {
         Self(CanisterHttpRequestArgument {
-            url,
+            url: url.as_ref().to_string(),
             headers: vec![],
             method: HttpMethod::GET,
             max_response_bytes: None,

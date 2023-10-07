@@ -80,7 +80,7 @@ async fn http_get_with_features(
     log_cycle!("Calling http_get_with_features");
 
     // Initialize the HttpRequest
-    let mut request = HttpRequest::new(url.clone());
+    let mut request = HttpRequest::new(url);
 
     // Add query parameters if provided
     if let Some(params) = query_params {
@@ -189,7 +189,7 @@ async fn http_post_with_features(
     log_cycle!("Calling http_post_with_features");
 
     // Initialize the HttpRequest
-    let mut request = HttpRequest::new(url.clone());
+    let mut request = HttpRequest::new(url);
 
     // Add query parameters if provided
     if let Some(params) = query_params {

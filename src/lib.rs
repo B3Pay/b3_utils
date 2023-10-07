@@ -78,6 +78,9 @@ pub mod logs;
 #[cfg(feature = "stable_memory")]
 pub mod memory;
 
+#[cfg(feature = "rpc")]
+pub mod rpc;
+
 // VETKD API not yet ready for use
 #[cfg(feature = "exprimental_vetkd")]
 pub mod vetkd;

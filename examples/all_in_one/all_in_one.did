@@ -1,8 +1,22 @@
-type Result = variant { Ok : nat64; Err : text };
+type LogEntry = record {
+  counter : nat64;
+  file : text;
+  line : nat32;
+  cycle : opt nat;
+  version : text;
+  message : text;
+  timestamp : nat64;
+  "variant" : LogVariant;
+};
+type LogVariant = variant { info; warn; error };
+type TaskTimerEntry = record { task : vec nat8; time : nat64 };
 service : {
-  get_transaction_count : () -> (nat64) query;
-  get_transaction_list : () -> (vec text) query;
-  get_transaction_list_with_value : () -> (vec record { text; nat64 }) query;
-  get_transaction_value : (text) -> (Result);
-  get_transaction_value_sum : () -> (nat64) query;
+  get_receipt_list : () -> (vec record { text; text }) query;
+  get_timers : () -> (vec TaskTimerEntry) query;
+  get_transaction_list : () -> (vec record { text; text }) query;
+  get_transaction_receipt_from : (text) -> (text);
+  get_transaction_value : (text) -> (text);
+  print_log_entries : () -> (vec LogEntry) query;
+  schedule_task : (nat64, text) -> ();
+  verify_transaction : (text) -> (nat, text);
 }

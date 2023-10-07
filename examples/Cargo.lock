@@ -9,7 +9,9 @@ dependencies = [
  "b3_utils",
  "candid",
  "ic-cdk",
+ "ic0",
  "serde",
+ "serde_derive",
  "serde_json",
 ]
 
@@ -43,6 +45,7 @@ dependencies = [
  "ic_bls12_381",
  "serde",
  "serde_bytes",
+ "serde_json",
  "sha2 0.9.9",
  "subtle",
 ]
