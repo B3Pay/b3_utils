@@ -1,5 +1,5 @@
 use b3_utils::{
-    http::HttpRequest,
+    http::HttpOutcall,
     log_cycle,
     logs::{export_log, LogEntry},
 };
@@ -12,7 +12,7 @@ use ic_cdk::{
 async fn http_get(url: String, max_response_bytes: Option<u64>) -> String {
     log_cycle!("Calling http_get");
 
-    let request = HttpRequest::new(url).get(max_response_bytes);
+    let request = HttpOutcall::new(url).get(max_response_bytes);
 
     let cycle_cost = request.calculate_cycle_cost();
 
@@ -41,7 +41,7 @@ async fn http_get(url: String, max_response_bytes: Option<u64>) -> String {
 async fn http_get_with_closure(url: String, max_response_bytes: u64) -> String {
     log_cycle!("Calling http_get_with_closure");
 
-    let request = HttpRequest::new(url).get(Some(max_response_bytes));
+    let request = HttpOutcall::new(url).get(Some(max_response_bytes));
 
     let cycle_cost = request.calculate_cycle_cost();
 
@@ -79,8 +79,8 @@ async fn http_get_with_features(
 ) -> String {
     log_cycle!("Calling http_get_with_features");
 
-    // Initialize the HttpRequest
-    let mut request = HttpRequest::new(url);
+    // Initialize the HttpOutcall
+    let mut request = HttpOutcall::new(url);
 
     // Add query parameters if provided
     if let Some(params) = query_params {
@@ -122,7 +122,7 @@ async fn http_get_with_features(
 async fn http_head(url: String, max_response_bytes: Option<u64>) -> String {
     log_cycle!("Calling http_head");
 
-    let request = HttpRequest::new(url).head(max_response_bytes);
+    let request = HttpOutcall::new(url).head(max_response_bytes);
 
     let cycle_cost = request.calculate_cycle_cost();
 
@@ -152,7 +152,7 @@ async fn http_head(url: String, max_response_bytes: Option<u64>) -> String {
 async fn http_post(url: String, json_string: String, max_response_bytes: Option<u64>) -> String {
     log_cycle!("Calling http_post");
 
-    let request = HttpRequest::new(url).post(&json_string, max_response_bytes);
+    let request = HttpOutcall::new(url).post(&json_string, max_response_bytes);
 
     let cycle_cost = request.calculate_cycle_cost();
 
@@ -188,8 +188,8 @@ async fn http_post_with_features(
 ) -> String {
     log_cycle!("Calling http_post_with_features");
 
-    // Initialize the HttpRequest
-    let mut request = HttpRequest::new(url);
+    // Initialize the HttpOutcall
+    let mut request = HttpOutcall::new(url);
 
     // Add query parameters if provided
     if let Some(params) = query_params {
@@ -240,7 +240,7 @@ async fn http_post_with_closure(
 ) -> String {
     log_cycle!("Calling http_post_with_closure");
 
-    let request = HttpRequest::new(url).post(&json_string, Some(max_response_bytes));
+    let request = HttpOutcall::new(url).post(&json_string, Some(max_response_bytes));
 
     let cycle_cost = request.calculate_cycle_cost();
 

@@ -1,6 +1,6 @@
 use b3_utils::{
     hex_string_with_0x_to_u128, hex_string_with_0x_to_vec,
-    http::HttpRequest,
+    http::HttpOutcall,
     log,
     logs::{export_log, LogEntry},
     memory::{
@@ -54,7 +54,7 @@ async fn get_asset_transfers(from_block: String) -> Result<transfer::Result, Str
 
     log!("Request: {}", rpc.to_string());
 
-    let request = HttpRequest::new(&URL)
+    let request = HttpOutcall::new(&URL)
         .post(&rpc.to_string(), None)
         .send_with_closure(|response: HttpResponse| HttpResponse {
             status: response.status,
@@ -86,7 +86,7 @@ async fn get_transaction(hash: TransactionHash) -> Result<transaction::Result, S
         "params": [hash]
     });
 
-    let request = HttpRequest::new(URL)
+    let request = HttpOutcall::new(URL)
         .post(&rpc.to_string(), Some(1024))
         .send_with_closure(|response: HttpResponse| HttpResponse {
             status: response.status,
@@ -119,7 +119,7 @@ async fn get_transaction_receipt(hash: TransactionHash) -> Result<receipt::Resul
         "params": [hash]
     });
 
-    let request = HttpRequest::new(URL)
+    let request = HttpOutcall::new(URL)
         .post(&rpc.to_string(), Some(2024))
         .send_with_closure(|response: HttpResponse| HttpResponse {
             status: response.status,

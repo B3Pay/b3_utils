@@ -9,9 +9,9 @@ use ic_cdk::api::management_canister::http_request::{
 };
 
 /// Used to build a request to the Management Canister's `http_request` method.
-pub struct HttpRequest(pub CanisterHttpRequestArgument);
+pub struct HttpOutcall(pub CanisterHttpRequestArgument);
 
-impl HttpRequest {
+impl HttpOutcall {
     /// Creates a new request to be built up by having
     pub fn new<S: AsRef<str>>(url: S) -> Self {
         Self(CanisterHttpRequestArgument {
