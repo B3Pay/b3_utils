@@ -21,10 +21,15 @@ type LogEntry = record {
 };
 type LogVariant = variant { info; warn; error };
 type PartitionDetail = record { id : nat8; name : text; size : nat64 };
-type TaskTimerEntry = record { task : opt nat64; time : nat64 };
+type Task = variant {
+  GetLatestExternalTransfer : text;
+  VerifyTransaction : text;
+  GetTransactionReceiptFrom : text;
+  GetTransactionValue : text;
+};
+type TaskTimerEntry = record { task : Task; time : nat64 };
 service : () -> {
   get_external_transfers : () -> (vec text) query;
-  get_latest_block : () -> (text) query;
   get_latest_external_transfer : (text) -> (text);
   get_partition_details : () -> (vec PartitionDetail) query;
   get_receipt_list : () -> (vec text) query;
@@ -34,6 +39,8 @@ service : () -> {
   get_transaction_value : (text) -> (text);
   http_request : (HttpRequest) -> (HttpResponse) query;
   print_log_entries : () -> (vec LogEntry) query;
-  schedule_task : (nat64, opt nat64) -> ();
+  schedule_task : (nat64, Task) -> ();
+  start : () -> ();
+  stop : () -> ();
   verify_transaction : (text) -> (nat, text);
 }

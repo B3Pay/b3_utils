@@ -1,5 +1,5 @@
 use b3_utils::{
-    hex_string_with_0x_to_u128, hex_string_with_0x_to_u64,
+    hex_string_with_0x_to_u128,
     http::{HttpRequest, HttpResponse, HttpResponseBuilder},
     log_cycle,
     logs::{export_log, LogEntry},
@@ -10,7 +10,7 @@ use b3_utils::{
         with_stable_mem,
     },
     outcall::{HttpOutcall, HttpOutcallResponse},
-    report_log, u64_to_hex_string_with_0x, NanoTimeStamp,
+    report_log, NanoTimeStamp,
 };
 use candid::CandidType;
 use ic_cdk::{init, post_upgrade, query, update};
@@ -27,6 +27,9 @@ type TransactionHash = String;
 type ReceiptFrom = String;
 type TranasactionValue = String;
 type BlockNumber = String;
+
+const RECIPIENT: &str = "0xB51f94aEEebE55A3760E8169A22e536eBD3a6DCB";
+const URL: &str = "https://eth-sepolia.g.alchemy.com/v2/ZpSPh3E7KZQg4mb3tN8WFXxG4Auntbxp";
 
 thread_local! {
     static TASK_TIMER: RefCell<DefaultTaskTimer<Task>> = init_stable_mem_refcell("timer", 1).unwrap();
@@ -58,21 +61,35 @@ impl Storable for Task {
     }
 }
 
-const RECIPIENT: &str = "0xB51f94aEEebE55A3760E8169A22e536eBD3a6DCB";
-const URL: &str = "https://eth-sepolia.g.alchemy.com/v2/ZpSPh3E7KZQg4mb3tN8WFXxG4Auntbxp";
-
 #[init]
 fn init() {
     log_cycle!("Init");
 
-    schedule_task(10, 4437563);
+    schedule_task(10, Task::GetLatestExternalTransfer("0x43d20e".to_string()));
 }
 
 #[post_upgrade]
 fn post_upgrade() {
     log_cycle!("Post upgrade");
-
     reschedule();
+}
+
+#[update]
+fn stop_timer() {
+    log_cycle!("Stop Timer");
+
+    TASK_TIMER.with(|tt| {
+        let mut tt = tt.borrow_mut();
+
+        tt.clear_timer()
+    });
+}
+
+#[update]
+fn start_timer() {
+    log_cycle!("Start Timer");
+
+    schedule_task(10, Task::GetLatestExternalTransfer("0x43d20e".to_string()));
 }
 
 async fn get_asset_transfers(from_block: String) -> Result<transfer::Result, String> {
@@ -277,7 +294,7 @@ fn get_external_transfers() -> Vec<String> {
 }
 
 #[query]
-fn get_timers() -> Vec<TaskTimerEntry<u64>> {
+fn get_timers() -> Vec<TaskTimerEntry<Task>> {
     TASK_TIMER.with(|s| {
         let state = s.borrow();
 
@@ -296,7 +313,7 @@ fn print_log_entries() -> Vec<LogEntry> {
 }
 
 #[update]
-fn schedule_task(after_sec: u64, task: u64) {
+fn schedule_task(after_sec: u64, task: Task) {
     let time = NanoTimeStamp::now().add_secs(after_sec);
 
     let timer = TaskTimerEntry { task, time };
@@ -336,16 +353,17 @@ fn global_timer() {
     }
 }
 
-async fn execute_task(block_number: u64) {
-    let block_number_hex = u64_to_hex_string_with_0x(block_number);
+async fn execute_task(task: Task) {
+    match task {
+        Task::GetLatestExternalTransfer(block_number) => {
+            let next_block_number = get_latest_external_transfer(block_number).await;
 
-    let next_block_number = get_latest_external_transfer(block_number_hex).await;
+            log_cycle!("Task executed: {}", next_block_number);
 
-    log_cycle!("Task executed: {}", block_number);
-
-    let next_block_number = hex_string_with_0x_to_u64(next_block_number).unwrap();
-
-    schedule_task(60, next_block_number);
+            schedule_task(60, Task::GetLatestExternalTransfer(next_block_number));
+        }
+        _ => panic!("Wrong task"),
+    };
 }
 
 fn reschedule() {
