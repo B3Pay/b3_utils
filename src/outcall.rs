@@ -5,8 +5,10 @@ pub use cost::*;
 
 use ic_cdk::api::management_canister::http_request::{
     http_request, http_request_with_closure, CanisterHttpRequestArgument, HttpHeader, HttpMethod,
-    HttpResponse, TransformContext,
+    TransformContext,
 };
+
+pub use ic_cdk::api::management_canister::http_request::HttpResponse as HttpOutcallResponse;
 
 /// Used to build a request to the Management Canister's `http_request` method.
 pub struct HttpOutcall(pub CanisterHttpRequestArgument);
@@ -134,7 +136,7 @@ impl HttpOutcall {
     }
 
     /// Wraps around `http_request` to issue a request to the `http_request` endpoint.
-    pub async fn send(self) -> Result<HttpResponse, String> {
+    pub async fn send(self) -> Result<HttpOutcallResponse, String> {
         let cycle_cost = self.calculate_cycle_cost();
 
         // You can log or use the cycle_cost here for further actions
@@ -147,8 +149,8 @@ impl HttpOutcall {
     /// Wraps around `http_request_with_closure` to issue a request to the `http_request` endpoint with a transform closure.
     pub async fn send_with_closure(
         self,
-        transform_func: impl FnOnce(HttpResponse) -> HttpResponse + 'static,
-    ) -> Result<HttpResponse, String> {
+        transform_func: impl FnOnce(HttpOutcallResponse) -> HttpOutcallResponse + 'static,
+    ) -> Result<HttpOutcallResponse, String> {
         let cycle_cost = self.calculate_cycle_cost();
         // You can log or use the cycle_cost here for further actions
 

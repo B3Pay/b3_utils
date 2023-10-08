@@ -105,7 +105,7 @@ impl<T: Ord + Storable> InitMemory<DefaultVMHeap<T>> for DefaultVMHeap<T> {
     }
 }
 
-impl<T: Ord + PartialOrd + Storable> InitMemory<DefaultTaskTimer<T>> for DefaultTaskTimer<T> {
+impl<T: Storable> InitMemory<DefaultTaskTimer<T>> for DefaultTaskTimer<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Timer
     }

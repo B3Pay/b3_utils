@@ -1,4 +1,5 @@
 use candid::CandidType;
+use serde::{Deserialize, Serialize};
 
 pub use ic_stable_structures::{
     cell::InitError as ExternalCellInitError, log::InitError as ExternalLogInitError,
@@ -7,7 +8,7 @@ pub use ic_stable_structures::{
     VectorMemory,
 };
 
-#[derive(CandidType, Clone, Debug)]
+#[derive(CandidType, Deserialize, Serialize, Clone, Debug)]
 pub struct PartitionDetail {
     pub name: String,
     pub size: u64,

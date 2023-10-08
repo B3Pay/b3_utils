@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, cmp::Ordering};
 
 use candid::CandidType;
 use ic_stable_structures::{storable::Bound, vec::InitError, GrowFailed, Storable};
@@ -9,16 +9,10 @@ use crate::{memory::DefaultVMHeap, NanoTimeStamp};
 use super::types::DefaultVM;
 
 // Added the missing generic type parameter <T>
-pub struct DefaultTaskTimer<T: Ord + PartialOrd + Storable>(DefaultVMHeap<TaskTimerEntry<T>>);
-
-#[derive(CandidType, Debug, PartialEq, Eq, Ord, Clone, Serialize, Deserialize)]
-pub struct TaskTimerEntry<T> {
-    pub time: NanoTimeStamp,
-    pub task: T,
-}
+pub struct DefaultTaskTimer<T: Storable>(DefaultVMHeap<TaskTimerEntry<T>>);
 
 // Added the missing generic type parameter <T>  trait bound
-impl<T: Ord + PartialOrd + Storable> DefaultTaskTimer<T> {
+impl<T: Storable> DefaultTaskTimer<T> {
     pub fn init(vm: DefaultVM) -> Result<Self, InitError> {
         let task_timer = Self(DefaultVMHeap::init(vm)?);
 
@@ -56,16 +50,33 @@ impl<T: Ord + PartialOrd + Storable> DefaultTaskTimer<T> {
     }
 }
 
-impl<T> PartialOrd for TaskTimerEntry<T>
-where
-    T: PartialOrd,
-{
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        self.time.partial_cmp(&other.time)
+#[derive(CandidType, Debug, Clone, Serialize, Deserialize)]
+pub struct TaskTimerEntry<T> {
+    pub time: NanoTimeStamp,
+    pub task: T,
+}
+
+impl<T> PartialOrd for TaskTimerEntry<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
-impl<T: Ord + PartialOrd + Storable> Storable for TaskTimerEntry<T> {
+impl<T> Ord for TaskTimerEntry<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.time.cmp(&other.time)
+    }
+}
+
+impl<T> PartialEq for TaskTimerEntry<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.time == other.time
+    }
+}
+
+impl<T> Eq for TaskTimerEntry<T> {}
+
+impl<T: Storable> Storable for TaskTimerEntry<T> {
     fn to_bytes(&self) -> Cow<[u8]> {
         let time_bytes = self.time.to_le_bytes();
         let task_bytes = self.task.to_bytes();
