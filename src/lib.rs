@@ -49,6 +49,7 @@ pub mod error;
 pub mod http;
 pub mod mocks;
 pub mod nonce;
+pub mod outcall;
 pub mod types;
 
 mod timestamp;

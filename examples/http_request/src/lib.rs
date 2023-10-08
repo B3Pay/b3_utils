@@ -1,7 +1,7 @@
 use b3_utils::{
-    http::HttpOutcall,
     log_cycle,
     logs::{export_log, LogEntry},
+    outcall::HttpOutcall,
 };
 use ic_cdk::{
     api::management_canister::http_request::{HttpHeader, HttpResponse, TransformArgs},

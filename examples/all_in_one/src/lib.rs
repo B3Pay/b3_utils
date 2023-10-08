@@ -1,13 +1,12 @@
 use b3_utils::{
-    hex_string_with_0x_to_u128, hex_string_with_0x_to_vec,
-    http::HttpOutcall,
-    log,
+    hex_string_with_0x_to_u128, hex_string_with_0x_to_vec, log,
     logs::{export_log, LogEntry},
     memory::{
         init_stable_mem_refcell,
         timer::{DefaultTaskTimer, TaskTimerEntry},
         types::{DefaultVMCell, DefaultVMMap},
     },
+    outcall::HttpOutcall,
     report_log, vec_to_hex_string_with_0x, NanoTimeStamp,
 };
 use ic_cdk::{api::management_canister::http_request::HttpResponse, init, query, update};
