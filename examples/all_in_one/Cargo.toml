@@ -15,11 +15,7 @@ serde_derive = "1.0"
 ic-cdk = { workspace = true }
 candid = { workspace = true }
 b3_utils = { workspace = true, features = [
-    "exprimental_vetkd",
     "stable_memory",
-    "ledger",
-    "wasm",
-    "rpc",
     "logging",
     "owner",
 ] }

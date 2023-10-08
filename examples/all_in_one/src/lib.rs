@@ -6,18 +6,18 @@ use b3_utils::{
     memory::{
         init_stable_mem_refcell,
         timer::{DefaultTaskTimer, TaskTimerEntry},
-        types::DefaultVMMap,
+        types::{DefaultVMCell, DefaultVMMap},
     },
-    report_log,
-    rpc::JsonRpcRequest,
-    vec_to_hex_string_with_0x, NanoTimeStamp,
+    report_log, vec_to_hex_string_with_0x, NanoTimeStamp,
 };
-use ic_cdk::{api::management_canister::http_request::HttpResponse, query, update};
+use ic_cdk::{api::management_canister::http_request::HttpResponse, init, query, update};
+use serde_json::json;
 use std::cell::RefCell;
 
 mod receipt;
 mod test;
 mod transaction;
+mod transfer;
 
 type TransactionHash = String;
 type ReceiptFrom = String;
@@ -27,16 +27,67 @@ thread_local! {
     static TASK_TIMER: RefCell<DefaultTaskTimer<[u8; 32]>> = init_stable_mem_refcell("timer", 1).unwrap();
     static TRANSACTIONS: RefCell<DefaultVMMap<TransactionHash, TranasactionValue>> = init_stable_mem_refcell("trasnactions", 2).unwrap();
     static RECEIPTS: RefCell<DefaultVMMap<TransactionHash, ReceiptFrom>> = init_stable_mem_refcell("receipts", 3).unwrap();
+    static LATEST_BLOCK: RefCell<DefaultVMCell<String>> = init_stable_mem_refcell("latest_block", 4).unwrap();
 }
 
 const RECIPIENT: &str = "0xB51f94aEEebE55A3760E8169A22e536eBD3a6DCB";
 const URL: &str = "https://eth-sepolia.g.alchemy.com/v2/ZpSPh3E7KZQg4mb3tN8WFXxG4Auntbxp";
 
+#[init]
+fn init() {
+    log!("Init");
+}
+
+async fn get_asset_transfers(from_block: String) -> Result<transfer::Result, String> {
+    let params = json!({
+        "fromBlock": from_block,
+        "toAddress": RECIPIENT,
+        "category": ["external"],
+    });
+
+    let rpc = json!({
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "alchemy_getAssetTransfers",
+        "params": [params]
+    });
+
+    log!("Request: {}", rpc.to_string());
+
+    let request = HttpRequest::new(&URL)
+        .post(&rpc.to_string(), None)
+        .send_with_closure(|response: HttpResponse| HttpResponse {
+            status: response.status,
+            body: response.body,
+            ..Default::default()
+        })
+        .await;
+
+    match request {
+        Ok(response) => match serde_json::from_slice::<transfer::Root>(&response.body) {
+            Ok(response_body) => {
+                log!("{:?}", response_body);
+
+                Ok(response_body.result)
+            }
+            Err(m) => {
+                return report_log(m);
+            }
+        },
+        Err(e) => Err(format!("Error: {}", e)),
+    }
+}
+
 async fn get_transaction(hash: TransactionHash) -> Result<transaction::Result, String> {
-    let rpc = JsonRpcRequest::new("eth_getTransactionByHash", vec![&hash], 1);
+    let rpc = json!({
+        "jsonrpc": "2.0",
+        "id": 0,
+        "method": "eth_getTransactionByHash",
+        "params": [hash]
+    });
 
     let request = HttpRequest::new(URL)
-        .post(&rpc.to_json(), Some(1024))
+        .post(&rpc.to_string(), Some(1024))
         .send_with_closure(|response: HttpResponse| HttpResponse {
             status: response.status,
             body: response.body,
@@ -61,10 +112,15 @@ async fn get_transaction(hash: TransactionHash) -> Result<transaction::Result, S
 }
 
 async fn get_transaction_receipt(hash: TransactionHash) -> Result<receipt::Result, String> {
-    let rpc = JsonRpcRequest::new("eth_getTransactionReceipt", vec![&hash], 1);
+    let rpc = json!({
+        "jsonrpc": "2.0",
+        "id": 2,
+        "method": "eth_getTransactionReceipt",
+        "params": [hash]
+    });
 
     let request = HttpRequest::new(URL)
-        .post(&rpc.to_json(), Some(2024))
+        .post(&rpc.to_string(), Some(2024))
         .send_with_closure(|response: HttpResponse| HttpResponse {
             status: response.status,
             body: response.body,
@@ -86,6 +142,12 @@ async fn get_transaction_receipt(hash: TransactionHash) -> Result<receipt::Resul
             return report_log(m);
         }
     }
+}
+#[update]
+async fn get_latest_external_transfer(from_block: String) -> String {
+    let transfers = get_asset_transfers(from_block).await.unwrap();
+
+    transfers.transfers[0].hash.clone()
 }
 
 #[update]

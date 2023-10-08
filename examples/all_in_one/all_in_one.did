@@ -10,7 +10,8 @@ type LogEntry = record {
 };
 type LogVariant = variant { info; warn; error };
 type TaskTimerEntry = record { task : vec nat8; time : nat64 };
-service : {
+service : () -> {
+  get_latest_external_transfer : (text) -> (text);
   get_receipt_list : () -> (vec record { text; text }) query;
   get_timers : () -> (vec TaskTimerEntry) query;
   get_transaction_list : () -> (vec record { text; text }) query;
