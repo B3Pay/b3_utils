@@ -4,7 +4,7 @@ mod test {
 
     #[test]
     fn test_production_subaccount() {
-        let subaccount = Subaccount::default();
+        let subaccount = Subaccount::new(Environment::Production, 0);
         assert_eq!(
             subaccount.to_owned(),
             Subaccount([

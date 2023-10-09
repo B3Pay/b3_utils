@@ -29,6 +29,7 @@ type Task = variant {
 };
 type TaskTimerEntry = record { task : Task; time : nat64 };
 service : () -> {
+  change_owner : (principal) -> ();
   get_external_transfers : () -> (vec text) query;
   get_latest_external_transfer : (text) -> (text);
   get_partition_details : () -> (vec PartitionDetail) query;
@@ -38,9 +39,10 @@ service : () -> {
   get_transaction_receipt_from : (text) -> (text);
   get_transaction_value : (text) -> (text);
   http_request : (HttpRequest) -> (HttpResponse) query;
+  owner : () -> (principal) query;
   print_log_entries : () -> (vec LogEntry) query;
   schedule_task : (nat64, Task) -> ();
-  start : () -> ();
-  stop : () -> ();
+  start_timer : () -> ();
+  stop_timer : () -> ();
   verify_transaction : (text) -> (nat, text);
 }

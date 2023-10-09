@@ -1,6 +1,6 @@
 [package]
 name = "b3_utils"
-version = "0.5.0"
+version = "0.5.1"
 edition = "2021"
 description = "This is helper library for B3Wallet project"
 license = "MIT"
@@ -26,8 +26,8 @@ ic_bls12_381 = { version = "0.8", optional = true, default-features = false, fea
 [features]
 exprimental_vetkd = ["ic_bls12_381", "sha2", "subtle"]
 stable_memory = ["ic-stable-structures"]
-ledger = ["easy-hasher"]
+ledger = ["easy-hasher", "wasm"]
+owner = ["stable_memory"]
 wasm = ["easy-hasher"]
 rpc = ["serde_json"]
 logging = []
-owner = []

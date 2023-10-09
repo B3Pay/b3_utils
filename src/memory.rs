@@ -45,6 +45,14 @@ impl StableMemoryManager {
         }
     }
 
+    fn check_id(&self, id: u8) -> Result<(), StableMemoryError> {
+        if id == 0 || id > 250 {
+            return Err(StableMemoryError::IdOutOfRange(id));
+        }
+
+        Ok(())
+    }
+
     fn check_partition(&self, name: &PartitionName, id: u8) -> Result<(), StableMemoryError> {
         match self.partitions.get(&name) {
             Some(existing_id) if existing_id != id => {
@@ -124,6 +132,8 @@ impl StableMemoryManager {
         name: &str,
         id: u8,
     ) -> Result<T, StableMemoryError> {
+        self.check_id(id)?;
+
         let init_arg = match T::memory_type() {
             MemoryType::Vec => {
                 let memory = self.create(name, id)?;

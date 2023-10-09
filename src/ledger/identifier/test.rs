@@ -12,7 +12,7 @@ mod tests {
             "0000000000000000000000000000000000000000000000000000000000000000",
         );
 
-        let subaccount = Subaccount::default();
+        let subaccount = Subaccount::new(Environment::Production, 0);
 
         assert_eq!(
             subaccount.to_string(),

@@ -10,9 +10,10 @@ use b3_utils::{
         with_stable_mem,
     },
     outcall::{HttpOutcall, HttpOutcallResponse},
+    owner::{caller_is_owner, get_owner, set_owner},
     report_log, NanoTimeStamp,
 };
-use candid::CandidType;
+use candid::{CandidType, Principal};
 use ic_cdk::{init, post_upgrade, query, update};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -74,7 +75,19 @@ fn post_upgrade() {
     reschedule();
 }
 
-#[update]
+#[query]
+fn owner() -> Principal {
+    get_owner()
+}
+
+#[update(guard = "caller_is_owner")]
+fn change_owner(new_owner: Principal) {
+    log_cycle!("Change owner: {}", new_owner);
+
+    set_owner(new_owner.into()).unwrap();
+}
+
+#[update(guard = "caller_is_owner")]
 fn stop_timer() {
     log_cycle!("Stop Timer");
 
@@ -85,7 +98,7 @@ fn stop_timer() {
     });
 }
 
-#[update]
+#[update(guard = "caller_is_owner")]
 fn start_timer() {
     log_cycle!("Start Timer");
 

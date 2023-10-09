@@ -12,12 +12,6 @@ pub use error::*;
 
 pub mod traits;
 
-impl Default for Subaccount {
-    fn default() -> Self {
-        Subaccount([0u8; 32])
-    }
-}
-
 #[derive(CandidType, Deserialize, Serialize, Clone, Debug, PartialEq)]
 pub struct Subaccount(pub [u8; 32]);
 

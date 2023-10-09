@@ -1,39 +1,52 @@
 use std::cell::RefCell;
 
-use crate::types::UserId;
+use candid::Principal;
+use ic_stable_structures::cell::ValueError;
 
-thread_local! {
-    static STATE: RefCell<UserId> = RefCell::new(UserId::anonymous());
+use crate::{
+    memory::{error::StableMemoryError, types::DefaultVMCell, with_stable_mem_mut},
+    Subaccount,
+};
+
+fn init_owner(name: &str, id: u8) -> Result<RefCell<DefaultVMCell<Subaccount>>, StableMemoryError> {
+    let memory = with_stable_mem_mut(|pm| pm.create(name, id))?;
+
+    let owner_id = Subaccount::from(ic_cdk::caller());
+
+    let cell = DefaultVMCell::init(memory, owner_id)
+        .map_err(|e| StableMemoryError::UnableToCreateMemory(e.to_string()))?;
+
+    Ok(RefCell::new(cell))
 }
 
-pub fn with_owner<F, R>(f: F) -> R
-where
-    F: FnOnce(&UserId) -> R,
-{
-    STATE.with(|states| {
+thread_local! {
+    static OWNER: RefCell<DefaultVMCell<Subaccount>> = init_owner("owner", 253).unwrap();
+}
+
+pub fn get_owner() -> Principal {
+    OWNER.with(|states| {
         let state = states.borrow();
-        f(&state)
+
+        state.get().to_principal().unwrap()
     })
 }
 
-pub fn with_owner_mut<F, R>(f: F) -> R
-where
-    F: FnOnce(&mut UserId) -> R,
-{
-    STATE.with(|states| {
+pub fn set_owner(new_owner: Principal) -> Result<Principal, ValueError> {
+    OWNER.with(|states| {
         let mut state = states.borrow_mut();
-        f(&mut state)
+        let old_owner = state.set(new_owner.into())?;
+
+        Ok(old_owner.to_principal().unwrap())
     })
 }
 
 pub fn caller_is_owner() -> Result<(), String> {
     let caller_id = ic_cdk::caller();
+    let owner_id = get_owner();
 
-    with_owner(|owner_id| {
-        if caller_id == *owner_id {
-            Ok(())
-        } else {
-            Err("Error::Caller is not owner!".to_string())
-        }
-    })
+    if caller_id == owner_id {
+        Ok(())
+    } else {
+        Err(format!("Caller is not the owner. Caller: {}", caller_id))
+    }
 }
