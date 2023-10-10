@@ -1,7 +1,7 @@
 use std::ops::Add;
 
 use super::constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
-use crate::environment::Environment;
+use crate::{environment::Environment, vec_to_hex_string_with_0x};
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
@@ -304,6 +304,43 @@ impl Subaccount {
 
     pub fn to_vec(&self) -> Vec<u8> {
         self.0.to_vec()
+    }
+
+    /// Returns the subaccount as a hex string.
+    /// The hex string is prefixed with 0x.
+    /// Convert your principal to the smart contract argument.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use b3_utils::{Environment, Subaccount};
+    /// use candid::Principal;
+    ///
+    /// let principal = Principal::from_text("b7pqa-qqaaa-aaaap-abdva-cai").unwrap();
+    ///
+    /// let subaccount = Subaccount::from_principal(principal);
+    ///
+    /// assert_eq!(subaccount.to_eth_principal().unwrap(), "0x0a0000000001e008ea0101000000000000000000000000000000000000000000".to_string());
+    /// ```
+    pub fn to_eth_principal(&self) -> Result<String, SubaccountError> {
+        if !self.is_principal() {
+            return Err(SubaccountError::NotPrincipal);
+        }
+
+        let length = self.0[0] as usize;
+
+        if length > 29 {
+            return Err(SubaccountError::LengthError(length));
+        }
+
+        let mut fixed_bytes = [0u8; 32];
+
+        fixed_bytes[0] = length as u8;
+        fixed_bytes[1..length + 1].copy_from_slice(&self.0[1..length + 1]);
+
+        let hex = vec_to_hex_string_with_0x(fixed_bytes);
+
+        Ok(hex)
     }
 
     /// Returns the subaccount as a Principal.

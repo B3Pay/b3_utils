@@ -44,6 +44,7 @@
 //!
 //! This project is licensed under the MIT License.
 
+pub mod call;
 pub mod constants;
 pub mod error;
 pub mod http;

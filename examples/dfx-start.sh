@@ -4,4 +4,7 @@ else
     dfx start --clean --background
 fi
 
-dfx deploy vetkd_system_api --specified-id wfdtj-lyaaa-aaaap-abakq-cai
+# if --vetkd is specified, deploy vetkd_system_api
+if [[ $* == *--vetkd* ]]; then
+    dfx deploy vetkd_system_api --specified-id wfdtj-lyaaa-aaaap-abakq-cai
+fi

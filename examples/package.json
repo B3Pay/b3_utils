@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "encrypted-notes-dapp",
   "version": "0.2.0",
   "keywords": [
@@ -12,9 +13,15 @@
   "scripts": {
     "dfx:start": "sh dfx-start.sh",
     "generate": "dfx generate",
-    "dev": "cd vetkd && npm run dev",
-    "build": "cd vetkd && npm install && npm run build",
+    "dev:vetkd": "cd vetkd && npm run dev",
+    "dev:payment": "cd payment && npm run start",
+    "build:vetkd": "cd vetkd && npm install && npm run build",
+    "build:payment": "cd payment && npm install && npm run build",
     "deploy": "cargo test && dfx deploy",
     "test": "cargo test"
-  }
+  },
+  "workspaces": [
+    "vetkd",
+    "payment"
+  ]
 }
