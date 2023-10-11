@@ -2,8 +2,9 @@ import Balance from "./Balance"
 import { useReActor } from "./actor"
 
 const App = () => {
-  const { actorState, loading, initialized } = useReActor()
+  const { actorState, allMethods, loading, initialized } = useReActor()
 
+  console.log("allMethods", allMethods)
   console.log("actorState", actorState)
   console.log("loadingState", loading)
 

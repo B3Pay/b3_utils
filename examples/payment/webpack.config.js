@@ -11,6 +11,7 @@ const frontendDirectory = "payment_frontend"
 
 const frontend_entry = path.join("src", frontendDirectory, "src/index.html")
 
+/** @type {import('webpack').Configuration} */
 module.exports = {
   target: "web",
   mode: isDevelopment ? "development" : "production",
@@ -84,6 +85,9 @@ module.exports = {
       ]
     })
   ],
+  performance: {
+    hints: false
+  },
   // proxy /api to port 4943 during development.
   // if you edit dfx.json to define a project-specific local network, change the port to match.
   devServer: {

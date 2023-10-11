@@ -1120,28 +1120,28 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@re-actor/core@^0.0.0-alpha.21":
-  version "0.0.0-alpha.21"
-  resolved "https://registry.yarnpkg.com/@re-actor/core/-/core-0.0.0-alpha.21.tgz#442a2f675934227af0bbf69fcbe53445619e24c3"
-  integrity sha512-zPJwPOI6FmOM5Yphb1Nb/fwB9A4kaPDZFTdJxrEXwlFZpLNMnTO3KYzrQtBq5YzF9R3WT2D6WphGR6L0ALp4Sw==
+"@re-actor/core@0.0.0-alpha.26":
+  version "0.0.0-alpha.26"
+  resolved "https://registry.yarnpkg.com/@re-actor/core/-/core-0.0.0-alpha.26.tgz#cf945a3560b78395103fb2aa91d2b53a6202a45e"
+  integrity sha512-p/64QW2b7T3ckIAINJHxbEv3tTPy/bqyt3tgGEjxs6r/ic7TVRy8zhxS1xFMx00UNaj44EW83thoSeW90I4TfQ==
   dependencies:
-    "@re-actor/store" "^0.0.0-alpha.21"
-    "@re-actor/types" "^0.0.0-alpha.21"
+    "@re-actor/store" "^0.0.0-alpha.26"
+    "@re-actor/types" "^0.0.0-alpha.25"
     zustand "4.4.0"
 
-"@re-actor/store@^0.0.0-alpha.21":
-  version "0.0.0-alpha.21"
-  resolved "https://registry.yarnpkg.com/@re-actor/store/-/store-0.0.0-alpha.21.tgz#780bf5d9659f9f59c7fa692f9dcb828b94f55087"
-  integrity sha512-UHiKGWjGZs5RdaaEns9cCOLkAmNsGtxS7/Y9UgyPSuL+uVD1QHVjI+3RalfHP8w6buAOWJ7D3xRgax1OvTJ0Zw==
+"@re-actor/store@^0.0.0-alpha.26":
+  version "0.0.0-alpha.26"
+  resolved "https://registry.yarnpkg.com/@re-actor/store/-/store-0.0.0-alpha.26.tgz#c88d17c3e939d066e3e57bd18da98ada898f14ea"
+  integrity sha512-bZg/LvxW8wfbnvtnY3C7jooFmxP/xmIXTDl0uDGeJLK9pZW+DgkP4aiUyBLKmrVuqftd+Ns9KY7eUQAbxCjc2Q==
   dependencies:
     "@dfinity/agent" "^0.19.3"
-    "@re-actor/types" "^0.0.0-alpha.21"
+    "@re-actor/types" "^0.0.0-alpha.25"
     zustand "^4.4.1"
 
-"@re-actor/types@^0.0.0-alpha.21":
-  version "0.0.0-alpha.21"
-  resolved "https://registry.yarnpkg.com/@re-actor/types/-/types-0.0.0-alpha.21.tgz#2ed5ec4fc35bec576a9582e38253ebb72ebb4c3f"
-  integrity sha512-PtRnNfTnv1cY6l2eA7ADaGq0ekGc2UnSgF//rttE9M9/CfMHgEP7Pd0vBdasqIzQBS3Z6/raFdIMWKu1xgyhlA==
+"@re-actor/types@^0.0.0-alpha.25":
+  version "0.0.0-alpha.25"
+  resolved "https://registry.yarnpkg.com/@re-actor/types/-/types-0.0.0-alpha.25.tgz#c3daf0b6366b62b0708d9a992277bb4867e67977"
+  integrity sha512-SfZouWWXHKZoxMFaIKtg+AohTN5X4BFIUcK51szxCYgl4bceOnaJhLkGtAp1c79ddi3G24Ew6nmYS9h8IrsK3w==
   dependencies:
     "@dfinity/agent" "^0.19.3"
     "@dfinity/auth-client" "^0.19.3"
