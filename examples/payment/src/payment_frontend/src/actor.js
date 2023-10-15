@@ -6,5 +6,6 @@ export const {
   callActor,
   initialize,
   useReActor,
-  useActorState
+  useActorState,
+  useActorMethod
 } = createReActor(() => createActor(canisterId))

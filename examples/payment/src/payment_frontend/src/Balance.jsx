@@ -1,12 +1,12 @@
-import { callActor, useActorState } from "./actor"
+import { useActorMethod } from "./actor"
 
 const Balance = ({}) => {
-  const { loading, result, error } = useActorState("balance")
+  const { call, loading, result, error } = useActorMethod("balance")
 
   return (
     <div>
       {error && <div className="error">{error?.toString()}</div>}
-      <button onClick={() => callActor("balance")} disabled={loading}>
+      <button onClick={() => call()} disabled={loading}>
         Get Balance
       </button>
       {loading ? (

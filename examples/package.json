@@ -19,9 +19,5 @@
     "build:payment": "cd payment && npm install && npm run build",
     "deploy": "cargo test && dfx deploy",
     "test": "cargo test"
-  },
-  "workspaces": [
-    "vetkd",
-    "payment"
-  ]
+  }
 }
