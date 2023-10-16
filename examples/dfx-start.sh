@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if [[ $* == *--use-old-metering* ]]; then
     dfx start --use-old-metering --clean --background
 else
