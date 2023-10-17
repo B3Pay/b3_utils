@@ -1,25 +1,24 @@
 {
   "canisters": {
     "all_in_one": {
-      "type": "custom",
-      "wasm": "target/wasm32-unknown-unknown/release/all_in_one-opt.wasm",
+      "type": "rust",
       "candid": "all_in_one/all_in_one.did",
       "package": "all_in_one",
-      "build": "sh build.sh all_in_one"
+      "build": "./build.sh all_in_one"
     },
     "http_request": {
       "type": "custom",
       "wasm": "target/wasm32-unknown-unknown/release/http_request-opt.wasm",
       "candid": "http_request/http_request.did",
       "package": "http_request",
-      "build": "sh build.sh http_request"
+      "build": "./build.sh http_request"
     },
     "stable_memory": {
       "candid": "stable_memory/stable_memory.did",
       "package": "stable_memory",
       "type": "custom",
       "wasm": "target/wasm32-unknown-unknown/release/stable_memory-opt.wasm",
-      "build": "sh build.sh stable_memory",
+      "build": "./build.sh stable_memory",
       "declarations": {
         "output": "declarations/stable_memory",
         "node_compatibility": true
@@ -30,7 +29,7 @@
       "wasm": "target/wasm32-unknown-unknown/release/payment_backend-opt.wasm",
       "candid": "payment/src/payment_backend/payment_backend.did",
       "package": "payment_backend",
-      "build": "sh build.sh payment_backend",
+      "build": "./build.sh payment_backend",
       "declarations": {
         "env_override": null,
         "output": "payment/src/declarations/payment_backend",

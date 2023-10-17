@@ -11,13 +11,13 @@
     "Rust"
   ],
   "scripts": {
-    "dfx:start": "sh dfx-start.sh",
+    "dfx:start": "./dfx-start.sh",
     "generate": "dfx generate",
     "dev:vetkd": "cd vetkd && npm run dev",
     "dev:payment": "cd payment && npm run start",
     "build:vetkd": "cd vetkd && npm install && npm run build",
     "build:payment": "cd payment && npm install && npm run build",
-    "deploy": "cargo test && dfx deploy",
+    "deploy": "dfx deploy",
     "test": "cargo test"
   }
 }

@@ -12,6 +12,7 @@ type ApproveError = variant {
 type Result = variant { Ok : nat; Err : ApproveError };
 type Result_1 = variant { Ok : RetrieveEthRequest; Err : WithdrawalError };
 type RetrieveEthRequest = record { block_index : nat };
+type WithdrawalArg = record { recipient : text; amount : nat };
 type WithdrawalError = variant {
   TemporarilyUnavailable : text;
   InsufficientAllowance : record { allowance : nat };
@@ -22,5 +23,6 @@ service : {
   approve : (nat) -> (Result);
   balance : () -> (nat);
   deposit_principal : () -> (text) query;
+  verify_transaction : (text) -> (WithdrawalArg);
   withdraw_eth : (nat, text) -> (Result_1);
 }
