@@ -320,7 +320,7 @@ impl Subaccount {
     ///
     /// let subaccount = Subaccount::from_principal(principal);
     ///
-    /// assert_eq!(subaccount.to_bytes32().unwrap(), );
+    /// assert_eq!(subaccount.to_bytes32().unwrap(), [10, 0, 0, 0, 0, 1, 224, 8, 234, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     /// ```
     pub fn to_bytes32(&self) -> Result<[u8; 32], SubaccountError> {
         if !self.is_principal() {
