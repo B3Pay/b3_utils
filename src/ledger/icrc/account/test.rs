@@ -2,7 +2,7 @@
 mod tests {
     use candid::Principal;
 
-    use crate::{ledger::ICRCAccount, mocks::id_mock, Environment, Subaccount};
+    use crate::{ledger::icrc::ICRCAccount, mocks::id_mock, Environment, Subaccount};
 
     #[test]
     fn test_account_and_subaccount_with_loop() {

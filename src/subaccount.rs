@@ -1,7 +1,7 @@
 use std::ops::Add;
 
 use super::constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
-use crate::{environment::Environment, vec_to_hex_string_with_0x};
+use crate::environment::Environment;
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
@@ -320,9 +320,9 @@ impl Subaccount {
     ///
     /// let subaccount = Subaccount::from_principal(principal);
     ///
-    /// assert_eq!(subaccount.to_eth_principal().unwrap(), "0x0a0000000001e008ea0101000000000000000000000000000000000000000000".to_string());
+    /// assert_eq!(subaccount.to_bytes32().unwrap(), );
     /// ```
-    pub fn to_eth_principal(&self) -> Result<String, SubaccountError> {
+    pub fn to_bytes32(&self) -> Result<[u8; 32], SubaccountError> {
         if !self.is_principal() {
             return Err(SubaccountError::NotPrincipal);
         }
@@ -333,14 +333,7 @@ impl Subaccount {
             return Err(SubaccountError::LengthError(length));
         }
 
-        let mut fixed_bytes = [0u8; 32];
-
-        fixed_bytes[0] = length as u8;
-        fixed_bytes[1..length + 1].copy_from_slice(&self.0[1..length + 1]);
-
-        let hex = vec_to_hex_string_with_0x(fixed_bytes);
-
-        Ok(hex)
+        Ok(self.as_ref().clone())
     }
 
     /// Returns the subaccount as a Principal.

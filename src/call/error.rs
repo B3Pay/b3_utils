@@ -7,7 +7,7 @@ pub enum InterCallError {
 impl std::fmt::Display for InterCallError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            InterCallError::CallError(method,msg) => write!(f, "Error calling method {}: {}", method, msg),
+            InterCallError::CallError(method, msg) => write!(f, "Error calling method {}: {}", method, msg),
         }
     }
 }
