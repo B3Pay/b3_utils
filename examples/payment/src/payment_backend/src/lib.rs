@@ -4,7 +4,7 @@ use b3_utils::{
     ledger::ICRCAccount,
     outcall::{HttpOutcall, HttpOutcallResponse},
     owner::caller_is_owner,
-    Subaccount,
+    vec_to_hex_string_with_0x, Subaccount,
 };
 use candid::{CandidType, Nat, Principal};
 use ic_cdk::{query, update};
@@ -147,7 +147,11 @@ async fn withdraw_eth(amount: Nat, recipient: String) -> WithdrawalResult {
 
 #[query]
 async fn deposit_principal() -> String {
-    Subaccount::from(ic_cdk::id()).to_eth_principal().unwrap()
+    let subaccount = Subaccount::from(ic_cdk::id());
+
+    let bytes32 = subaccount.to_bytes32().unwrap();
+
+    vec_to_hex_string_with_0x(bytes32)
 }
 
 ic_cdk::export_candid!();

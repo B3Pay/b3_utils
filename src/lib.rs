@@ -44,14 +44,18 @@
 //!
 //! This project is licensed under the MIT License.
 
-pub mod call;
 pub mod constants;
 pub mod error;
 pub mod http;
 pub mod mocks;
 pub mod nonce;
-pub mod outcall;
 pub mod types;
+
+pub mod outcall;
+pub use outcall::*;
+
+pub mod call;
+pub use call::*;
 
 mod timestamp;
 pub use timestamp::*;
