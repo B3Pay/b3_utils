@@ -3,13 +3,13 @@ mod name;
 use ic_stable_structures::btreemap::Iter;
 pub use name::*;
 
-use super::types::{DefaultVM, DefaultVMMap};
+use super::types::{DefaultStableBTreeMap, DefaultVM};
 
-pub struct Partitions(DefaultVMMap<PartitionName, u8>);
+pub struct Partitions(DefaultStableBTreeMap<PartitionName, u8>);
 
 impl Partitions {
     pub fn init(default_vm: DefaultVM) -> Self {
-        Self(DefaultVMMap::init(default_vm))
+        Self(DefaultStableBTreeMap::init(default_vm))
     }
 
     pub fn get(&self, name: &PartitionName) -> Option<u8> {

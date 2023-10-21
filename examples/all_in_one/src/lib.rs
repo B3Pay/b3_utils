@@ -6,7 +6,7 @@ use b3_utils::{
     memory::{
         init_stable_mem_refcell,
         timer::{DefaultTaskTimer, TaskTimerEntry},
-        types::{Bound, DefaultVMMap, PartitionDetail, Storable},
+        types::{Bound, DefaultStableBTreeMap, PartitionDetail, Storable},
         with_stable_mem,
     },
     outcall::{HttpOutcall, HttpOutcallResponse},
@@ -34,9 +34,9 @@ const URL: &str = "https://eth-sepolia.g.alchemy.com/v2/ZpSPh3E7KZQg4mb3tN8WFXxG
 
 thread_local! {
     static TASK_TIMER: RefCell<DefaultTaskTimer<Task>> = init_stable_mem_refcell("timer", 1).unwrap();
-    static TRANSACTIONS: RefCell<DefaultVMMap<TransactionHash, TranasactionValue>> = init_stable_mem_refcell("trasnactions", 2).unwrap();
-    static RECEIPTS: RefCell<DefaultVMMap<TransactionHash, ReceiptFrom>> = init_stable_mem_refcell("receipts", 3).unwrap();
-    static EXTERNAL_TRANSFERS: RefCell<DefaultVMMap<TransactionHash, String>> = init_stable_mem_refcell("external_transfers", 4).unwrap();
+    static TRANSACTIONS: RefCell<DefaultStableBTreeMap<TransactionHash, TranasactionValue>> = init_stable_mem_refcell("trasnactions", 2).unwrap();
+    static RECEIPTS: RefCell<DefaultStableBTreeMap<TransactionHash, ReceiptFrom>> = init_stable_mem_refcell("receipts", 3).unwrap();
+    static EXTERNAL_TRANSFERS: RefCell<DefaultStableBTreeMap<TransactionHash, String>> = init_stable_mem_refcell("external_transfers", 4).unwrap();
 }
 
 #[derive(Debug, Clone, CandidType, Serialize, Deserialize)]

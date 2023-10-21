@@ -17,8 +17,8 @@ pub struct PartitionDetail {
 
 pub type DefaultVM = VirtualMemory<DefaultMemoryImpl>;
 
-pub type DefaultVMMap<K, V> = StableBTreeMap<K, V, DefaultVM>;
-pub type DefaultVMVec<T> = StableVec<T, DefaultVM>;
-pub type DefaultVMLog<T> = StableLog<T, DefaultVM, DefaultVM>;
-pub type DefaultVMCell<T> = StableCell<T, DefaultVM>;
-pub type DefaultVMHeap<T> = StableMinHeap<T, DefaultVM>;
+pub type DefaultStableBTreeMap<K, V> = StableBTreeMap<K, V, DefaultVM>;
+pub type DefaultStableVec<T> = StableVec<T, DefaultVM>;
+pub type DefaultStableLog<T> = StableLog<T, DefaultVM, DefaultVM>;
+pub type DefaultStableCell<T> = StableCell<T, DefaultVM>;
+pub type DefaultStableMinHeap<T> = StableMinHeap<T, DefaultVM>;

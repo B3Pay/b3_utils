@@ -1,7 +1,10 @@
 use super::{
     error::StableMemoryError,
     timer::DefaultTaskTimer,
-    types::{DefaultVM, DefaultVMCell, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec},
+    types::{
+        DefaultStableBTreeMap, DefaultStableCell, DefaultStableLog, DefaultStableMinHeap,
+        DefaultStableVec, DefaultVM,
+    },
 };
 
 pub use ic_stable_structures::{
@@ -31,7 +34,7 @@ pub trait InitMemory<T>: Sized {
     fn init(arg: InitMemoryArg) -> Result<Self, StableMemoryError>;
 }
 
-impl<T: Storable> InitMemory<DefaultVMVec<T>> for DefaultVMVec<T> {
+impl<T: Storable> InitMemory<DefaultStableVec<T>> for DefaultStableVec<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Vec
     }
@@ -46,7 +49,9 @@ impl<T: Storable> InitMemory<DefaultVMVec<T>> for DefaultVMVec<T> {
     }
 }
 
-impl<K: Ord + Storable + Clone, V: Storable> InitMemory<DefaultVMMap<K, V>> for DefaultVMMap<K, V> {
+impl<K: Ord + Storable + Clone, V: Storable> InitMemory<DefaultStableBTreeMap<K, V>>
+    for DefaultStableBTreeMap<K, V>
+{
     fn memory_type() -> MemoryType {
         MemoryType::Map
     }
@@ -60,7 +65,7 @@ impl<K: Ord + Storable + Clone, V: Storable> InitMemory<DefaultVMMap<K, V>> for 
     }
 }
 
-impl<T: Storable> InitMemory<DefaultVMLog<T>> for DefaultVMLog<T> {
+impl<T: Storable> InitMemory<DefaultStableLog<T>> for DefaultStableLog<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Log
     }
@@ -75,7 +80,7 @@ impl<T: Storable> InitMemory<DefaultVMLog<T>> for DefaultVMLog<T> {
     }
 }
 
-impl<T: Storable + Default> InitMemory<DefaultVMCell<T>> for DefaultVMCell<T> {
+impl<T: Storable + Default> InitMemory<DefaultStableCell<T>> for DefaultStableCell<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Cell
     }
@@ -90,14 +95,14 @@ impl<T: Storable + Default> InitMemory<DefaultVMCell<T>> for DefaultVMCell<T> {
     }
 }
 
-impl<T: Ord + Storable> InitMemory<DefaultVMHeap<T>> for DefaultVMHeap<T> {
+impl<T: Ord + Storable> InitMemory<DefaultStableMinHeap<T>> for DefaultStableMinHeap<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Heap
     }
 
     fn init(arg: InitMemoryArg) -> Result<Self, StableMemoryError> {
         if let InitMemoryArg::Single(memory) = arg {
-            DefaultVMHeap::init(memory)
+            DefaultStableMinHeap::init(memory)
                 .map_err(|e| StableMemoryError::UnableToCreateMemory(e.to_string()))
         } else {
             Err(StableMemoryError::WrongInitializationArgument)

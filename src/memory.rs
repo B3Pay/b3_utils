@@ -16,7 +16,7 @@ pub mod partitions;
 pub mod traits;
 pub mod types;
 
-use types::{DefaultVM, DefaultVMHeap};
+use types::{DefaultStableMinHeap, DefaultVM};
 
 use self::backup::BackupPartition;
 use self::partitions::{PartitionName, Partitions};

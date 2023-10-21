@@ -1,7 +1,8 @@
 use b3_utils::logs::{export_log, export_log_messages_page, LogEntry};
 use b3_utils::memory::timer::{DefaultTaskTimer, TaskTimerEntry};
 use b3_utils::memory::types::{
-    Bound, DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec, PartitionDetail, Storable,
+    Bound, DefaultStableBTreeMap, DefaultStableLog, DefaultStableMinHeap, DefaultStableVec,
+    PartitionDetail, Storable,
 };
 use b3_utils::memory::{
     init_stable_mem_refcell, with_backup_mem, with_backup_mem_mut, with_stable_mem,
@@ -21,12 +22,12 @@ const MAX_OPERATION_SIZE: u32 = 200;
 thread_local! {
     static TASK_TIMER: RefCell<DefaultTaskTimer<Task>> = init_stable_mem_refcell("timer", 1).unwrap();
 
-    static MAP: RefCell<DefaultVMMap<u64, User>> = init_stable_mem_refcell("map", 10).unwrap();
-    static HEAP: RefCell<DefaultVMHeap<u64>> = init_stable_mem_refcell("heap", 11).unwrap();
-    static USERS: RefCell<DefaultVMMap<u64, User>> = init_stable_mem_refcell("users", 12).unwrap();
-    static SUBACCOUNTS: RefCell<DefaultVMMap<Subaccount, User>> = init_stable_mem_refcell("subaccounts", 13).unwrap();
-    static STABLE_LOG: RefCell<DefaultVMLog<Subaccount>> = init_stable_mem_refcell("logs", 14).unwrap();
-    static VEC: RefCell<DefaultVMVec<ProcessedOperation>> = init_stable_mem_refcell("ledger", 15).unwrap();
+    static MAP: RefCell<DefaultStableBTreeMap<u64, User>> = init_stable_mem_refcell("map", 10).unwrap();
+    static HEAP: RefCell<DefaultStableMinHeap<u64>> = init_stable_mem_refcell("heap", 11).unwrap();
+    static USERS: RefCell<DefaultStableBTreeMap<u64, User>> = init_stable_mem_refcell("users", 12).unwrap();
+    static SUBACCOUNTS: RefCell<DefaultStableBTreeMap<Subaccount, User>> = init_stable_mem_refcell("subaccounts", 13).unwrap();
+    static STABLE_LOG: RefCell<DefaultStableLog<Subaccount>> = init_stable_mem_refcell("logs", 14).unwrap();
+    static VEC: RefCell<DefaultStableVec<ProcessedOperation>> = init_stable_mem_refcell("ledger", 15).unwrap();
 
     static STATE: RefCell<State> = RefCell::new(State::default());
 }

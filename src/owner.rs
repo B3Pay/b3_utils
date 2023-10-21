@@ -4,23 +4,26 @@ use candid::Principal;
 use ic_stable_structures::cell::ValueError;
 
 use crate::{
-    memory::{error::StableMemoryError, types::DefaultVMCell, with_stable_mem_mut},
+    memory::{error::StableMemoryError, types::DefaultStableCell, with_stable_mem_mut},
     Subaccount,
 };
 
-fn init_owner(name: &str, id: u8) -> Result<RefCell<DefaultVMCell<Subaccount>>, StableMemoryError> {
+fn init_owner(
+    name: &str,
+    id: u8,
+) -> Result<RefCell<DefaultStableCell<Subaccount>>, StableMemoryError> {
     let memory = with_stable_mem_mut(|pm| pm.create(name, id))?;
 
     let owner_id = Subaccount::from(ic_cdk::caller());
 
-    let cell = DefaultVMCell::init(memory, owner_id)
+    let cell = DefaultStableCell::init(memory, owner_id)
         .map_err(|e| StableMemoryError::UnableToCreateMemory(e.to_string()))?;
 
     Ok(RefCell::new(cell))
 }
 
 thread_local! {
-    static OWNER: RefCell<DefaultVMCell<Subaccount>> = init_owner("owner", 253).unwrap();
+    static OWNER: RefCell<DefaultStableCell<Subaccount>> = init_owner("owner", 253).unwrap();
 }
 
 pub fn get_owner() -> Principal {

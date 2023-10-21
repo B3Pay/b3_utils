@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
     use crate::memory::{
-        types::{DefaultVMHeap, DefaultVMLog, DefaultVMMap, DefaultVMVec},
+        types::{DefaultStableBTreeMap, DefaultStableLog, DefaultStableMinHeap, DefaultStableVec},
         with_stable_mem, with_stable_mem_mut, StableMemoryManager,
     };
 
@@ -101,7 +101,7 @@ mod tests {
     fn test_stable_vec() {
         let mut stable_memory = StableMemoryManager::init();
 
-        let vec: DefaultVMVec<u32> = stable_memory.init_memory("test_partition", 10).unwrap();
+        let vec: DefaultStableVec<u32> = stable_memory.init_memory("test_partition", 10).unwrap();
 
         vec.push(&1).unwrap();
         vec.push(&2).unwrap();
@@ -118,7 +118,8 @@ mod tests {
     fn test_stable_map() {
         let mut stable_memory = StableMemoryManager::init();
 
-        let mut map: DefaultVMMap<u32, u32> = stable_memory.init_memory("test", 13).unwrap();
+        let mut map: DefaultStableBTreeMap<u32, u32> =
+            stable_memory.init_memory("test", 13).unwrap();
 
         map.insert(1, 1);
         map.insert(2, 2);
@@ -135,7 +136,8 @@ mod tests {
     fn test_stable_heap() {
         let mut stable_memory = StableMemoryManager::init();
 
-        let mut heap: DefaultVMHeap<u32> = stable_memory.init_memory("test_partition", 10).unwrap();
+        let mut heap: DefaultStableMinHeap<u32> =
+            stable_memory.init_memory("test_partition", 10).unwrap();
 
         heap.push(&1).unwrap();
         heap.push(&2).unwrap();
@@ -152,7 +154,7 @@ mod tests {
     fn test_stable_log() {
         let mut stable_memory = StableMemoryManager::init();
 
-        let log: DefaultVMLog<u32> = stable_memory.init_memory("test_partition", 10).unwrap();
+        let log: DefaultStableLog<u32> = stable_memory.init_memory("test_partition", 10).unwrap();
 
         log.append(&1).unwrap();
         log.append(&2).unwrap();
@@ -169,10 +171,10 @@ mod tests {
     fn test_stable_heap_with_stable_vec() {
         let mut stable_memory = StableMemoryManager::init();
 
-        let mut min_heap: DefaultVMHeap<u32> =
+        let mut min_heap: DefaultStableMinHeap<u32> =
             stable_memory.init_memory("test_partition", 10).unwrap();
 
-        let vec: DefaultVMVec<u32> = stable_memory.init_memory("test_partition1", 11).unwrap();
+        let vec: DefaultStableVec<u32> = stable_memory.init_memory("test_partition1", 11).unwrap();
 
         vec.push(&1).unwrap();
         vec.push(&2).unwrap();
@@ -267,7 +269,7 @@ mod tests {
         assert_eq!(backup.len(), 0);
 
         let memory = stable_memory
-            .init_memory::<DefaultVMVec<u8>>("test", 1)
+            .init_memory::<DefaultStableVec<u8>>("test", 1)
             .unwrap();
 
         memory.push(&1).unwrap();

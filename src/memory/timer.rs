@@ -4,17 +4,17 @@ use candid::CandidType;
 use ic_stable_structures::{storable::Bound, vec::InitError, GrowFailed, Storable};
 use serde::{Deserialize, Serialize};
 
-use crate::{memory::DefaultVMHeap, NanoTimeStamp};
+use crate::{memory::DefaultStableMinHeap, NanoTimeStamp};
 
 use super::types::DefaultVM;
 
 // Added the missing generic type parameter <T>
-pub struct DefaultTaskTimer<T: Storable>(DefaultVMHeap<TaskTimerEntry<T>>);
+pub struct DefaultTaskTimer<T: Storable>(DefaultStableMinHeap<TaskTimerEntry<T>>);
 
 // Added the missing generic type parameter <T>  trait bound
 impl<T: Storable> DefaultTaskTimer<T> {
     pub fn init(vm: DefaultVM) -> Result<Self, InitError> {
-        let task_timer = Self(DefaultVMHeap::init(vm)?);
+        let task_timer = Self(DefaultStableMinHeap::init(vm)?);
 
         Ok(task_timer)
     }
