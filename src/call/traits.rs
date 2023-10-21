@@ -16,6 +16,10 @@ impl From<&Principal> for InterCall {
 
 impl From<&str> for InterCall {
     fn from(principal: &str) -> Self {
-        Self(Principal::from_text(principal).unwrap())
+        let principal = Principal::from_text(principal)
+            .map_err(|_| "InterCall: Invalid principal".to_string())
+            .unwrap();
+
+        Self(principal)
     }
 }

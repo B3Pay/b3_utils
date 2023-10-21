@@ -4,7 +4,7 @@ use crate::{
     types::CanisterId,
 };
 
-use candid::{CandidType, Nat};
+use candid::{CandidType, Nat, Principal};
 use serde::{Deserialize, Serialize};
 
 use super::{ICRC1TransferArgs, ICRC1TransferResult, ICRCMetadata};
@@ -52,5 +52,27 @@ impl ICRC1 {
         args: ICRC1TransferArgs,
     ) -> Result<ICRC1TransferResult, InterCallError> {
         InterCall::from(self.0).call("icrc1_transfer", args).await
+    }
+}
+
+impl From<Principal> for ICRC1 {
+    fn from(principal: Principal) -> Self {
+        Self(principal)
+    }
+}
+
+impl From<&Principal> for ICRC1 {
+    fn from(principal: &Principal) -> Self {
+        Self(principal.clone())
+    }
+}
+
+impl From<&str> for ICRC1 {
+    fn from(principal: &str) -> Self {
+        let principal = Principal::from_text(principal)
+            .map_err(|_| "ICRC1: Invalid principal".to_string())
+            .unwrap();
+
+        Self(principal)
     }
 }
