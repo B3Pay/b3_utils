@@ -6,6 +6,10 @@ use std::fmt;
 
 use crate::error::HelperError;
 
+pub fn caller_is_controller() -> bool {
+    ic_cdk::api::is_controller(&ic_cdk::caller())
+}
+
 pub async fn ic_canister_status(
     canister_id: CanisterId,
 ) -> Result<CanisterStatusResponse, HelperError> {

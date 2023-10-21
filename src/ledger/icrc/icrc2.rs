@@ -15,6 +15,10 @@ use super::{
 pub struct ICRC2(pub CanisterId);
 
 impl ICRC2 {
+    pub fn new(canister_id: CanisterId) -> Self {
+        ICRC2(canister_id)
+    }
+
     pub async fn allowance(&self) -> Result<ICRC2Allowance, InterCallError> {
         InterCall::from(self.0).call("icrc2_allowance", ()).await
     }
