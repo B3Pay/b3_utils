@@ -25,9 +25,9 @@ impl ICRC2 {
 
     pub async fn approve(
         &self,
-        account: ICRC2ApproveArgs,
+        args: ICRC2ApproveArgs,
     ) -> Result<ICRC2ApproveResult, InterCallError> {
-        InterCall::from(self.0).call("icrc2_approve", account).await
+        InterCall::from(self.0).call("icrc2_approve", args).await
     }
 
     pub async fn transfer_from(
