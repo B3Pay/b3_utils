@@ -6,8 +6,12 @@ use std::fmt;
 
 use crate::error::HelperError;
 
-pub fn caller_is_controller() -> bool {
-    ic_cdk::api::is_controller(&ic_cdk::caller())
+pub fn caller_is_controller() -> Result<(), String> {
+    if ic_cdk::api::is_controller(&ic_cdk::caller()) {
+        Ok(())
+    } else {
+        Err("Caller is not controller".to_string())
+    }
 }
 
 pub async fn ic_canister_status(
