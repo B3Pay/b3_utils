@@ -9,7 +9,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-candid = "0.9.6"
+candid = { workspace = true }
 ic-cdk = { workspace = true }
 serde = "1"
 ic-crypto-internal-bls12-381-vetkd = { git = "https://github.com/dfinity/ic" }
