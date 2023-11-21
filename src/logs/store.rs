@@ -3,7 +3,7 @@ use std::cell::RefCell;
 use super::{buffer::LogBuffer, LogEntry};
 
 thread_local! {
-    pub static MAIN_LOG: RefCell<LogBuffer> = RefCell::new(LogBuffer::with_capacity(100));
+    pub static MAIN_LOG: RefCell<LogBuffer> = RefCell::new(LogBuffer::with_capacity(1000));
 }
 
 pub fn with_log<F, R>(f: F) -> R

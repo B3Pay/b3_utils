@@ -118,6 +118,19 @@ mod test {
     }
 
     #[test]
+    fn test_eth_address_to_vec() {
+        let hex_string = "0x22C64EA6fA6c67B9331cc45967A257456B03D518";
+        let data = hex_string_with_0x_to_vec(hex_string).unwrap();
+        assert_eq!(
+            data,
+            vec![
+                34, 198, 78, 166, 250, 108, 103, 185, 51, 28, 196, 89, 103, 162, 87, 69, 107, 3,
+                213, 24
+            ]
+        );
+    }
+
+    #[test]
     fn test_hex_string_with_0x_to_vec() {
         let hex_string = "0x0102030405";
         let data = hex_string_with_0x_to_vec(hex_string).unwrap();
