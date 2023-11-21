@@ -86,6 +86,10 @@ mod test {
 
     #[test]
     fn test_log_loop() {
+        with_log_mut(|log| {
+            log.set_capacity(100);
+        });
+
         for i in 0..109 {
             log!("Hello, {}!", i);
         }
@@ -101,6 +105,10 @@ mod test {
 
     #[test]
     fn test_log_loop_with_bigger_capacity() {
+        with_log_mut(|log| {
+            log.set_capacity(100);
+        });
+
         for i in 0..109 {
             log!("Hello, {}!", i);
         }
@@ -128,6 +136,10 @@ mod test {
 
     #[test]
     fn test_log_loop_with_smaller_capacity() {
+        with_log_mut(|log| {
+            log.set_capacity(100);
+        });
+
         for i in 0..109 {
             log!("Hello, {}!", i);
         }
