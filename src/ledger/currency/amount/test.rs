@@ -106,7 +106,7 @@ mod test {
     fn test_to_nat() {
         let amount = TokenAmount::new(100, 8);
 
-        assert_eq!(amount.to_nat(), 100);
+        assert_eq!(amount.to_nat(), 100u64);
 
         let amount = TokenAmount::new(1000000000000000000, 0);
 

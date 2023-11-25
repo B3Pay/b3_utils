@@ -67,7 +67,7 @@ pub fn hex_string_with_0x_to_nat<S: AsRef<str>>(stringlike: S) -> Result<Nat, He
         hex::decode(&str_ref[2..]).map_err(|e| HelperError::HexStringToNatError(e.to_string()))?;
 
     let mut result = Nat::from(0u8);
-    let base = Nat::from(256);
+    let base = Nat::from(256u16);
 
     for byte in decoded {
         result = result * base.clone() + Nat::from(byte);

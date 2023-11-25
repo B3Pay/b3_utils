@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 candid = { workspace = true }
-ic-cdk = "0.11.0"
+ic-cdk = { workspace = true }
 serde = "1"
 hex = "0.4"
 b3_utils = { workspace = true, features = ["logging", "exprimental_vetkd"] }
