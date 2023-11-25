@@ -83,6 +83,8 @@ pub mod logs;
 
 #[cfg(feature = "stable_memory")]
 pub mod memory;
+#[cfg(feature = "stable_memory")]
+pub mod principal;
 
 #[cfg(feature = "rpc")]
 pub mod rpc;
