@@ -1,11 +1,11 @@
 use crate::{
     error::HelperError,
     nonce::Nonce,
-    types::{CanisterId, ControllerId, Metadata, UserId},
+    types::{CanisterId, ControllerId, Metadata},
     wasm::WasmModule,
     NanoTimeStamp,
 };
-use candid::{CandidType, Encode};
+use candid::{CandidType, Encode, Principal};
 use ic_cdk::api::management_canister::main::{CanisterInstallMode, CanisterStatusResponse};
 use serde::{Deserialize, Serialize};
 
@@ -44,7 +44,7 @@ pub struct WalletInititializeArgs {
 
 #[derive(CandidType, Deserialize, Serialize)]
 pub struct WalletCanisterInitArgs {
-    pub owner_id: UserId,
+    pub owner_id: Principal,
     pub system_id: CanisterId,
 }
 

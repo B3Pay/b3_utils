@@ -8,7 +8,7 @@ use std::borrow::Cow;
 pub struct SystemCanisterStatus {
     pub status_at: NanoTimeStamp,
     pub version: String,
-    pub user_status: usize,
+    pub user_status: u64,
     pub canister_status: CanisterStatusResponse,
 }
 
