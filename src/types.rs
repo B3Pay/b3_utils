@@ -12,6 +12,9 @@ pub type ControllerIds = Vec<ControllerId>;
 /// Represents the ID of a canister in the system.
 pub type CanisterId = Principal;
 
+/// Represents a list of canister IDs.
+pub type CanisterIds = Vec<CanisterId>;
+
 /// Represents the ID of a user in the system.
 pub type UserId = Subaccount;
 

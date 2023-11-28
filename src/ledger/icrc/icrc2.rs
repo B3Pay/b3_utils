@@ -1,5 +1,5 @@
 use crate::{
-    call::{InterCall, InterCallError},
+    api::{Cycles, InterCall, InterCallError},
     types::CanisterId,
 };
 
@@ -15,27 +15,27 @@ use super::{
 pub struct ICRC2(pub CanisterId);
 
 impl ICRC2 {
-    pub fn new(canister_id: CanisterId) -> Self {
-        ICRC2(canister_id)
-    }
-
     pub async fn allowance(&self) -> Result<ICRC2Allowance, InterCallError> {
-        InterCall::from(self.0).call("icrc2_allowance", ()).await
+        InterCall(self.0)
+            .call("icrc2_allowance", (), Cycles::NoPay)
+            .await
     }
 
     pub async fn approve(
         &self,
         args: ICRC2ApproveArgs,
     ) -> Result<ICRC2ApproveResult, InterCallError> {
-        InterCall::from(self.0).call("icrc2_approve", args).await
+        InterCall(self.0)
+            .call("icrc2_approve", args, Cycles::NoPay)
+            .await
     }
 
     pub async fn transfer_from(
         &self,
         args: ICRC2TransferFromArgs,
     ) -> Result<ICRC2TransferFromResult, InterCallError> {
-        InterCall::from(self.0)
-            .call("icrc2_transfer_from", args)
+        InterCall(self.0)
+            .call("icrc2_transfer_from", args, Cycles::NoPay)
             .await
     }
 }

@@ -1,15 +1,21 @@
 use crate::{
     error::HelperError,
     nonce::Nonce,
-    types::{CanisterId, ControllerId, Metadata},
+    types::{CanisterId, CanisterIds, ControllerId, Metadata},
     wasm::WasmModule,
     NanoTimeStamp,
 };
 use candid::{CandidType, Encode, Principal};
 use ic_cdk::api::management_canister::main::{CanisterInstallMode, CanisterStatusResponse};
 use serde::{Deserialize, Serialize};
-
 use std::collections::HashMap;
+
+pub mod canister;
+pub mod error;
+
+pub use canister::WalletCanister;
+
+pub type WalletCanisters = Vec<WalletCanister>;
 
 pub type WalletVersion = String;
 
@@ -53,6 +59,21 @@ impl WalletCanisterInitArgs {
         Encode!(&self).map_err(|e| HelperError::EncodeError(e.to_string()))
     }
 }
+
+#[derive(CandidType, Deserialize, Serialize)]
+pub enum UserStatus {
+    Registered,
+    Unregistered,
+    SingleCanister(CanisterId),
+    MultipleCanister(CanisterIds),
+}
+
+#[derive(CandidType, Deserialize, Serialize)]
+pub struct UserCanisterStatus {
+    pub version: String,
+    pub canister_status: CanisterStatusResponse,
+}
+
 #[derive(CandidType, Deserialize, Serialize)]
 pub struct WalletCanisterStatus {
     pub name: String,

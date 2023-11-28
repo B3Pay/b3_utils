@@ -54,8 +54,7 @@ pub mod types;
 pub mod outcall;
 pub use outcall::*;
 
-pub mod call;
-pub use call::*;
+pub mod api;
 
 mod timestamp;
 pub use timestamp::*;

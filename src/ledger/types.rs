@@ -10,8 +10,6 @@ pub use system::*;
 mod wallet;
 pub use wallet::*;
 
-pub type Cycles = u128;
-
 #[derive(CandidType, Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct TransferMemo(pub u64);
 
