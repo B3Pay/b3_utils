@@ -83,11 +83,11 @@ impl Wasm {
     /// use b3_utils::wasm::Blob;
     ///
     /// let mut wasm = Wasm::default();
-    /// assert_eq!(wasm.get(), Blob::default());
+    /// assert_eq!(wasm.bytes(), Blob::default());
     /// wasm.load(&vec![0x00, 0x61, 0x73, 0x6D]);
-    /// assert_eq!(wasm.get(), Blob::from(vec![0x00, 0x61, 0x73, 0x6D]));
+    /// assert_eq!(wasm.bytes(), Blob::from(vec![0x00, 0x61, 0x73, 0x6D]));
     /// ```
-    pub fn get(&self) -> Blob {
+    pub fn bytes(&self) -> Blob {
         self.0.to_vec()
     }
     /// Returns true if the current Wasm binary is empty.

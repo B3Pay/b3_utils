@@ -8,9 +8,9 @@ mod tests {
         let blob = vec![1, 2, 3];
 
         assert_eq!(wasm.load(&blob), 3);
-        assert_eq!(wasm.get(), vec![1, 2, 3]);
+        assert_eq!(wasm.bytes(), vec![1, 2, 3]);
 
-        println!("{:?}", wasm.get());
+        println!("{:?}", wasm.bytes());
         println!("{:?}", wasm.generate_hash());
     }
 
@@ -22,9 +22,9 @@ mod tests {
 
         assert_eq!(wasm.load(&blob), 3);
         assert_eq!(wasm.load(&blob2), 6);
-        assert_eq!(wasm.get(), vec![1, 2, 3, 4, 5, 6]);
+        assert_eq!(wasm.bytes(), vec![1, 2, 3, 4, 5, 6]);
 
-        println!("{:?}", wasm.get());
+        println!("{:?}", wasm.bytes());
         println!("{:?}", wasm.generate_hash());
 
         if wasm.is_loaded(6) {
@@ -33,7 +33,7 @@ mod tests {
 
         assert_eq!(wasm.len(), 0);
 
-        println!("{:?}", wasm.get());
+        println!("{:?}", wasm.bytes());
         println!("{:?}", wasm.generate_hash());
     }
 
