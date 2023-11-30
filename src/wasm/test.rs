@@ -11,7 +11,7 @@ mod tests {
         assert_eq!(wasm.bytes(), vec![1, 2, 3]);
 
         println!("{:?}", wasm.bytes());
-        println!("{:?}", wasm.generate_hash());
+        println!("{:?}", wasm.hash());
     }
 
     #[test]
@@ -25,7 +25,7 @@ mod tests {
         assert_eq!(wasm.bytes(), vec![1, 2, 3, 4, 5, 6]);
 
         println!("{:?}", wasm.bytes());
-        println!("{:?}", wasm.generate_hash());
+        println!("{:?}", wasm.hash());
 
         if wasm.is_loaded(6) {
             wasm.unload();
@@ -34,7 +34,7 @@ mod tests {
         assert_eq!(wasm.len(), 0);
 
         println!("{:?}", wasm.bytes());
-        println!("{:?}", wasm.generate_hash());
+        println!("{:?}", wasm.hash());
     }
 
     #[test]
@@ -69,10 +69,10 @@ mod tests {
         let mut wasm = Wasm::default();
         let blob = vec![1, 2, 3];
 
-        assert_eq!(wasm.generate_hash(), WasmHash::default());
+        assert_eq!(wasm.hash(), WasmHash::default());
         assert_eq!(wasm.load(&blob), 3);
 
-        let actual = wasm.generate_hash();
+        let actual = wasm.hash();
 
         let expected = WasmHash::from([
             3, 144, 88, 198, 242, 192, 203, 73, 44, 83, 59, 10, 77, 20, 239, 119, 204, 15, 120,

@@ -165,13 +165,13 @@ impl Wasm {
     /// use b3_utils::wasm::Wasm;
     ///
     /// let mut wasm = Wasm::default();
-    /// assert_eq!(wasm.generate_hash().to_vec(), vec![0x00; 32]);
+    /// assert_eq!(wasm.hash().to_vec(), vec![0x00; 32]);
     ///
     /// wasm.load(&vec![0x00, 0x61, 0x73, 0x6D]);
-    /// let hash = wasm.generate_hash();
+    /// let hash = wasm.hash();
     /// assert_eq!(hash.to_vec(), vec![205, 93, 73, 53, 164, 140, 6, 114, 203, 6, 64, 123, 180, 67, 188, 0, 135, 175, 249, 71, 198, 184, 100, 186, 200, 134, 152, 44, 115, 179, 2, 127]);
     /// ```
-    pub fn generate_hash(&self) -> WasmHash {
+    pub fn hash(&self) -> WasmHash {
         if self.0.is_empty() {
             return WasmHash::default();
         }
@@ -187,13 +187,13 @@ impl Wasm {
     /// use b3_utils::wasm::Wasm;
     ///
     /// let mut wasm = Wasm::default();
-    /// assert_eq!(wasm.generate_hash_string(), String::default());
+    /// assert_eq!(wasm.hash_string(), String::default());
     ///
     /// wasm.load(&vec![0x00, 0x61, 0x73, 0x6D]);
-    /// let hash_string = wasm.generate_hash_string();
+    /// let hash_string = wasm.hash_string();
     /// assert_eq!(hash_string, "cd5d4935a48c0672cb06407bb443bc0087aff947c6b864bac886982c73b3027f");
     /// ```
-    pub fn generate_hash_string(&self) -> String {
+    pub fn hash_string(&self) -> String {
         if self.0.is_empty() {
             return String::default();
         }
@@ -215,6 +215,6 @@ impl Wasm {
     /// assert!(wasm.verify_hash(&[205, 93, 73, 53, 164, 140, 6, 114, 203, 6, 64, 123, 180, 67, 188, 0, 135, 175, 249, 71, 198, 184, 100, 186, 200, 134, 152, 44, 115, 179, 2, 127]));
     /// ```
     pub fn verify_hash(&self, hash: &WasmHash) -> bool {
-        self.generate_hash() == *hash
+        self.hash() == *hash
     }
 }
