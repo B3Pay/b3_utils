@@ -4,7 +4,6 @@ pub mod error;
 use crate::{
     api::{AppInstallArg, AppStatus, AppVersion, CallCycles, InterCall, Management},
     types::{CanisterId, ControllerIds, UserId},
-    wasm::WasmHash,
 };
 use candid::CandidType;
 use ic_cdk::api::management_canister::{
@@ -29,14 +28,6 @@ impl AppCall {
             .call("validate_signer", (signer_id,), CallCycles::NoPay)
             .await
             .map_err(|err| AppCallError::ValidateSignerError(err.to_string()))
-    }
-
-    /// Get the wasm hash of the canister.
-    pub async fn wasm_hash(&self) -> Result<WasmHash, AppCallError> {
-        InterCall(self.0)
-            .call("wasm_hash", (), CallCycles::NoPay)
-            .await
-            .map_err(|err| AppCallError::WasmHashError(err.to_string()))
     }
 
     /// Get the version of the canister.

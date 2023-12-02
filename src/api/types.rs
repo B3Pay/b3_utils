@@ -2,11 +2,12 @@ use crate::{
     error::HelperError,
     nonce::Nonce,
     types::{CanisterId, ControllerId, Metadata},
-    wasm::WasmModule,
     NanoTimeStamp,
 };
 use candid::{CandidType, Encode, Principal};
-use ic_cdk::api::management_canister::main::{CanisterInstallMode, CanisterStatusResponse};
+use ic_cdk::api::management_canister::main::{
+    CanisterInstallMode, CanisterStatusResponse, WasmModule,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

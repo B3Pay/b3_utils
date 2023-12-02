@@ -2,7 +2,6 @@ use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
 pub type WasmSize = usize;
-pub type WasmModule = Vec<u8>;
 pub type WasmHash = [u8; 32];
 pub type WasmHashString = String;
 pub type WasmVersion = String;

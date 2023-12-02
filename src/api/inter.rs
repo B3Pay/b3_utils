@@ -4,7 +4,7 @@ mod traits;
 pub use error::*;
 
 use candid::CandidType;
-use ic_cdk::api::call::{call, call_with_payment, call_with_payment128};
+use ic_cdk::api::call::{call, call_with_payment, call_with_payment128, CallResult};
 use serde::de::DeserializeOwned;
 
 use crate::{api::types::CallCycles, types::CanisterId};
@@ -22,7 +22,7 @@ impl InterCall {
         A: CandidType,
         R: CandidType + DeserializeOwned,
     {
-        let res: Result<(R,), _> = match cycles {
+        let res: CallResult<(R,)> = match cycles {
             CallCycles::Pay128(cycles) => {
                 call_with_payment128(self.0, method, (args,), cycles).await
             }

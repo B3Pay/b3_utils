@@ -1,7 +1,6 @@
-use candid::{CandidType, Decode, Encode};
+use candid::CandidType;
 use ic_cdk::api::management_canister::provisional::CanisterId;
 use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 
 #[derive(CandidType, Deserialize, Serialize, Clone)]
 pub struct AppBug {
@@ -43,6 +42,10 @@ impl AppBugs {
 
 #[cfg(feature = "stable_memory")]
 use crate::memory::types::{Bound, Storable};
+#[cfg(feature = "stable_memory")]
+use candid::{Decode, Encode};
+#[cfg(feature = "stable_memory")]
+use std::borrow::Cow;
 
 #[cfg(feature = "stable_memory")]
 impl Storable for AppBug {
