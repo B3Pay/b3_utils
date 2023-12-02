@@ -1,5 +1,5 @@
 use b3_utils::{
-    api::{Cycles, InterCall},
+    api::{CallCycles, InterCall},
     hex_string_with_0x_to_u64,
     ledger::ICRCAccount,
     outcall::{HttpOutcall, HttpOutcallResponse},
@@ -70,7 +70,7 @@ async fn balance() -> Nat {
     let account = ICRCAccount::new(ic_cdk::id(), None);
 
     InterCall::from(LEDGER)
-        .call("icrc1_balance_of", account, Cycles::NoPay)
+        .call("icrc1_balance_of", account, CallCycles::NoPay)
         .await
         .unwrap()
 }
@@ -89,7 +89,7 @@ async fn approve(amount: Nat) -> ApproveResult {
     };
 
     InterCall::from(LEDGER)
-        .call("icrc2_approve", approve, Cycles::NoPay)
+        .call("icrc2_approve", approve, CallCycles::NoPay)
         .await
         .unwrap()
 }
@@ -140,7 +140,7 @@ async fn withdraw_eth(amount: Nat, recipient: String) -> WithdrawalResult {
     let withraw = WithdrawalArg { amount, recipient };
 
     InterCall::from(MINTER)
-        .call("withdraw_eth", withraw, Cycles::NoPay)
+        .call("withdraw_eth", withraw, CallCycles::NoPay)
         .await
         .unwrap()
 }

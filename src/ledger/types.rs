@@ -4,12 +4,6 @@ use serde::{Deserialize, Serialize};
 
 pub use icp::*;
 
-mod system;
-pub use system::*;
-
-mod wallet;
-pub use wallet::*;
-
 #[derive(CandidType, Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub struct TransferMemo(pub u64);
 

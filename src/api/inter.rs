@@ -1,13 +1,13 @@
 mod error;
-pub use error::*;
-
 mod traits;
+
+pub use error::*;
 
 use candid::CandidType;
 use ic_cdk::api::call::{call, call_with_payment, call_with_payment128};
 use serde::de::DeserializeOwned;
 
-use crate::{api::types::Cycles, types::CanisterId};
+use crate::{api::types::CallCycles, types::CanisterId};
 
 pub struct InterCall(pub CanisterId);
 
@@ -16,16 +16,18 @@ impl InterCall {
         &self,
         method: &str,
         args: A,
-        cycles: Cycles,
+        cycles: CallCycles,
     ) -> Result<R, InterCallError>
     where
         A: CandidType,
         R: CandidType + DeserializeOwned,
     {
         let res: Result<(R,), _> = match cycles {
-            Cycles::Pay128(cycles) => call_with_payment128(self.0, method, (args,), cycles).await,
-            Cycles::Pay(cycles) => call_with_payment(self.0, method, (args,), cycles).await,
-            Cycles::NoPay => call(self.0, method, (args,)).await,
+            CallCycles::Pay128(cycles) => {
+                call_with_payment128(self.0, method, (args,), cycles).await
+            }
+            CallCycles::Pay(cycles) => call_with_payment(self.0, method, (args,), cycles).await,
+            CallCycles::NoPay => call(self.0, method, (args,)).await,
         };
 
         match res {
