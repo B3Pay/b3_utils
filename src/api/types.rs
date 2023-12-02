@@ -1,15 +1,9 @@
-use crate::{
-    error::HelperError,
-    nonce::Nonce,
-    types::{CanisterId, ControllerId, Metadata},
-    NanoTimeStamp,
-};
+use crate::{error::HelperError, nonce::Nonce, types::CanisterId, NanoTimeStamp};
 use candid::{CandidType, Encode, Principal};
 use ic_cdk::api::management_canister::main::{
     CanisterInstallMode, CanisterStatusResponse, WasmModule,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 pub type AppVersion = String;
 
@@ -17,29 +11,6 @@ pub struct AppInstallArg {
     pub arg: Vec<u8>,
     pub wasm_module: WasmModule,
     pub mode: CanisterInstallMode,
-}
-
-#[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
-pub struct AppController {
-    pub name: String,
-    pub metadata: Metadata,
-}
-
-impl AppController {
-    pub fn new(name: String, metadata: Option<Metadata>) -> Self {
-        Self {
-            name,
-            metadata: metadata.unwrap_or_default(),
-        }
-    }
-}
-
-pub type AppControllerMap = HashMap<ControllerId, AppController>;
-
-#[derive(CandidType, Debug, Clone, Deserialize)]
-pub struct AppInititializeArgs {
-    pub controllers: AppControllerMap,
-    pub metadata: Option<Metadata>,
 }
 
 #[derive(CandidType, Deserialize, Serialize)]

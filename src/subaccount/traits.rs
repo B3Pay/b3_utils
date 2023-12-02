@@ -2,7 +2,15 @@ use std::{cmp, fmt, hash, mem::size_of, str::FromStr};
 
 use candid::Principal;
 
+use crate::ledger::constants::DEFAULT_SUBACCOUNT;
+
 use super::{Subaccount, SubaccountError};
+
+impl Default for Subaccount {
+    fn default() -> Self {
+        DEFAULT_SUBACCOUNT
+    }
+}
 
 impl Eq for Subaccount {}
 

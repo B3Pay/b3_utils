@@ -1,7 +1,6 @@
 use crate::ledger::{base32::base32_encode_account, constants::DEFAULT_SUBACCOUNT};
 use crate::Subaccount;
 use candid::{CandidType, Principal};
-use easy_hasher::easy_hasher;
 use serde::{Deserialize, Serialize};
 use std::{cmp, fmt, hash, str::FromStr};
 
@@ -37,19 +36,22 @@ impl ICRCAccount {
 
     fn compute_checksum(&self) -> Vec<u8> {
         // Create a buffer to hold the principal bytes and the subaccount bytes
-        let mut buffer = Vec::with_capacity(29 + 32);
+        let mut crc32hasher = crc32fast::Hasher::new();
 
         // Add the owner principal bytes
-        buffer.extend_from_slice(&self.owner.as_slice());
+        crc32hasher.update(&self.owner.as_slice());
 
         // If subaccount exists, add the subaccount bytes. Otherwise add 32 zeros
         match &self.subaccount {
-            Some(subaccount) => buffer.extend_from_slice(&subaccount.to_vec()),
-            None => buffer.extend_from_slice(&[0u8; 32]),
+            Some(subaccount) => crc32hasher.update(&subaccount.to_vec()),
+            None => crc32hasher.update(&[0u8; 32]),
         }
 
         // Compute the CRC32 checksum
-        easy_hasher::raw_crc32(buffer).to_vec()
+        let checksum = crc32hasher.finalize();
+
+        // Convert the checksum to bytes
+        checksum.to_be_bytes().to_vec()
     }
 
     fn compute_base32_checksum(&self) -> String {

@@ -9,6 +9,9 @@ pub type ControllerId = Principal;
 /// Represents a list of controller IDs.
 pub type ControllerIds = Vec<ControllerId>;
 
+/// Represents a list of controller IDs.
+pub type AppControllerMap = HashMap<ControllerId, String>;
+
 /// Represents the ID of a canister in the system.
 pub type CanisterId = Principal;
 
@@ -26,6 +29,3 @@ pub type OperationId = u64;
 
 /// Represents a deadline timestamp.
 pub type Deadline = u64;
-
-/// Represents metadata as a key-value pair.
-pub type Metadata = HashMap<String, String>;

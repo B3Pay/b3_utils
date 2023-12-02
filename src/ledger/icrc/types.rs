@@ -1,17 +1,15 @@
-use candid::{CandidType, Int, Nat};
+use candid::{CandidType, Nat};
 use serde::{Deserialize, Serialize};
-
-use serde_bytes::ByteBuf;
 
 use crate::{ledger::icrc::ICRCAccount, Subaccount};
 
-use super::{error::ICRC1TransferError, ICRC2ApproveError, ICRC2TransferFromError};
+use super::{error::ICRC1TransferError, ICRC2ApproveError, ICRC2TransferFromError, Value};
 
 pub type TxIndex = Nat;
 
 pub type ICRCTokens = Nat;
 
-pub type ICRCMetadata = Vec<(String, ICRC1MetadataValue)>;
+pub type ICRCMetadata = Vec<(String, Value)>;
 
 pub type ICRCMemo = Vec<u8>;
 
@@ -31,15 +29,6 @@ pub struct ICRC1TransferArgs {
     pub memo: Option<ICRCMemo>,
     pub created_at_time: Option<ICRCTimestamp>,
     pub from_subaccount: Option<Subaccount>,
-}
-
-/// Variant type for the `metadata` endpoint values.
-#[derive(CandidType, Deserialize, Serialize, Clone, Debug, PartialEq, Eq)]
-pub enum ICRC1MetadataValue {
-    Nat(Nat),
-    Int(Int),
-    Text(String),
-    Blob(ByteBuf),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq, Eq)]

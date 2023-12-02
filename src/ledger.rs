@@ -7,18 +7,21 @@ pub use icrc::*;
 mod identifier;
 pub use identifier::*;
 
-pub mod types;
+mod types;
+pub use types::*;
 
 pub mod constants;
 
-use ::easy_hasher::easy_hasher::Hash;
-use easy_hasher::easy_hasher;
+use sha3::{Digest, Keccak256, Sha3_256};
 
-pub fn raw_keccak256(data: &[u8]) -> Hash {
-    easy_hasher::raw_keccak256(data.to_vec())
+pub fn raw_sha3_256(data: &[u8]) -> Vec<u8> {
+    let mut hasher = Sha3_256::new();
+    hasher.update(data);
+    hasher.finalize().to_vec()
 }
 
-pub fn raw_sha256(data: &[u8]) -> Vec<u8> {
-    let hash = easy_hasher::raw_sha256(data.to_vec());
-    hash.to_vec()
+pub fn raw_keccak256(data: &[u8]) -> Vec<u8> {
+    let mut hasher = Keccak256::new();
+    hasher.update(data);
+    hasher.finalize().to_vec()
 }

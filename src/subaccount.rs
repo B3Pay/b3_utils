@@ -1,7 +1,7 @@
 use std::ops::Add;
 
 use super::constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
-use crate::environment::Environment;
+use crate::{environment::Environment, ledger::constants::DEFAULT_SUBACCOUNT};
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
@@ -232,7 +232,7 @@ impl Subaccount {
     /// assert_eq!(subaccount.is_default(), true);
     /// ```
     pub fn is_default(&self) -> bool {
-        self.0 == [0u8; 32]
+        self.0 == DEFAULT_SUBACCOUNT.0
     }
 
     /// Checks if the subaccount is a principal subaccount
