@@ -13,7 +13,7 @@ pub struct AppInstallArg {
     pub mode: CanisterInstallMode,
 }
 
-#[derive(CandidType, Deserialize, Serialize)]
+#[derive(CandidType, Deserialize, Serialize, Debug)]
 pub struct AppInitArgs {
     pub owner_id: Principal,
     pub system_id: CanisterId,
