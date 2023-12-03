@@ -4,7 +4,7 @@ use candid::{CandidType, Deserialize, Int, Nat};
 use num_traits::cast::ToPrimitive;
 use serde::Serialize;
 use serde_bytes::ByteBuf;
-use sha3::{Digest, Sha3_256};
+use sha2::{Digest, Sha256};
 
 const INT128_BUF_SIZE: usize = 19;
 pub type Hash = [u8; 32];
@@ -45,12 +45,12 @@ impl Value {
             Value::Nat(nat) => {
                 let mut buf = vec![];
                 nat.encode(&mut buf).expect("bug: cannot encode a Nat");
-                Sha3_256::digest(&buf).into()
+                Sha256::digest(&buf).into()
             }
             Value::Nat64(n) => {
                 let mut buf = [0u8; INT128_BUF_SIZE];
                 let offset = leb128(&mut buf, *n as u128);
-                Sha3_256::digest(&buf[0..=offset]).into()
+                Sha256::digest(&buf[0..=offset]).into()
             }
             Value::Int(int) => {
                 let v = int
@@ -64,12 +64,12 @@ impl Value {
                     true => leb128(&mut buf, v as u128),
                     false => sleb128(&mut buf, v),
                 };
-                Sha3_256::digest(&buf[0..=offset]).into()
+                Sha256::digest(&buf[0..=offset]).into()
             }
-            Value::Blob(bytes) => Sha3_256::digest(bytes).into(),
-            Value::Text(text) => Sha3_256::digest(text.as_bytes()).into(),
+            Value::Blob(bytes) => Sha256::digest(bytes).into(),
+            Value::Text(text) => Sha256::digest(text.as_bytes()).into(),
             Value::Array(values) => {
-                let mut hasher = Sha3_256::new();
+                let mut hasher = Sha256::new();
                 for v in values.iter() {
                     hasher.update(v.hash());
                 }
@@ -78,13 +78,13 @@ impl Value {
             Value::Map(map) => {
                 let mut hpairs = Vec::with_capacity(map.len());
                 for (k, v) in map.iter() {
-                    let key_hash: Hash = Sha3_256::digest(k.as_bytes()).into();
+                    let key_hash: Hash = Sha256::digest(k.as_bytes()).into();
                     hpairs.push((key_hash, v.hash()));
                 }
 
                 hpairs.sort_unstable();
 
-                let mut hasher = Sha3_256::new();
+                let mut hasher = Sha256::new();
                 for (khash, vhash) in hpairs.iter() {
                     hasher.update(&khash[..]);
                     hasher.update(&vhash[..]);

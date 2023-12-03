@@ -10,11 +10,9 @@ readme = "./README.md"
 ic-cdk = { version = "0.12", features = ["transform-closure"] }
 serde = { version = "1.0", features = ["derive"] }
 candid = "0.10"
-hex = "0.4"
+hex = { version = "0.4", features = ["serde"] }
 serde_bytes = "0.11"
 num-traits = { version = "0.2", optional = true }
-sha3 = { version = "0.10", optional = true }
-easy-hasher = { version = "2.2", optional = true }
 crc32fast = { version = "1.3", optional = true }
 sha2 = { version = "0.9", optional = true }
 subtle = { version = "2.5", optional = true }
@@ -27,10 +25,10 @@ ic_bls12_381 = { version = "0.8", optional = true, default-features = false, fea
 ] }
 
 [features]
-exprimental_vetkd = ["ic_bls12_381", "sha2", "subtle"]
+exprimental_vetkd = ["ic_bls12_381", "subtle"]
 stable_memory = ["ic-stable-structures"]
-ledger = ["sha3", "crc32fast", "easy-hasher", "num-traits", "wasm"]
+ledger = ["crc32fast", "sha2", "num-traits", "wasm"]
 owner = ["stable_memory"]
-wasm = ["sha3"]
+wasm = ["sha2"]
 rpc = ["serde_json"]
 logging = []
