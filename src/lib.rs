@@ -71,6 +71,9 @@ pub use utils::*;
 #[cfg(feature = "owner")]
 pub mod owner;
 
+#[cfg(feature = "sha2")]
+pub mod sha2;
+
 #[cfg(feature = "wasm")]
 pub mod wasm;
 
