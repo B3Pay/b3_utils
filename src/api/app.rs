@@ -58,6 +58,14 @@ impl AppCall {
             .map_err(|err| AppCallError::CanisterInfoError(err.to_string()))
     }
 
+    /// Get the module hash of the canister.
+    pub async fn module_hash(&self) -> Result<Option<Vec<u8>>, AppCallError> {
+        self.info(None)
+            .await
+            .map(|info| info.module_hash)
+            .map_err(|err| AppCallError::CanisterInfoError(err.to_string()))
+    }
+
     /// Install the code for the canister.
     pub async fn install_code(&self, args: AppInstallArg) -> Result<(), AppCallError> {
         let canister_id = self.canister_id();
