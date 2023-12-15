@@ -5,16 +5,16 @@ use ic_stable_structures::cell::ValueError;
 
 use crate::{
     memory::{error::StableMemoryError, types::DefaultStableCell, with_stable_mem_mut},
-    Subaccount,
+    principal::StoredPrincipal,
 };
 
 fn init_owner(
     name: &str,
     id: u8,
-) -> Result<RefCell<DefaultStableCell<Subaccount>>, StableMemoryError> {
+) -> Result<RefCell<DefaultStableCell<StoredPrincipal>>, StableMemoryError> {
     let memory = with_stable_mem_mut(|pm| pm.create(name, id))?;
 
-    let owner_id = Subaccount::from(ic_cdk::caller());
+    let owner_id = StoredPrincipal::from(ic_cdk::caller());
 
     let cell = DefaultStableCell::init(memory, owner_id)
         .map_err(|e| StableMemoryError::UnableToCreateMemory(e.to_string()))?;
@@ -23,14 +23,14 @@ fn init_owner(
 }
 
 thread_local! {
-    static OWNER: RefCell<DefaultStableCell<Subaccount>> = init_owner("owner", 253).unwrap();
+    static OWNER: RefCell<DefaultStableCell<StoredPrincipal>> = init_owner("owner", 253).unwrap();
 }
 
 pub fn get_owner() -> Principal {
     OWNER.with(|states| {
         let state = states.borrow();
 
-        state.get().to_principal().unwrap()
+        state.get().into()
     })
 }
 
@@ -39,7 +39,7 @@ pub fn set_owner(new_owner: Principal) -> Result<Principal, ValueError> {
         let mut state = states.borrow_mut();
         let old_owner = state.set(new_owner.into())?;
 
-        Ok(old_owner.to_principal().unwrap())
+        Ok(old_owner.into())
     })
 }
 
