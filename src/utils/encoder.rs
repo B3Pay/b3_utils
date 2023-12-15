@@ -76,6 +76,17 @@ pub fn hex_string_with_0x_to_nat<S: AsRef<str>>(stringlike: S) -> Result<Nat, He
     Ok(result)
 }
 
+/// Converts a string to a slug.
+pub fn name_to_slug(name: &str) -> String {
+    name.to_lowercase()
+        .trim()
+        .replace(|c: char| !c.is_alphanumeric() && c != '-' && c != '_', "-")
+        .replace(|c: char| c.is_whitespace(), "-")
+        .replace("--", "-")
+        .trim_matches('-')
+        .to_string()
+}
+
 #[cfg(test)]
 mod test {
     use candid::Nat;
@@ -162,5 +173,12 @@ mod test {
         let hex_string = "0x000000000000000000000000000000000000000000000000002386f26fc10000";
         let value = hex_string_with_0x_to_nat(hex_string).unwrap();
         assert_eq!(value, Nat::from(10000000000000000u64));
+    }
+
+    #[test]
+    fn test_name_to_slug() {
+        assert_eq!(name_to_slug("Example App Name"), "example-app-name");
+        assert_eq!(name_to_slug("  Another Test!   "), "another-test");
+        assert_eq!(name_to_slug("Special&^Chars"), "special-chars");
     }
 }
