@@ -13,8 +13,7 @@ pub use utils::*;
 mod types;
 pub use types::*;
 
-mod traits;
-pub use traits::*;
+pub mod traits;
 
 /// Represents a WebAssembly (Wasm) binary.
 #[derive(CandidType, Deserialize, Serialize, Clone)]

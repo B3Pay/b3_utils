@@ -1,13 +1,37 @@
+use core::fmt;
+
 use candid::{CandidType, Principal};
 use ic_stable_structures::Storable;
 use serde::{Deserialize, Serialize};
 
+use ic_stable_structures::storable::{Blob, Bound};
+
 #[derive(
-    Debug, CandidType, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
+    Debug, CandidType, Hash, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
 )]
 pub struct StoredPrincipal(Principal);
 
-use ic_stable_structures::storable::{Blob, Bound};
+impl StoredPrincipal {
+    pub fn to_text(&self) -> String {
+        self.0.to_text()
+    }
+
+    pub fn from_text(text: &str) -> Result<Self, String> {
+        Principal::from_text(text)
+            .map_err(|e| format!("Principal::from_text failed: {}", e))
+            .map(Self)
+    }
+
+    pub fn from_slice(slice: &[u8]) -> Result<Self, String> {
+        Principal::try_from_slice(slice)
+            .map_err(|e| format!("Principal::try_from_slice failed: {}", e))
+            .map(Self)
+    }
+
+    pub fn as_slice(&self) -> &[u8] {
+        self.0.as_slice()
+    }
+}
 
 impl Storable for StoredPrincipal {
     const BOUND: Bound = Blob::<29>::BOUND;
@@ -25,6 +49,12 @@ impl Storable for StoredPrincipal {
         Self(Principal::from_slice(
             Blob::<29>::from_bytes(bytes).as_slice(),
         ))
+    }
+}
+
+impl fmt::Display for StoredPrincipal {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0.to_text())
     }
 }
 
