@@ -1,7 +1,10 @@
-use candid::Principal;
+use candid::{CandidType, Principal};
 use ic_stable_structures::Storable;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    Debug, CandidType, Deserialize, Serialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord,
+)]
 pub struct StoredPrincipal(Principal);
 
 use ic_stable_structures::storable::{Blob, Bound};

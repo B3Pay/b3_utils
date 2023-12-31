@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{nonce::Nonce, Subaccount};
+use crate::{nonce::Nonce, principal::StoredPrincipal};
 use candid::Principal;
 
 /// Represents the ID of a controller in the system.
@@ -19,7 +19,7 @@ pub type CanisterId = Principal;
 pub type CanisterIds = Vec<CanisterId>;
 
 /// Represents the ID of a user in the system.
-pub type UserId = Subaccount;
+pub type UserId = StoredPrincipal;
 
 /// Represents the ID of a role in the system.
 pub type RoleId = Nonce;
