@@ -3,13 +3,16 @@ pub mod error;
 
 use crate::{
     api::{AppInstallArg, AppStatus, AppVersion, CallCycles, InterCall, Management},
-    types::{CanisterId, ControllerIds, UserId},
+    types::{CanisterId, ControllerId, ControllerIds, UserId},
 };
 use candid::CandidType;
-use ic_cdk::api::management_canister::{
-    main::{CanisterInfoResponse, InstallCodeArgument, UpdateSettingsArgument},
-    provisional::CanisterSettings,
+use ic_cdk::api::management_canister::main::{
+    CanisterInfoResponse, InstallCodeArgument, UpdateSettingsArgument,
 };
+use ic_cdk::api::management_canister::{
+    main::CreateCanisterArgument, provisional::CanisterSettings,
+};
+
 use serde::{Deserialize, Serialize};
 
 use self::error::AppCallError;
@@ -22,12 +25,34 @@ impl AppCall {
         self.0.clone()
     }
 
+    /// create a new canister and save the canister id.
+    pub async fn create_with_cycles(
+        controllers: Vec<ControllerId>,
+        cycles: u128,
+    ) -> Result<Self, AppCallError> {
+        let args = CreateCanisterArgument {
+            settings: Some(CanisterSettings {
+                controllers: Some(controllers.clone()),
+                compute_allocation: None,
+                memory_allocation: None,
+                freezing_threshold: None,
+            }),
+        };
+
+        let result = Management::create_canister(args, cycles).await;
+
+        match result {
+            Ok(result) => Ok(Self(result.canister_id)),
+            Err(err) => Err(AppCallError::CreateCanisterError(err.to_string())),
+        }
+    }
+
     /// Get the owner of the canister.
     pub async fn validate_user(&self, signer_id: UserId) -> Result<bool, AppCallError> {
         InterCall(self.0)
             .call("validate_user", (signer_id,), CallCycles::NoPay)
             .await
-            .map_err(|err| AppCallError::ValidateSignerError(err.to_string()))
+            .map_err(|err| AppCallError::ValidateUserError(err.to_string()))
     }
 
     /// Get the version of the canister.
