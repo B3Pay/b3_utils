@@ -107,6 +107,14 @@ impl AppCall {
             .map_err(|err| AppCallError::InstallCodeError(err.to_string()))
     }
 
+    /// Uninstall the code for the canister.
+    /// The caller must be a controller of the canister.
+    pub async fn uninstall_code(&self) -> Result<(), AppCallError> {
+        Management::uninstall_code(self.0)
+            .await
+            .map_err(|err| AppCallError::UninstallCodeError(err.to_string()))
+    }
+
     /// Update the controllers of the canister.
     /// The caller must be a controller of the canister.
     /// Default controllers are the owner and the user itself.

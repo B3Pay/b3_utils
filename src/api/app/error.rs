@@ -10,6 +10,7 @@ pub enum AppCallError {
     VersionError(String),
     CanisterInfoError(String),
     InstallCodeError(String),
+    UninstallCodeError(String),
     WasmHashError(String),
 }
 
@@ -26,6 +27,7 @@ impl fmt::Display for AppCallError {
             AppCallError::CanisterStatusError(e) => write!(f, "Canister status error: {}", e),
             AppCallError::CanisterInfoError(e) => write!(f, "Wallet info error: {}", e),
             AppCallError::InstallCodeError(e) => write!(f, "Install code error: {}", e),
+            AppCallError::UninstallCodeError(e) => write!(f, "Uninstall code error: {}", e),
             AppCallError::WasmHashError(e) => write!(f, "Wasm hash error: {}", e),
 
         }
