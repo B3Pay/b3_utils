@@ -21,14 +21,15 @@ pub mod traits;
 pub struct Nonce(pub u64);
 
 impl Nonce {
+    /// Creates a new `Nonce` from the given `Option<u64>`.
     pub fn new(from: Option<u64>) -> Self {
         Self(from.unwrap_or(0))
     }
-
+    /// Creates a new `Nonce` from the given `u64`.
     pub fn from_le_bytes(bytes: [u8; 8]) -> Self {
         Nonce(u64::from_le_bytes(bytes))
     }
-
+    /// Creates a zero `Nonce`.
     pub fn zero() -> Self {
         Self(0)
     }

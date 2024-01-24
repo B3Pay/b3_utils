@@ -125,12 +125,12 @@ async fn verify_transaction(hash: String) -> bool {
 
     ic_cdk::println!("Transaction: {:?}", tx);
 
-    let amount: Nat = match hex_string_with_0x_to_u64(tx.value) {
+    let _amount: Nat = match hex_string_with_0x_to_u64(tx.value) {
         Ok(amount) => amount.into(),
         Err(m) => panic!("{}", m.to_string()),
     };
 
-    let recipient = tx.to;
+    let _recipient = tx.to;
 
     todo!("Verify transaction");
 }
