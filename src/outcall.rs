@@ -139,7 +139,6 @@ impl HttpOutcall {
     pub async fn send(self) -> Result<HttpOutcallResponse, String> {
         let cycle_cost = self.calculate_cycle_cost();
 
-        // You can log or use the cycle_cost here for further actions
         http_request(self.0, cycle_cost)
             .await
             .map(|(response,)| response)
@@ -152,7 +151,6 @@ impl HttpOutcall {
         transform_func: impl FnOnce(HttpOutcallResponse) -> HttpOutcallResponse + 'static,
     ) -> Result<HttpOutcallResponse, String> {
         let cycle_cost = self.calculate_cycle_cost();
-        // You can log or use the cycle_cost here for further actions
 
         http_request_with_closure(self.0, cycle_cost, transform_func)
             .await
