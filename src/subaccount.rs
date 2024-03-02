@@ -1,7 +1,7 @@
 use std::ops::Add;
 
-use super::constants::{DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
-use crate::{environment::Environment, ledger::constants::DEFAULT_SUBACCOUNT};
+use crate::constants::{DEFAULT_SUBACCOUNT, DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
+use crate::environment::Environment;
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 

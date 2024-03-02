@@ -1,4 +1,5 @@
-use crate::ledger::{base32::base32_encode_account, constants::DEFAULT_SUBACCOUNT};
+use crate::constants::DEFAULT_SUBACCOUNT;
+use crate::ledger::base32::base32_encode_account;
 use crate::Subaccount;
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};

@@ -1,6 +1,4 @@
-use crate::{ledger::currency::ICPToken, NanoTimeStamp, Subaccount};
-
-pub const DEFAULT_SUBACCOUNT: Subaccount = Subaccount([0u8; 32]);
+use crate::{ledger::currency::ICPToken, NanoTimeStamp};
 
 pub const SYSTEM_RATE_LIMIT: u64 = NanoTimeStamp::NS_PER_MINUTE;
 

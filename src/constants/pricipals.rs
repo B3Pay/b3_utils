@@ -1,4 +1,6 @@
-use crate::types::CanisterId;
+use crate::{types::CanisterId, Subaccount};
+
+pub const DEFAULT_SUBACCOUNT: Subaccount = Subaccount([0u8; 32]);
 
 // aaaaa-aa
 pub const MANAGMENT_CANISTER_ID: CanisterId = CanisterId::management_canister();

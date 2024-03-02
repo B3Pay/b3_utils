@@ -2,7 +2,7 @@ use std::{cmp, fmt, hash, mem::size_of, str::FromStr};
 
 use candid::Principal;
 
-use crate::ledger::constants::DEFAULT_SUBACCOUNT;
+use crate::constants::DEFAULT_SUBACCOUNT;
 
 use super::{Subaccount, SubaccountError};
 

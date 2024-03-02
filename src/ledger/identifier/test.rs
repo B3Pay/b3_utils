@@ -5,9 +5,8 @@ mod tests {
     use candid::Principal;
 
     use crate::{
-        ledger::{
-            constants::DEFAULT_SUBACCOUNT, AccountIdentifier, AccountIdentifierError, ChecksumError,
-        },
+        constants::DEFAULT_SUBACCOUNT,
+        ledger::{AccountIdentifier, AccountIdentifierError, ChecksumError},
         Environment, Subaccount,
     };
 

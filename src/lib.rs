@@ -13,7 +13,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! b3_utils = { version = "0.3", features = ["exprimental_vetkd", "logging"] }
+//! b3_utils = { version = "0.9", features = ["exprimental_vetkd", "logging"] }
 //! ```
 //!
 //! ## Examples
