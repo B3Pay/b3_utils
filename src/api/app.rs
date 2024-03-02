@@ -3,9 +3,9 @@ pub mod error;
 
 use crate::{
     api::{AppInstallArg, AppStatus, AppVersion, CallCycles, InterCall, Management},
-    types::{CanisterId, ControllerId, ControllerIds, UserId},
+    types::{CanisterId, ControllerId, ControllerIds},
 };
-use candid::CandidType;
+use candid::{CandidType, Principal};
 use ic_cdk::api::management_canister::main::{
     CanisterInfoResponse, InstallCodeArgument, UpdateSettingsArgument,
 };
@@ -49,9 +49,9 @@ impl AppCall {
     }
 
     /// Get the owner of the canister.
-    pub async fn validate_user(&self, signer_id: UserId) -> Result<bool, AppCallError> {
+    pub async fn validate_user(&self, user_id: Principal) -> Result<bool, AppCallError> {
         InterCall(self.0)
-            .call("validate_user", (signer_id,), CallCycles::NoPay)
+            .call("validate_user", (user_id,), CallCycles::NoPay)
             .await
             .map_err(|err| AppCallError::ValidateUserError(err.to_string()))
     }
