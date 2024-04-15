@@ -16,7 +16,7 @@ pub struct AppInstallArg {
 #[derive(CandidType, Deserialize, Serialize, Debug)]
 pub struct AppInitArgs {
     pub owner_id: Principal,
-    pub system_id: CanisterId,
+    pub forge_id: CanisterId,
 }
 
 impl AppInitArgs {
