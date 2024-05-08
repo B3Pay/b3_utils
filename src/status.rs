@@ -1,39 +1,51 @@
 #[derive(Debug)]
 pub enum Status {
-    Visible(StatusOption),
-    Hidden(StatusOption),
-    VisibleOptional(StatusOption),
-    HiddenOptional(StatusOption),
+    Visible = 1 << 0,
+    Hidden = 1 << 1,
 }
 
 #[derive(Debug)]
-pub enum StatusOption {
-    Default = 0,
-    Checked = 1,
+pub enum StatusType {
+    Checked = 1 << 6,
+    Optional = 1 << 7,
 }
 
-impl StatusOption {
-    pub fn to_number(self) -> u8 {
-        match self {
-            StatusOption::Default => 0,
-            StatusOption::Checked => 1,
-        }
+pub struct StatusHelper;
+
+impl StatusHelper {
+    pub fn is_hidden(status: u8) -> bool {
+        (status & (Status::Hidden as u8)) != 0
+    }
+
+    pub fn is_checked(status: u8) -> bool {
+        (status & (StatusType::Checked as u8)) != 0
+    }
+
+    pub fn is_visible(status: u8) -> bool {
+        (status & (Status::Visible as u8)) != 0
+    }
+
+    pub fn is_optional(status: u8) -> bool {
+        (status & (StatusType::Optional as u8)) != 0
+    }
+
+    pub fn toggle_checked(status: u8) -> u8 {
+        status ^ (StatusType::Checked as u8)
+    }
+
+    pub fn toggle_visibility(status: u8) -> u8 {
+        status ^ (Status::Visible as u8)
     }
 }
 
-impl Status {
-    pub fn to_number(self) -> u8 {
-        match self {
-            Status::Visible(status_option) => status_option.to_number(),
-            Status::Hidden(status_option) => status_option.to_number() + 64,
-            Status::VisibleOptional(status_option) => status_option.to_number() + 128,
-            Status::HiddenOptional(status_option) => status_option.to_number() + 192,
-        }
-    }
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_status() {
-    let status = Status::VisibleOptional(StatusOption::Checked);
-    println!("{:?}", status.to_number());
+    #[test]
+    fn test_status() {
+        let status = Status::Visible as u8;
+        assert_eq!(StatusHelper::is_visible(status), true);
+        assert_eq!(StatusHelper::is_checked(status), false);
+    }
 }
