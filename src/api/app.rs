@@ -33,10 +33,7 @@ impl AppCall {
         let args = CreateCanisterArgument {
             settings: Some(CanisterSettings {
                 controllers: Some(controllers.clone()),
-                compute_allocation: None,
-                memory_allocation: None,
-                freezing_threshold: None,
-                reserved_cycles_limit: None,
+                ..Default::default()
             }),
         };
 
@@ -146,10 +143,7 @@ impl AppCall {
             canister_id,
             settings: CanisterSettings {
                 controllers: Some(controllers),
-                compute_allocation: None,
-                memory_allocation: None,
-                freezing_threshold: None,
-                reserved_cycles_limit: None,
+                ..Default::default()
             },
         };
 

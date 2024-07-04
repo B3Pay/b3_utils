@@ -53,7 +53,6 @@ async fn http_get_with_closure(url: String, max_response_bytes: u64) -> String {
             status: response.status,
             body: response.body,
             headers: headers(),
-            ..Default::default()
         })
         .await;
 

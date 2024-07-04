@@ -10,7 +10,7 @@ members = [
 resolver = "1"
 
 [workspace.dependencies]
-ic-cdk = "0.13"
+ic-cdk = "0.15.0"
 candid = "0.10"
-ic0 = "0.21"
+ic0 = "0.23.0"
 b3_utils = { path = "../" }

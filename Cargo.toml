@@ -1,13 +1,13 @@
 [package]
 name = "b3_utils"
-version = "0.10.0"
+version = "0.11.0"
 edition = "2021"
-description = "This is helper library for B3Wallet project"
+description = "Utility functions for building on the Internet Computer"
 license = "MIT"
 readme = "./README.md"
 
 [dependencies]
-ic-cdk = { version = "0.13", features = ["transform-closure"] }
+ic-cdk = { version = "0.15.0", features = ["transform-closure"] }
 serde = { version = "1.0", features = ["derive"] }
 candid = "0.10"
 hex = { version = "0.4", features = ["serde"] }
