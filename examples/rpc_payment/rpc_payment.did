@@ -1,0 +1,96 @@
+type ApproveError = variant {
+  GenericError : record { message : text; error_code : nat };
+  TemporarilyUnavailable;
+  Duplicate : record { duplicate_of : nat };
+  BadFee : record { expected_fee : nat };
+  AllowanceChanged : record { current_allowance : nat };
+  CreatedInFuture : record { ledger_time : nat64 };
+  TooOld;
+  Expired : record { ledger_time : nat64 };
+  InsufficientFunds : record { balance : nat };
+};
+type GetTransactionReceiptResult = variant {
+  Ok : opt TransactionReceipt;
+  Err : RpcError;
+};
+type HttpOutcallError = variant {
+  IcError : record { code : RejectionCode; message : text };
+  InvalidHttpJsonRpcResponse : record {
+    status : nat16;
+    body : text;
+    parsingError : opt text;
+  };
+};
+type JsonRpcError = record { code : int64; message : text };
+type LogEntry = record {
+  transactionHash : opt text;
+  blockNumber : opt nat;
+  data : text;
+  blockHash : opt text;
+  transactionIndex : opt nat;
+  topics : vec text;
+  address : text;
+  logIndex : opt nat;
+  removed : bool;
+};
+type ProviderError = variant {
+  TooFewCycles : record { expected : nat; received : nat };
+  MissingRequiredProvider;
+  ProviderNotFound;
+  NoPermission;
+};
+type RejectionCode = variant {
+  NoError;
+  CanisterError;
+  SysTransient;
+  DestinationInvalid;
+  Unknown;
+  SysFatal;
+  CanisterReject;
+};
+type Result = variant { Ok : nat; Err : ApproveError };
+type Result_1 = variant { Ok : GetTransactionReceiptResult; Err : text };
+type Result_2 = variant { Ok : RetrieveEthRequest; Err : WithdrawalError };
+type RetrieveEthRequest = record { block_index : nat };
+type RpcError = variant {
+  JsonRpcError : JsonRpcError;
+  ProviderError : ProviderError;
+  ValidationError : ValidationError;
+  HttpOutcallError : HttpOutcallError;
+};
+type TransactionReceipt = record {
+  to : text;
+  status : nat;
+  transactionHash : text;
+  blockNumber : nat;
+  from : text;
+  logs : vec LogEntry;
+  blockHash : text;
+  "type" : text;
+  transactionIndex : nat;
+  effectiveGasPrice : nat;
+  logsBloom : text;
+  contractAddress : opt text;
+  gasUsed : nat;
+};
+type ValidationError = variant {
+  CredentialPathNotAllowed;
+  HostNotAllowed : text;
+  CredentialHeaderNotAllowed;
+  UrlParseError : text;
+  Custom : text;
+  InvalidHex : text;
+};
+type WithdrawalError = variant {
+  TemporarilyUnavailable : text;
+  InsufficientAllowance : record { allowance : nat };
+  AmountTooLow : record { min_withdrawal_amount : nat };
+  InsufficientFunds : record { balance : nat };
+};
+service : {
+  approve : (nat) -> (Result);
+  balance : () -> (nat);
+  deposit_principal : () -> (text) query;
+  eth_get_transaction_receipt : (text) -> (Result_1);
+  withdraw_eth : (nat, text) -> (Result_2);
+}

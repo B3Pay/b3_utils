@@ -24,22 +24,44 @@
         "node_compatibility": true
       }
     },
-    "payment_backend": {
+    "http_payment": {
       "type": "custom",
-      "wasm": "target/wasm32-unknown-unknown/release/payment_backend-opt.wasm",
-      "candid": "payment/src/payment_backend/payment_backend.did",
-      "package": "payment_backend",
-      "build": "./build.sh payment_backend",
+      "wasm": "target/wasm32-unknown-unknown/release/http_payment-opt.wasm",
+      "candid": "http_payment/http_payment.did",
+      "package": "http_payment",
+      "build": "./build.sh http_payment",
       "declarations": {
         "env_override": null,
-        "output": "payment/src/declarations/payment_backend",
+        "output": "payment/declarations/http_payment",
         "node_compatibility": true
       }
     },
+    "rpc_payment": {
+      "type": "custom",
+      "wasm": "target/wasm32-unknown-unknown/release/rpc_payment-opt.wasm",
+      "candid": "rpc_payment/rpc_payment.did",
+      "package": "rpc_payment",
+      "build": "./build.sh rpc_payment",
+      "declarations": {
+        "env_override": null,
+        "output": "payment/declarations/rpc_payment",
+        "node_compatibility": true
+      }
+    },
+    "evm_rpc": {
+      "type": "custom",
+      "candid": "https://github.com/internet-computer-protocol/evm-rpc-canister/releases/latest/download/evm_rpc.did",
+      "wasm": "https://github.com/internet-computer-protocol/evm-rpc-canister/releases/latest/download/evm_rpc.wasm.gz",
+      "remote": {
+        "id": {
+          "ic": "7hfb6-caaaa-aaaar-qadga-cai"
+        }
+      },
+      "specified_id": "7hfb6-caaaa-aaaar-qadga-cai",
+      "init_arg": "(record { nodesInSubnet = 28 })"
+    },
     "payment_frontend": {
-      "dependencies": [
-        "payment_backend"
-      ],
+      "dependencies": ["payment_backend"],
       "frontend": {
         "entrypoint": "payment/src/payment_frontend/src/index.html"
       },
@@ -67,10 +89,7 @@
       }
     },
     "vetkd_frontend": {
-      "dependencies": [
-        "vetkd_backend",
-        "vetkd_system_api"
-      ],
+      "dependencies": ["vetkd_backend", "vetkd_system_api"],
       "frontend": {
         "entrypoint": "vetkd/src/vetkd_frontend_js/src/index.html"
       },

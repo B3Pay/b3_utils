@@ -5,7 +5,8 @@ members = [
     "stable_memory",
     "vetkd/src/vetkd_backend",
     "vetkd/src/system_api",
-    "payment/src/payment_backend",
+    "http_payment",
+    "rpc_payment",
 ]
 resolver = "1"
 

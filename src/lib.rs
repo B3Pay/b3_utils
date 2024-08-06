@@ -49,8 +49,8 @@ pub mod error;
 pub mod http;
 pub mod mocks;
 pub mod nonce;
-pub mod types;
 pub mod status;
+pub mod types;
 
 pub mod outcall;
 pub use outcall::*;

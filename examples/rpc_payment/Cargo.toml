@@ -1,5 +1,5 @@
 [package]
-name = "payment_backend"
+name = "rpc_payment"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,9 +9,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-b3_utils = { workspace = true, features = ["ledger", "owner"] }
+b3_utils = { workspace = true, features = ["ledger", "owner", "rpc"] }
 candid = { workspace = true }
 ic-cdk = { workspace = true }
-serde = "1.0.188"
-serde_derive = "1.0.188"
-serde_json = "1.0.107"
+serde = { version = "1.0", features = ["derive"] }

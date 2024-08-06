@@ -47,3 +47,8 @@ pub const CKBTC_MINTER_CANISTER_TESTNET: CanisterId =
 const VETKD_ID_TESTNET: [u8; 10] = [0, 0, 0, 0, 0, 0, 0, 21, 1, 1];
 
 pub const VETKD_CANISTER_TESTNET: CanisterId = CanisterId::from_slice(&VETKD_ID_TESTNET);
+
+// EVM RPC ---------------------------------------------------------------------
+const EVM_RPC_ID: [u8; 10] = [0, 0, 0, 0, 2, 48, 0, 0, 1, 1];
+
+pub const EVM_RPC_CANISTER_ID: CanisterId = CanisterId::from_slice(&EVM_RPC_ID);
