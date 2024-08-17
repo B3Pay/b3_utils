@@ -8,12 +8,16 @@
 //! - `stable_memory`: Enables stable memory features. Includes the `b3-stable-structures` dependency.
 //! - `logging`: Enables logging functionality.
 //! - `ledger`: Enables ledger-related functionalities.
+//! - `owner`: Enables owner-related functionalities.
+//! - `sha2`: Enables SHA-2 hashing functionality.
+//! - `wasm`: Enables WebAssembly-related functionalities.
+//! - `rpc`: Enables EVM-RPC-canister functionalities.
 //!
 //! To enable a feature, add it to your `Cargo.toml` like so:
 //!
 //! ```toml
 //! [dependencies]
-//! b3_utils = { version = "0.9", features = ["exprimental_vetkd", "logging"] }
+//! b3_utils = { version = "0.12", features = ["exprimental_vetkd", "logging"] }
 //! ```
 //!
 //! ## Examples
