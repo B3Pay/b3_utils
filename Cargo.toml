@@ -1,6 +1,6 @@
 [package]
 name = "b3_utils"
-version = "0.12.0"
+version = "0.12.1"
 edition = "2021"
 description = "Utility functions for building on the Internet Computer"
 license = "MIT"
