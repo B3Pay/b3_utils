@@ -1,8 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use std::mem::size_of;
+    use std::{borrow::Cow, mem::size_of};
 
-    use super::*;
+    use ic_stable_structures::{storable::Bound, Storable};
+
+    use crate::memory::timer::TaskTimerEntry;
 
     #[test]
     fn test_timer_entry_to_and_from_bytes() {
@@ -14,6 +16,11 @@ mod tests {
         }
 
         impl Storable for TestTask {
+            const BOUND: Bound = Bound::Bounded {
+                is_fixed_size: false,
+                max_size: 8,
+            };
+
             fn to_bytes(&self) -> Cow<[u8]> {
                 match self {
                     TestTask::A => 9876543210u64.to_bytes(),
@@ -35,11 +42,6 @@ mod tests {
                     _ => TestTask::C(String::from_utf8(bytes.to_vec()).unwrap()),
                 }
             }
-        }
-
-        impl BoundedStorable for TestTask {
-            const IS_FIXED_SIZE: bool = true;
-            const MAX_SIZE: u32 = 24;
         }
 
         let entry = TaskTimerEntry {

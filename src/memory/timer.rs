@@ -8,6 +8,8 @@ use crate::{memory::DefaultStableMinHeap, NanoTimeStamp};
 
 use super::types::DefaultVM;
 
+mod test;
+
 #[derive(CandidType, Debug, Clone, Serialize, Deserialize)]
 pub struct TaskTimerEntry<T> {
     pub time: NanoTimeStamp,
