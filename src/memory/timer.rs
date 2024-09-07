@@ -8,6 +8,12 @@ use crate::{memory::DefaultStableMinHeap, NanoTimeStamp};
 
 use super::types::DefaultVM;
 
+#[derive(CandidType, Debug, Clone, Serialize, Deserialize)]
+pub struct TaskTimerEntry<T> {
+    pub time: NanoTimeStamp,
+    pub task: T,
+}
+
 // Added the missing generic type parameter <T>
 pub struct DefaultTaskTimer<T: Storable>(DefaultStableMinHeap<TaskTimerEntry<T>>);
 
@@ -48,12 +54,6 @@ impl<T: Storable> DefaultTaskTimer<T> {
             self.0.pop();
         }
     }
-}
-
-#[derive(CandidType, Debug, Clone, Serialize, Deserialize)]
-pub struct TaskTimerEntry<T> {
-    pub time: NanoTimeStamp,
-    pub task: T,
 }
 
 impl<T> PartialOrd for TaskTimerEntry<T> {
