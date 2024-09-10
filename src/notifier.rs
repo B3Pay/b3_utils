@@ -244,3 +244,10 @@ pub async fn send_email(email: EmailProvider) -> Result<HttpOutcallResponse, Str
         })
         .await
 }
+
+#[derive(CandidType, Debug, Serialize, Deserialize)]
+pub struct SendEmailArgs {
+    pub to: String,
+    pub subject: String,
+    pub message: String,
+}
