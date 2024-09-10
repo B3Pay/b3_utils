@@ -79,10 +79,8 @@ impl fmt::Display for Subaccount {
     }
 }
 
-#[cfg(feature = "stable_memory")]
 use ic_stable_structures::storable::Bound;
 
-#[cfg(feature = "stable_memory")]
 impl ic_stable_structures::Storable for Subaccount {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         self.0.to_bytes()

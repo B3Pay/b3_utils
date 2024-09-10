@@ -14,4 +14,4 @@ candid = { workspace = true }
 ic-cdk = { workspace = true }
 ic0 = { workspace = true }
 serde = { version = "1.0", features = ["derive"] }
-b3_utils = { workspace = true, features = ["logging", "stable_memory"] }
+b3_utils = { workspace = true, features = ["logging"] }

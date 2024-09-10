@@ -40,14 +40,10 @@ impl AppBugs {
     }
 }
 
-#[cfg(feature = "stable_memory")]
 use crate::memory::types::{Bound, Storable};
-#[cfg(feature = "stable_memory")]
 use candid::{Decode, Encode};
-#[cfg(feature = "stable_memory")]
 use std::borrow::Cow;
 
-#[cfg(feature = "stable_memory")]
 impl Storable for AppBug {
     const BOUND: Bound = Bound::Unbounded;
 
@@ -60,7 +56,6 @@ impl Storable for AppBug {
     }
 }
 
-#[cfg(feature = "stable_memory")]
 impl Storable for AppBugs {
     const BOUND: Bound = Bound::Unbounded;
 

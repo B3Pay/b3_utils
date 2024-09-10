@@ -1,10 +1,8 @@
 use super::Wasm;
 use serde_bytes::ByteBuf;
 
-#[cfg(feature = "stable_memory")]
 use crate::memory::types::{Bound, Storable};
 
-#[cfg(feature = "stable_memory")]
 impl Storable for Wasm {
     const BOUND: Bound = Bound::Unbounded;
 

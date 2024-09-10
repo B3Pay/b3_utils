@@ -50,10 +50,8 @@ impl fmt::Display for Nonce {
     }
 }
 
-#[cfg(feature = "stable_memory")]
 use ic_stable_structures::storable::Bound;
 
-#[cfg(feature = "stable_memory")]
 impl ic_stable_structures::Storable for Nonce {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         self.to_le_bytes().to_vec().into()

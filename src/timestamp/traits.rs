@@ -28,10 +28,8 @@ impl fmt::Display for NanoTimeStamp {
     }
 }
 
-#[cfg(feature = "stable_memory")]
 use ic_stable_structures::storable::Bound;
 
-#[cfg(feature = "stable_memory")]
 impl ic_stable_structures::Storable for NanoTimeStamp {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         self.to_le_bytes().to_vec().into()

@@ -5,7 +5,6 @@
 //! ## Features
 //!
 //! - `vetkd`: Enables functionality related to vetkd. Includes dependencies `ic_bls12_381`, `sha2`, and `subtle`.
-//! - `stable_memory`: Enables stable memory features. Includes the `b3-stable-structures` dependency.
 //! - `logging`: Enables logging functionality.
 //! - `ledger`: Enables ledger-related functionalities.
 //! - `owner`: Enables owner-related functionalities.
