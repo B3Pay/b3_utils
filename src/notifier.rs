@@ -51,6 +51,7 @@ struct AppKeyToken {
 pub enum EmailProviderType {
     Resend,
     Courier,
+    OneSignal,
 }
 
 impl Storable for EmailProviderType {
@@ -61,6 +62,7 @@ impl Storable for EmailProviderType {
         match string.as_ref() {
             "Resend" => EmailProviderType::Resend,
             "Courier" => EmailProviderType::Courier,
+            "OneSignal" => EmailProviderType::OneSignal,
             _ => panic!("Invalid EmailProviderType"),
         }
     }
@@ -69,6 +71,7 @@ impl Storable for EmailProviderType {
         match self {
             EmailProviderType::Resend => "Resend".to_string().into_bytes().into(),
             EmailProviderType::Courier => "Courier".to_string().into_bytes().into(),
+            EmailProviderType::OneSignal => "OneSignal".to_string().into_bytes().into(),
         }
     }
 }
@@ -102,6 +105,7 @@ pub trait EmailTrait {
 pub enum EmailProvider {
     Resend(Resend),
     Courier(Courier),
+    OneSignal(OneSignal),
 }
 
 #[derive(Deserialize, CandidType, Clone)]
@@ -137,6 +141,7 @@ impl EmailTrait for Resend {
 pub enum CourierProvider {
     Gmail,
     Resend,
+    OneSignal,
     // Postmark,
     // SendGrid,
 }
@@ -165,6 +170,7 @@ impl EmailTrait for Courier {
                     "channels": [match self.provider {
                         CourierProvider::Gmail => "gmail",
                         CourierProvider::Resend => "resend",
+                        CourierProvider::OneSignal => "onesignal",
                         // CourierProvider::Postmark => "postmark",
                         // CourierProvider::SendGrid => "sendgrid",
                     }]
@@ -184,103 +190,32 @@ impl EmailTrait for Courier {
     }
 }
 
-pub struct EmailBuilder {
-    provider: EmailProviderType,
-    to: Option<String>,
-    from: Option<String>,
-    subject: Option<String>,
-    content: Option<String>,
-    courier_provider: Option<CourierProvider>,
+#[derive(Deserialize, CandidType, Clone)]
+pub struct OneSignal {
+    pub app_id: String,
+    pub email_subject: String,
+    pub email_body: String,
+    pub include_email_tokens: Vec<String>,
 }
 
-impl From<EmailProvider> for EmailBuilder {
-    fn from(email: EmailProvider) -> Self {
-        match email {
-            EmailProvider::Resend(resend) => EmailBuilder {
-                provider: EmailProviderType::Resend,
-                to: Some(resend.to),
-                from: Some(resend.from),
-                subject: Some(resend.subject),
-                content: Some(resend.content),
-                courier_provider: None,
-            },
-            EmailProvider::Courier(courier) => EmailBuilder {
-                provider: EmailProviderType::Courier,
-                to: Some(courier.to),
-                from: None,
-                subject: Some(courier.title),
-                content: Some(courier.content),
-                courier_provider: Some(courier.provider),
-            },
-        }
-    }
-}
-
-impl EmailBuilder {
-    pub fn new(provider: EmailProviderType) -> Self {
-        EmailBuilder {
-            provider,
-            to: None,
-            from: None,
-            subject: None,
-            content: None,
-            courier_provider: None,
-        }
+impl EmailTrait for OneSignal {
+    fn body(&self) -> Vec<u8> {
+        serde_json::json!({
+            "app_id": self.app_id,
+            "email_subject": self.email_subject,
+            "email_body": self.email_body,
+            "include_email_tokens": self.include_email_tokens,
+        })
+        .to_string()
+        .into_bytes()
     }
 
-    pub fn provider(mut self, provider: EmailProviderType) -> Self {
-        self.provider = provider;
-        self
+    fn url(&self) -> String {
+        get_app_key(&EmailProviderType::OneSignal).url
     }
 
-    pub fn courier_provider(mut self, provider: CourierProvider) -> Self {
-        self.courier_provider = Some(provider);
-        self
-    }
-
-    pub fn to(mut self, to: &str) -> Self {
-        self.to = Some(to.to_string());
-        self
-    }
-
-    pub fn from(mut self, from: &str) -> Self {
-        self.from = Some(from.to_string());
-        self
-    }
-
-    pub fn subject(mut self, subject: &str) -> Self {
-        self.subject = Some(subject.to_string());
-        self
-    }
-
-    pub fn content(mut self, content: &str) -> Self {
-        self.content = Some(content.to_string());
-        self
-    }
-
-    pub fn build(self) -> Result<EmailProvider, String> {
-        match self.provider {
-            EmailProviderType::Resend => {
-                let resend = Resend {
-                    to: self.to.ok_or("To address is required")?,
-                    from: self.from.ok_or("From address is required")?,
-                    subject: self.subject.ok_or("Subject is required")?,
-                    content: self.content.ok_or("Content is required")?,
-                };
-                Ok(EmailProvider::Resend(resend))
-            }
-            EmailProviderType::Courier => {
-                let courier = Courier {
-                    to: self.to.ok_or("To address is required")?,
-                    title: self.subject.ok_or("Subject is required")?,
-                    content: self.content.ok_or("Content is required")?,
-                    provider: self
-                        .courier_provider
-                        .ok_or("Courier provider is required")?,
-                };
-                Ok(EmailProvider::Courier(courier))
-            }
-        }
+    fn provider_type(&self) -> EmailProviderType {
+        EmailProviderType::OneSignal
     }
 }
 
