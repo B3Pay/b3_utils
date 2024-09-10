@@ -17,7 +17,8 @@ num-traits = { version = "0.2.19", optional = true }
 crc32fast = { version = "1.4.2", optional = true }
 sha2 = { version = "0.10.8", optional = true }
 evm-rpc-canister-types = { version = "1.0.0", optional = true }
-ic-stable-structures = { version = "0.6.5", optional = true }
+ic-stable-structures = "0.6.5"
+serde_json = { version = "1.0.68", optional = true }
 
 # experimental features - do not update
 ic_bls12_381 = { version = "0.8.0", optional = true, default-features = false, features = [
@@ -30,6 +31,7 @@ subtle = { version = "2.5.0", optional = true }
 [features]
 exprimental_vetkd = ["ic_bls12_381", "subtle"]
 ledger = ["crc32fast", "sha2", "num-traits", "wasm"]
+notifier = ["serde_json"]
 sha256 = ["sha2"]
 wasm = ["sha2"]
 rpc = ["evm-rpc-canister-types"]

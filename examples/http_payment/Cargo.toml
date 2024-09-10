@@ -9,7 +9,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-b3_utils = { workspace = true, features = ["ledger", "owner"] }
+b3_utils = { workspace = true, features = ["ledger"] }
 candid = { workspace = true }
 ic-cdk = { workspace = true }
 serde = "1.0.188"

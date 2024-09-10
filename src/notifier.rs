@@ -7,6 +7,7 @@ use crate::{
 };
 use candid::CandidType;
 use enum_dispatch::enum_dispatch;
+use ic_stable_structures::storable::Bound;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 
@@ -53,26 +54,39 @@ pub enum EmailProviderType {
 }
 
 impl Storable for EmailProviderType {
-    const BOUND: b3_utils::memory::types::Bound = b3_utils::memory::types::Bound::Unbounded;
+    const BOUND: Bound = Bound::Unbounded;
 
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
-        serde_json::from_slice(&bytes).unwrap()
+        let string = String::from_utf8_lossy(&bytes);
+        match string.as_ref() {
+            "Resend" => EmailProviderType::Resend,
+            "Courier" => EmailProviderType::Courier,
+            _ => panic!("Invalid EmailProviderType"),
+        }
     }
 
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
-        serde_json::to_vec(self).unwrap().into()
+        match self {
+            EmailProviderType::Resend => "Resend".to_string().into_bytes().into(),
+            EmailProviderType::Courier => "Courier".to_string().into_bytes().into(),
+        }
     }
 }
 
 impl Storable for AppKeyToken {
-    const BOUND: b3_utils::memory::types::Bound = b3_utils::memory::types::Bound::Unbounded;
+    const BOUND: Bound = Bound::Unbounded;
 
     fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
-        serde_json::from_slice(&bytes).unwrap()
+        let string = String::from_utf8_lossy(&bytes);
+        let parts: Vec<&str> = string.split(',').collect();
+        AppKeyToken {
+            key: parts[0].to_string(),
+            url: parts[1].to_string(),
+        }
     }
 
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
-        serde_json::to_vec(self).unwrap().into()
+        format!("{},{}", self.key, self.url).into_bytes().into()
     }
 }
 

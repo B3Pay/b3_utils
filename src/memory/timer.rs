@@ -3,7 +3,7 @@ use crate::{memory::DefaultStableMinHeap, NanoTimeStamp};
 use candid::CandidType;
 use ic_stable_structures::{storable::Bound, vec::InitError, GrowFailed, Storable};
 use serde::{Deserialize, Serialize};
-use std::{borrow::Cow, cmp::Ordering, time::Duration};
+use std::{borrow::Cow, cmp::Ordering};
 
 mod test;
 
@@ -11,12 +11,12 @@ mod test;
 pub struct TaskTimerEntry<T> {
     pub time: NanoTimeStamp,
     pub task: T,
-    pub interval: Option<Duration>,
+    pub interval: Option<NanoTimeStamp>,
 }
 
 pub struct DefaultTaskTimer<T: Storable>(DefaultStableMinHeap<TaskTimerEntry<T>>);
 
-impl<T: Storable> DefaultTaskTimer<T> {
+impl<T: Storable + Clone> DefaultTaskTimer<T> {
     pub fn init(vm: DefaultVM) -> Result<Self, InitError> {
         let task_timer = Self(DefaultStableMinHeap::init(vm)?);
         Ok(task_timer)
@@ -44,10 +44,10 @@ impl<T: Storable> DefaultTaskTimer<T> {
 
     pub fn pop_timer(&mut self) -> Option<TaskTimerEntry<T>> {
         let timer = self.0.pop();
-        if let Some(timer) = timer {
+        if let Some(timer) = timer.clone() {
             if let Some(interval) = timer.interval {
                 // If it's an interval timer, reschedule it
-                let new_time = timer.time + NanoTimeStamp::from(interval.as_nanos() as u64);
+                let new_time = timer.time + interval.clone();
                 let new_timer = TaskTimerEntry {
                     time: new_time,
                     task: timer.task.clone(),
@@ -56,6 +56,7 @@ impl<T: Storable> DefaultTaskTimer<T> {
                 let _ = self.push_timer(&new_timer);
             }
         }
+
         timer
     }
 
@@ -64,10 +65,14 @@ impl<T: Storable> DefaultTaskTimer<T> {
     }
 
     // New method to set an interval timer
-    pub fn set_timer_interval(&mut self, interval: Duration, task: T) -> Result<(), GrowFailed> {
+    pub fn set_timer_interval(
+        &mut self,
+        interval: NanoTimeStamp,
+        task: T,
+    ) -> Result<(), GrowFailed> {
         let now = ic_cdk::api::time();
         let timer = TaskTimerEntry {
-            time: NanoTimeStamp::from(now + interval.as_nanos() as u64),
+            time: NanoTimeStamp::from(interval.0 + now),
             task,
             interval: Some(interval),
         };
@@ -99,8 +104,8 @@ impl<T: Storable> Storable for TaskTimerEntry<T> {
     fn to_bytes(&self) -> Cow<[u8]> {
         let time_bytes = self.time.to_le_bytes();
         let task_bytes = self.task.to_bytes();
-        let interval_bytes = match self.interval {
-            Some(interval) => interval.as_nanos().to_le_bytes().to_vec(),
+        let interval_bytes = match &self.interval {
+            Some(interval) => interval.to_le_bytes().to_vec(),
             None => vec![0; 16], // Use 16 bytes for consistency
         };
         let total_size = 8 + task_bytes.len() + 16;
@@ -119,7 +124,7 @@ impl<T: Storable> Storable for TaskTimerEntry<T> {
             None
         } else {
             let nanos = u128::from_le_bytes(bytes[task_end..].try_into().unwrap());
-            Some(Duration::from_nanos(nanos as u64))
+            Some(NanoTimeStamp(nanos as u64))
         };
         Self {
             time,

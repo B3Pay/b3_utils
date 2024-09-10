@@ -86,7 +86,9 @@ pub mod ledger;
 #[cfg(feature = "logging")]
 pub mod logs;
 
-pub mod courier;
+#[cfg(feature = "notifier")]
+pub mod notifier;
+
 pub mod memory;
 pub mod principal;
 

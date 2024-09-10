@@ -1,5 +1,7 @@
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
+use std::ops::Add;
+use std::ops::Sub;
 
 #[cfg(not(target_arch = "wasm32"))]
 use crate::mocks::time_mock as ic_timestamp;
@@ -13,6 +15,22 @@ mod traits;
     Default, CandidType, Deserialize, Serialize, PartialEq, Eq, PartialOrd, Ord, Clone, Debug,
 )]
 pub struct NanoTimeStamp(pub u64);
+
+impl Add for NanoTimeStamp {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        NanoTimeStamp(self.0 + other.0)
+    }
+}
+
+impl Sub for NanoTimeStamp {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        NanoTimeStamp(self.0 - other.0)
+    }
+}
 
 impl NanoTimeStamp {
     // Constants for nanosecond conversions

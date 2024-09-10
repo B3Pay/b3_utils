@@ -110,7 +110,7 @@ impl<T: Ord + Storable> InitMemory<DefaultStableMinHeap<T>> for DefaultStableMin
     }
 }
 
-impl<T: Storable> InitMemory<DefaultTaskTimer<T>> for DefaultTaskTimer<T> {
+impl<T: Storable + Clone> InitMemory<DefaultTaskTimer<T>> for DefaultTaskTimer<T> {
     fn memory_type() -> MemoryType {
         MemoryType::Timer
     }

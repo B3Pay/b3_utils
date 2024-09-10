@@ -51,7 +51,7 @@ mod tests {
         };
 
         let bytes = entry.to_bytes();
-        assert_eq!(bytes.len(), 16);
+        assert_eq!(bytes.len(), 32);
 
         let entry_from_bytes = TaskTimerEntry::from_bytes(bytes);
 
@@ -66,7 +66,7 @@ mod tests {
         };
 
         let bytes = entry.to_bytes();
-        assert_eq!(bytes.len(), 16);
+        assert_eq!(bytes.len(), 32);
 
         let entry_from_bytes = TaskTimerEntry::from_bytes(bytes);
 
