@@ -15,3 +15,6 @@ Reserved Stable Memory IDs
 | 253| Backup Memory |
 | 252| Timer Memory |
 | 251| Owner Memory |
+| 250| Reserved Unknow |
+| 249| Notifier(idempotency) Memory |
+| 248| Notifier(Keys) Memory |

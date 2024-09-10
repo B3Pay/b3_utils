@@ -12,8 +12,8 @@ use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
 
 thread_local! {
-    static CURRENT_ID_COUNTER: RefCell<DefaultStableCell<u64>> = init_stable_mem_refcell("counter_id", 220).unwrap();
-    static EMAIL_PROVIDER_KEY_MAP: RefCell<DefaultStableBTreeMap<EmailProviderType, AppKeyToken>> = init_stable_mem_refcell("app_key", 221).unwrap();
+    static IDEMPOTENCY_KEY_COUNTER: RefCell<DefaultStableCell<u64>> = init_stable_mem_refcell("idempotency_key", 249).unwrap();
+    static EMAIL_PROVIDER_KEY_MAP: RefCell<DefaultStableBTreeMap<EmailProviderType, AppKeyToken>> = init_stable_mem_refcell("provider_key_map", 248).unwrap();
 }
 
 fn get_app_key(provider: &EmailProviderType) -> AppKeyToken {
@@ -31,9 +31,9 @@ pub fn set_app_key(provider: EmailProviderType, key: String, url: String) {
 }
 
 fn get_next_id() -> u64 {
-    let current_id: u64 = CURRENT_ID_COUNTER.with(|c| *c.borrow().get());
+    let current_id: u64 = IDEMPOTENCY_KEY_COUNTER.with(|c| *c.borrow().get());
 
-    CURRENT_ID_COUNTER.with(|c| {
+    IDEMPOTENCY_KEY_COUNTER.with(|c| {
         let mut counter = c.borrow_mut();
         counter.set(current_id + 1).unwrap();
     });
