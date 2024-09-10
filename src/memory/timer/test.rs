@@ -47,6 +47,7 @@ mod tests {
         let entry = TaskTimerEntry {
             time: 1234567890.into(),
             task: TestTask::A,
+            interval: None,
         };
 
         let bytes = entry.to_bytes();
@@ -61,6 +62,7 @@ mod tests {
         let entry = TaskTimerEntry {
             time: 1234567890.into(),
             task: TestTask::B,
+            interval: None,
         };
 
         let bytes = entry.to_bytes();
@@ -74,6 +76,7 @@ mod tests {
         let entry = TaskTimerEntry {
             time: 1234567890.into(),
             task: TestTask::C("Hello World!".to_string()),
+            interval: None,
         };
 
         let bytes = entry.to_bytes();

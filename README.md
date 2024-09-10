@@ -7,3 +7,11 @@ For more detailed examples, see the [documentation](https://docs.rs/b3_utils).
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
+Reserved Stable Memory IDs
+| ID | Description |
+|----|---------------|
+| 254| Memory details|
+| 253| Backup Memory |
+| 252| Timer Memory |
+| 251| Owner Memory |

@@ -27,6 +27,7 @@ pub struct StableMemoryManager {
     memory_manager: MemoryManager<DefaultMemoryImpl>,
     backup: BackupPartition,
     partitions: Partitions,
+    timer: DefaultStableMinHeap<DefaultTaskTimer>,
 }
 
 impl StableMemoryManager {
@@ -35,13 +36,17 @@ impl StableMemoryManager {
         let partitions_vm = memory_manager.get(MemoryId::new(254));
         let partitions = Partitions::init(partitions_vm);
 
-        let backup_vm = memory_manager.get(MemoryId::new(0));
+        let backup_vm = memory_manager.get(MemoryId::new(253));
         let backup = BackupPartition::init(backup_vm);
+
+        let timer_vm = memory_manager.get(MemoryId::new(252));
+        let timer = DefaultStableMinHeap::init(timer_vm).unwrap();
 
         Self {
             memory_manager,
             partitions,
             backup,
+            timer,
         }
     }
 

@@ -23,7 +23,7 @@ fn init_owner(
 }
 
 thread_local! {
-    static OWNER: RefCell<DefaultStableCell<StoredPrincipal>> = init_owner("owner", 253).unwrap();
+    static OWNER: RefCell<DefaultStableCell<StoredPrincipal>> = init_owner("owner", 251).unwrap();
 }
 
 pub fn get_owner() -> Principal {

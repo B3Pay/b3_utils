@@ -1,12 +1,9 @@
-use std::{borrow::Cow, cmp::Ordering};
-
+use super::types::DefaultVM;
+use crate::{memory::DefaultStableMinHeap, NanoTimeStamp};
 use candid::CandidType;
 use ic_stable_structures::{storable::Bound, vec::InitError, GrowFailed, Storable};
 use serde::{Deserialize, Serialize};
-
-use crate::{memory::DefaultStableMinHeap, NanoTimeStamp};
-
-use super::types::DefaultVM;
+use std::{borrow::Cow, cmp::Ordering, time::Duration};
 
 mod test;
 
@@ -14,16 +11,14 @@ mod test;
 pub struct TaskTimerEntry<T> {
     pub time: NanoTimeStamp,
     pub task: T,
+    pub interval: Option<Duration>,
 }
 
-// Added the missing generic type parameter <T>
 pub struct DefaultTaskTimer<T: Storable>(DefaultStableMinHeap<TaskTimerEntry<T>>);
 
-// Added the missing generic type parameter <T>  trait bound
 impl<T: Storable> DefaultTaskTimer<T> {
     pub fn init(vm: DefaultVM) -> Result<Self, InitError> {
         let task_timer = Self(DefaultStableMinHeap::init(vm)?);
-
         Ok(task_timer)
     }
 
@@ -48,13 +43,35 @@ impl<T: Storable> DefaultTaskTimer<T> {
     }
 
     pub fn pop_timer(&mut self) -> Option<TaskTimerEntry<T>> {
-        self.0.pop()
+        let timer = self.0.pop();
+        if let Some(timer) = timer {
+            if let Some(interval) = timer.interval {
+                // If it's an interval timer, reschedule it
+                let new_time = timer.time + NanoTimeStamp::from(interval.as_nanos() as u64);
+                let new_timer = TaskTimerEntry {
+                    time: new_time,
+                    task: timer.task.clone(),
+                    interval: Some(interval),
+                };
+                let _ = self.push_timer(&new_timer);
+            }
+        }
+        timer
     }
 
     pub fn clear_timer(&mut self) {
-        for _ in 0..self.0.len() {
-            self.0.pop();
-        }
+        while self.0.pop().is_some() {}
+    }
+
+    // New method to set an interval timer
+    pub fn set_timer_interval(&mut self, interval: Duration, task: T) -> Result<(), GrowFailed> {
+        let now = ic_cdk::api::time();
+        let timer = TaskTimerEntry {
+            time: NanoTimeStamp::from(now + interval.as_nanos() as u64),
+            task,
+            interval: Some(interval),
+        };
+        self.push_timer(&timer)
     }
 }
 
@@ -82,28 +99,37 @@ impl<T: Storable> Storable for TaskTimerEntry<T> {
     fn to_bytes(&self) -> Cow<[u8]> {
         let time_bytes = self.time.to_le_bytes();
         let task_bytes = self.task.to_bytes();
-
-        // Now the total size is dynamic based on the size of task_bytes
-        let total_size = 8 + task_bytes.len();
+        let interval_bytes = match self.interval {
+            Some(interval) => interval.as_nanos().to_le_bytes().to_vec(),
+            None => vec![0; 16], // Use 16 bytes for consistency
+        };
+        let total_size = 8 + task_bytes.len() + 16;
         let mut bytes = vec![0; total_size];
-
         bytes[0..8].copy_from_slice(&time_bytes);
         bytes[8..8 + task_bytes.len()].copy_from_slice(&task_bytes);
-
+        bytes[8 + task_bytes.len()..].copy_from_slice(&interval_bytes);
         bytes.into()
     }
 
     fn from_bytes(bytes: Cow<[u8]>) -> Self {
         let time = NanoTimeStamp::from_le_bytes(bytes[0..8].try_into().unwrap());
-
-        // Use the rest of the bytes for the task
-        let task = T::from_bytes(bytes[8..].into());
-
-        Self { time, task }
+        let task_end = bytes.len() - 16;
+        let task = T::from_bytes(bytes[8..task_end].into());
+        let interval = if bytes[task_end..] == [0; 16] {
+            None
+        } else {
+            let nanos = u128::from_le_bytes(bytes[task_end..].try_into().unwrap());
+            Some(Duration::from_nanos(nanos as u64))
+        };
+        Self {
+            time,
+            task,
+            interval,
+        }
     }
 
     const BOUND: Bound = Bound::Bounded {
         is_fixed_size: false,
-        max_size: 8 + T::BOUND.max_size(),
+        max_size: 24 + T::BOUND.max_size(), // 8 for time, 16 for interval, plus task size
     };
 }

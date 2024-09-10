@@ -73,7 +73,6 @@ pub use environment::*;
 mod utils;
 pub use utils::*;
 
-#[cfg(feature = "owner")]
 pub mod owner;
 
 #[cfg(feature = "sha2")]
@@ -88,9 +87,8 @@ pub mod ledger;
 #[cfg(feature = "logging")]
 pub mod logs;
 
-#[cfg(feature = "stable_memory")]
+pub mod courier;
 pub mod memory;
-#[cfg(feature = "stable_memory")]
 pub mod principal;
 
 #[cfg(feature = "rpc")]
