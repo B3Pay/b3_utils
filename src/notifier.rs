@@ -52,6 +52,7 @@ pub enum EmailProviderType {
     Resend,
     Courier,
     OneSignal,
+    CloudflareWorker, // Add the new provider type
 }
 
 impl Storable for EmailProviderType {
@@ -63,6 +64,7 @@ impl Storable for EmailProviderType {
             "Resend" => EmailProviderType::Resend,
             "Courier" => EmailProviderType::Courier,
             "OneSignal" => EmailProviderType::OneSignal,
+            "CloudflareWorker" => EmailProviderType::CloudflareWorker, // Add this line
             _ => panic!("Invalid EmailProviderType"),
         }
     }
@@ -72,6 +74,9 @@ impl Storable for EmailProviderType {
             EmailProviderType::Resend => "Resend".to_string().into_bytes().into(),
             EmailProviderType::Courier => "Courier".to_string().into_bytes().into(),
             EmailProviderType::OneSignal => "OneSignal".to_string().into_bytes().into(),
+            EmailProviderType::CloudflareWorker => {
+                "CloudflareWorker".to_string().into_bytes().into()
+            } // Add this line
         }
     }
 }
@@ -106,6 +111,7 @@ pub enum EmailProvider {
     Resend(Resend),
     Courier(Courier),
     OneSignal(OneSignal),
+    CloudflareWorker(CloudflareWorker),
 }
 
 #[derive(Deserialize, CandidType, Clone)]
@@ -218,6 +224,33 @@ impl EmailTrait for OneSignal {
         EmailProviderType::OneSignal
     }
 }
+#[derive(Deserialize, CandidType, Clone)]
+pub struct CloudflareWorker {
+    pub to: String,
+    pub from: String,
+    pub subject: String,
+    pub content: String,
+}
+
+impl EmailTrait for CloudflareWorker {
+    fn body(&self) -> Vec<u8> {
+        serde_json::json!({
+            "to": self.to,
+            "subject": self.subject,
+            "html": self.content,
+        })
+        .to_string()
+        .into_bytes()
+    }
+
+    fn url(&self) -> String {
+        get_app_key(&EmailProviderType::CloudflareWorker).url
+    }
+
+    fn provider_type(&self) -> EmailProviderType {
+        EmailProviderType::CloudflareWorker
+    }
+}
 
 pub async fn send_email(email: EmailProvider) -> Result<HttpOutcallResponse, String> {
     let app_key = get_app_key(&email.provider_type());
@@ -228,7 +261,6 @@ pub async fn send_email(email: EmailProvider) -> Result<HttpOutcallResponse, Str
         .post(&String::from_utf8_lossy(&email.body()), None)
         .add_headers(vec![
             ("User-Agent".to_string(), "Mozilla/5.0".to_string()),
-            ("Content-Type".to_string(), "application/json".to_string()),
             (
                 "Authorization".to_string(),
                 format!("Bearer {}", app_key.key),
