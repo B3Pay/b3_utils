@@ -238,6 +238,7 @@ impl EmailTrait for CloudflareWorker {
             "to": self.to,
             "subject": self.subject,
             "html": self.content,
+            "from": self.from,
         })
         .to_string()
         .into_bytes()
