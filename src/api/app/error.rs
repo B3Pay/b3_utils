@@ -12,6 +12,7 @@ pub enum AppCallError {
     InstallCodeError(String),
     UninstallCodeError(String),
     WasmHashError(String),
+    RequestJoinError(String),
 }
 
 use std::fmt;
@@ -29,7 +30,7 @@ impl fmt::Display for AppCallError {
             AppCallError::InstallCodeError(e) => write!(f, "Install code error: {}", e),
             AppCallError::UninstallCodeError(e) => write!(f, "Uninstall code error: {}", e),
             AppCallError::WasmHashError(e) => write!(f, "Wasm hash error: {}", e),
-
+            AppCallError::RequestJoinError(e) => write!(f, "Request join error: {}", e),
         }
     }
 }

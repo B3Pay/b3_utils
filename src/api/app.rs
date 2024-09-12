@@ -3,7 +3,7 @@ pub mod error;
 
 use crate::{
     api::{AppInstallArg, AppStatus, AppVersion, CallCycles, InterCall, Management},
-    types::{CanisterId, ControllerId, ControllerIds},
+    types::{CanisterId, ControllerId, ControllerIds, OperationId},
 };
 use candid::{CandidType, Principal};
 use ic_cdk::api::management_canister::main::{
@@ -87,6 +87,14 @@ impl AppCall {
             .await
             .map(|info| info.module_hash)
             .map_err(|err| AppCallError::CanisterInfoError(err.to_string()))
+    }
+
+    /// Request to join the canister.
+    pub async fn request_join(&self, name: String) -> Result<OperationId, AppCallError> {
+        InterCall(self.0)
+            .call("request_join", (name,), CallCycles::NoPay)
+            .await
+            .map_err(|err| AppCallError::RequestJoinError(err.to_string()))
     }
 
     /// Install the code for the canister.
