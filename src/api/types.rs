@@ -26,6 +26,12 @@ impl AppInitArgs {
 }
 
 #[derive(CandidType, Deserialize, Serialize)]
+pub struct RequestJoinArgs {
+    pub name: String,
+    pub signer_id: Principal,
+}
+
+#[derive(CandidType, Deserialize, Serialize)]
 pub struct AppStatus {
     pub name: String,
     pub version: String,
