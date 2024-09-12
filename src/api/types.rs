@@ -1,5 +1,5 @@
 use crate::{error::HelperError, nonce::Nonce, types::CanisterId, NanoTimeStamp};
-use candid::{CandidType, Encode, Principal};
+use candid::{ser::IDLBuilder, utils::ArgumentEncoder, CandidType, Encode, Principal};
 use ic_cdk::api::management_canister::main::{
     CanisterInstallMode, CanisterStatusResponse, WasmModule,
 };
@@ -25,10 +25,20 @@ impl AppInitArgs {
     }
 }
 
-#[derive(CandidType, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Eq, CandidType, Clone, Deserialize, Serialize)]
 pub struct RequestJoinArgs {
     pub name: String,
     pub signer_id: Principal,
+}
+
+impl ArgumentEncoder for RequestJoinArgs {
+    fn encode(self, ser: &mut IDLBuilder) -> candid::Result<()> {
+        ser.arg(&self.name)?;
+        ser.arg(&self.signer_id)?;
+        ser.serialize_to_vec()?;
+
+        Ok(())
+    }
 }
 
 #[derive(CandidType, Deserialize, Serialize)]
@@ -52,4 +62,28 @@ pub enum CallCycles {
     NoPay,
     Pay(u64),
     Pay128(u128),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use candid::{decode_one, encode_one, Principal};
+
+    #[test]
+    fn test_request_join_args_decoding() {
+        // Create an instance of RequestJoinArgs
+        let original_args = RequestJoinArgs {
+            name: "Alice".to_string(),
+            signer_id: Principal::anonymous(),
+        };
+
+        // Serialize the instance
+        let encoded_args = encode_one(&original_args).expect("Failed to encode");
+
+        // Deserialize the serialized data
+        let decoded_args: RequestJoinArgs = decode_one(&encoded_args).expect("Failed to decode");
+
+        // Assert that the original and deserialized instances are equal
+        assert_eq!(original_args, decoded_args);
+    }
 }

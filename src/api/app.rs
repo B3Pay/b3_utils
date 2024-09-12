@@ -94,7 +94,7 @@ impl AppCall {
     /// Request to join the canister.
     pub async fn request_join(&self, args: RequestJoinArgs) -> Result<OperationId, AppCallError> {
         InterCall(self.0)
-            .call("request_join", (args,), CallCycles::NoPay)
+            .call("request_join", args, CallCycles::NoPay)
             .await
             .map_err(|err| AppCallError::RequestJoinError(err.to_string()))
     }
