@@ -50,7 +50,7 @@ impl AppCall {
     /// Get the owner of the canister.
     pub async fn validate_user(&self, user_id: Principal) -> Result<bool, AppCallError> {
         InterCall(self.0)
-            .call("validate_user", (user_id,), CallCycles::NoPay)
+            .call("validate_user", user_id, CallCycles::NoPay)
             .await
             .map_err(|err| AppCallError::ValidateUserError(err.to_string()))
     }
