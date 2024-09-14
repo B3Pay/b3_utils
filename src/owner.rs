@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 
 use candid::Principal;
-use ic_stable_structures::cell::ValueError;
 
 use crate::{
     memory::{error::StableMemoryError, types::DefaultStableCell, with_stable_mem_mut},
@@ -34,10 +33,10 @@ pub fn get_owner() -> Principal {
     })
 }
 
-pub fn set_owner(new_owner: Principal) -> Result<Principal, ValueError> {
+pub fn set_owner(new_owner: Principal) -> Result<Principal, String> {
     OWNER.with(|states| {
         let mut state = states.borrow_mut();
-        let old_owner = state.set(new_owner.into())?;
+        let old_owner = state.set(new_owner.into()).expect("Unable to set owner");
 
         Ok(old_owner.into())
     })
