@@ -1,4 +1,4 @@
-use crate::{error::HelperError, nonce::Nonce, types::CanisterId, NanoTimeStamp};
+use crate::{error::HelperError, nonce::Nonce, types::CanisterId, NanoTimeStamp, Subaccount};
 use candid::{ser::IDLBuilder, utils::ArgumentEncoder, CandidType, Encode, Principal};
 use ic_cdk::api::management_canister::main::{
     CanisterInstallMode, CanisterStatusResponse, WasmModule,
@@ -29,6 +29,7 @@ impl AppInitArgs {
 pub struct RequestJoinArgs {
     pub name: String,
     pub signer_id: Principal,
+    pub signature: Subaccount,
 }
 
 impl ArgumentEncoder for RequestJoinArgs {
@@ -75,6 +76,7 @@ mod tests {
         let original_args = RequestJoinArgs {
             name: "Alice".to_string(),
             signer_id: Principal::anonymous(),
+            signature: Subaccount::from([0; 32]),
         };
 
         // Serialize the instance
