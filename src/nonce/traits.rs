@@ -26,6 +26,12 @@ impl TryFrom<&[u8]> for Nonce {
     }
 }
 
+impl From<usize> for Nonce {
+    fn from(value: usize) -> Self {
+        Self(value as u64)
+    }
+}
+
 impl From<u64> for Nonce {
     fn from(value: u64) -> Self {
         Self(value)
