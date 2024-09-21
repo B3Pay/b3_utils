@@ -15,6 +15,7 @@ pub type Metadata = HashMap<String, Value>;
 pub enum Value {
     Blob(ByteBuf),
     Text(String),
+    Bool(bool),
     Nat(Nat),
     Nat64(u64),
     Int(Int),
@@ -68,6 +69,7 @@ impl Value {
             }
             Value::Blob(bytes) => Sha256::digest(bytes).into(),
             Value::Text(text) => Sha256::digest(text.as_bytes()).into(),
+            Value::Bool(b) => Sha256::digest(&[*b as u8]).into(),
             Value::Array(values) => {
                 let mut hasher = Sha256::new();
                 for v in values.iter() {
@@ -100,6 +102,7 @@ impl std::fmt::Display for Value {
         match self {
             Value::Blob(bytes) => write!(f, "{}", hex::encode(bytes.as_ref())),
             Value::Text(text) => write!(f, "{}", text),
+            Value::Bool(b) => write!(f, "{}", b),
             Value::Nat(nat) => write!(f, "{}", nat),
             Value::Nat64(nat64) => write!(f, "{}", nat64),
             Value::Int(int) => write!(f, "{}", int),
