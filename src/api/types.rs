@@ -27,14 +27,14 @@ impl AppInitArgs {
 
 #[derive(Debug, PartialEq, Eq, CandidType, Clone, Deserialize, Serialize)]
 pub struct RequestJoinArgs {
-    pub name: String,
+    pub email: String,
     pub signer_id: Principal,
     pub signature: Subaccount,
 }
 
 impl ArgumentEncoder for RequestJoinArgs {
     fn encode(self, ser: &mut IDLBuilder) -> candid::Result<()> {
-        ser.arg(&self.name)?;
+        ser.arg(&self.email)?;
         ser.arg(&self.signer_id)?;
         ser.serialize_to_vec()?;
 
@@ -74,7 +74,7 @@ mod tests {
     fn test_request_join_args_decoding() {
         // Create an instance of RequestJoinArgs
         let original_args = RequestJoinArgs {
-            name: "Alice".to_string(),
+            email: "Alice".to_string(),
             signer_id: Principal::anonymous(),
             signature: Subaccount::from([0; 32]),
         };
