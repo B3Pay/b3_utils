@@ -6,7 +6,7 @@ mod tests {
     fn test_ledger() {
         let ledger = CanisterId::from_text("ryjl3-tyaaa-aaaaa-aaaba-cai").unwrap();
 
-        assert_eq!(ledger, LEDGER_CANISTER_ID);
+        assert_eq!(ledger, ICP_LEDGER_CANISTER_ID);
     }
 
     #[test]

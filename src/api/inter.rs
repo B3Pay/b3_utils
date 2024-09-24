@@ -1,13 +1,11 @@
 mod error;
 mod traits;
 
-pub use error::*;
-
+use crate::{api::types::CallCycles, types::CanisterId};
 use candid::CandidType;
+pub use error::*;
 use ic_cdk::api::call::{call, call_with_payment, call_with_payment128, CallResult};
 use serde::de::DeserializeOwned;
-
-use crate::{api::types::CallCycles, types::CanisterId};
 
 pub struct InterCall(pub CanisterId);
 

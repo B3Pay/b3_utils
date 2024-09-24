@@ -6,9 +6,9 @@ pub const DEFAULT_SUBACCOUNT: Subaccount = Subaccount([0u8; 32]);
 pub const MANAGMENT_CANISTER_ID: CanisterId = CanisterId::management_canister();
 
 // ryjl3-tyaaa-aaaaa-aaaba-cai
-const LEDGER_ID: [u8; 10] = [0, 0, 0, 0, 0, 0, 0, 2, 1, 1];
+const ICP_LEDGER_ID: [u8; 10] = [0, 0, 0, 0, 0, 0, 0, 2, 1, 1];
 
-pub const LEDGER_CANISTER_ID: CanisterId = CanisterId::from_slice(&LEDGER_ID);
+pub const ICP_LEDGER_CANISTER_ID: CanisterId = CanisterId::from_slice(&ICP_LEDGER_ID);
 
 // rkp4c-7iaaa-aaaaa-aaaca-cai
 const CMC_ID: [u8; 10] = [0, 0, 0, 0, 0, 0, 0, 4, 1, 1];
