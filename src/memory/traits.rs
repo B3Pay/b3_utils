@@ -135,7 +135,7 @@ pub trait StateManagement {
     type Id;
 
     /// Create a new item in the state
-    fn create(args: Self::CreateArgs) -> Result<Self::Item, Self::Error>;
+    fn create(args: Self::CreateArgs) -> Result<Self::Id, Self::Error>;
 
     /// Get a writable state for an item
     fn write(id: Self::Id) -> Self::WriteState;
