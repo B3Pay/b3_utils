@@ -22,7 +22,7 @@ pub type CanisterIds = Vec<CanisterId>;
 pub type RoleId = Nonce;
 
 /// Represents the ID of an operation in the system.
-pub type OperationId = u64;
+pub type OperationId = Nonce;
 
 /// Represents a deadline timestamp.
 pub type Deadline = u64;
