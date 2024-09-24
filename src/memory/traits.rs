@@ -143,6 +143,11 @@ pub trait StateManagement {
     /// Get a readable state for an item
     fn read(id: Self::Id) -> Self::ReadState;
 
+    /// Iterate over all items in the state
+    fn iter<F, R>(f: F) -> Vec<R>
+    where
+        F: FnMut(&Self::Id, &Self::Item) -> R;
+
     /// Get views of all items in the state
     fn views() -> Vec<Self::View>;
 
