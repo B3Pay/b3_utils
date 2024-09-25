@@ -50,6 +50,18 @@ impl From<[u8; 32]> for Subaccount {
     }
 }
 
+impl From<Subaccount> for serde_bytes::ByteBuf {
+    fn from(subaccount: Subaccount) -> Self {
+        serde_bytes::ByteBuf::from(subaccount.0.to_vec())
+    }
+}
+
+impl From<&Subaccount> for serde_bytes::ByteBuf {
+    fn from(subaccount: &Subaccount) -> Self {
+        serde_bytes::ByteBuf::from(subaccount.0.to_vec())
+    }
+}
+
 impl TryFrom<Vec<u8>> for Subaccount {
     type Error = SubaccountError;
 

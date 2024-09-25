@@ -3,7 +3,6 @@ pub use error::*;
 
 use crate::ledger::currency::ICPToken;
 use crate::ledger::types::{TransferBlockIndex, TransferMemo};
-use crate::Subaccount;
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
@@ -19,7 +18,7 @@ pub struct ICPTransferArgs {
     pub fee: ICPToken,
     pub amount: ICPToken,
     pub to: serde_bytes::ByteBuf,
-    pub from_subaccount: Option<Subaccount>,
+    pub from_subaccount: Option<serde_bytes::ByteBuf>,
     pub created_at_time: Option<ICPTransferTimestamp>,
 }
 
