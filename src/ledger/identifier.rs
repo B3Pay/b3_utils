@@ -166,6 +166,12 @@ impl From<Principal> for AccountIdentifier {
     }
 }
 
+impl From<AccountIdentifier> for serde_bytes::ByteBuf {
+    fn from(account: AccountIdentifier) -> Self {
+        serde_bytes::ByteBuf::from(account.to_vec())
+    }
+}
+
 impl CandidType for AccountIdentifier {
     // The type expected for account identifier is
     fn _ty() -> candid::types::Type {
