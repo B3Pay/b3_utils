@@ -14,12 +14,12 @@ pub struct ICPTransferTimestamp {
     pub timestamp_nanos: u64,
 }
 
-#[derive(CandidType, Deserialize, Serialize, Clone)]
+#[derive(Debug, CandidType, Deserialize, Serialize, Clone)]
 pub struct ICPTransferArgs {
     pub memo: TransferMemo,
     pub fee: ICPToken,
     pub amount: ICPToken,
-    pub to: AccountIdentifier,
+    pub to: Vec<u8>,
     pub from_subaccount: Option<Subaccount>,
     pub created_at_time: Option<ICPTransferTimestamp>,
 }
