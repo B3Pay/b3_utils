@@ -21,10 +21,11 @@ pub trait StateAccess {
 }
 
 /// Trait for state-modifying operations
-pub trait StateMutations: StateAccess {
+pub trait StateMutations {
     type Error;
     type AddArgs;
     type WriteState;
+    type Id;
 
     /// Add a new item to the state
     fn add(args: Self::AddArgs) -> Result<Self::Id, Self::Error>;
