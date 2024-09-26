@@ -14,6 +14,19 @@ pub struct AppInstallArg {
 }
 
 #[derive(CandidType, Deserialize, Serialize, Debug)]
+pub struct WalletInitArgs {
+    pub owner_id: Principal,
+    pub core_id: CanisterId,
+    pub wallet_type: String,
+}
+
+impl WalletInitArgs {
+    pub fn encode(&self) -> Result<Vec<u8>, HelperError> {
+        Encode!(&self).map_err(|e| HelperError::EncodeError(e.to_string()))
+    }
+}
+
+#[derive(CandidType, Deserialize, Serialize, Debug)]
 pub struct AppInitArgs {
     pub owner_id: Principal,
     pub forge_id: CanisterId,
