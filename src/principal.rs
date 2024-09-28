@@ -16,13 +16,17 @@ impl StoredPrincipal {
         self.0.to_text()
     }
 
+    pub fn from_slice(slice: &[u8]) -> Self {
+        Self(Principal::from_slice(slice))
+    }
+
     pub fn from_text(text: &str) -> Result<Self, String> {
         Principal::from_text(text)
             .map_err(|e| format!("Principal::from_text failed: {}", e))
             .map(Self)
     }
 
-    pub fn from_slice(slice: &[u8]) -> Result<Self, String> {
+    pub fn try_from_slice(slice: &[u8]) -> Result<Self, String> {
         Principal::try_from_slice(slice)
             .map_err(|e| format!("Principal::try_from_slice failed: {}", e))
             .map(Self)
