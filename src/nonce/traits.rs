@@ -32,6 +32,15 @@ impl From<usize> for Nonce {
     }
 }
 
+impl From<i32> for Nonce {
+    fn from(value: i32) -> Self {
+        if value < 0 {
+            panic!("Negative nonce value");
+        }
+        Self(value as u64)
+    }
+}
+
 impl From<u64> for Nonce {
     fn from(value: u64) -> Self {
         Self(value)

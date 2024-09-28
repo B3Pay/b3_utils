@@ -9,6 +9,7 @@ use sha2::{Digest, Sha256};
 const INT128_BUF_SIZE: usize = 19;
 pub type Hash = [u8; 32];
 
+// Assuming the original types are imported or defined here
 pub type Metadata = HashMap<String, Value>;
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -21,6 +22,73 @@ pub enum Value {
     Int(Int),
     Array(Vec<Value>),
     Map(BTreeMap<String, Value>),
+}
+
+// Helper methods for Value
+impl Value {
+    pub fn as_blob(&self) -> Option<&ByteBuf> {
+        if let Value::Blob(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_text(&self) -> Option<&String> {
+        if let Value::Text(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_bool(&self) -> Option<bool> {
+        if let Value::Bool(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_nat(&self) -> Option<&Nat> {
+        if let Value::Nat(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_nat64(&self) -> Option<u64> {
+        if let Value::Nat64(v) = self {
+            Some(*v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_int(&self) -> Option<&Int> {
+        if let Value::Int(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_array(&self) -> Option<&Vec<Value>> {
+        if let Value::Array(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_map(&self) -> Option<&BTreeMap<String, Value>> {
+        if let Value::Map(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
 }
 
 impl Value {
@@ -326,6 +394,30 @@ impl From<Nat> for Value {
 impl From<String> for Value {
     fn from(s: String) -> Self {
         Value::Text(s)
+    }
+}
+
+impl From<bool> for Value {
+    fn from(v: bool) -> Self {
+        Value::Bool(v)
+    }
+}
+
+impl From<Int> for Value {
+    fn from(v: Int) -> Self {
+        Value::Int(v)
+    }
+}
+
+impl From<Vec<Value>> for Value {
+    fn from(v: Vec<Value>) -> Self {
+        Value::Array(v)
+    }
+}
+
+impl From<BTreeMap<String, Value>> for Value {
+    fn from(v: BTreeMap<String, Value>) -> Self {
+        Value::Map(v)
     }
 }
 
