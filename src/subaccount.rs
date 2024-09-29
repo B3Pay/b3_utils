@@ -147,6 +147,24 @@ impl Subaccount {
         [env_str, &index].join("_")
     }
 
+    /// Returns the id based on nonce as a string.
+    /// The id is used to identify the subaccount in the backend.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use b3_utils::{Environment, Subaccount};
+    ///
+    /// let subaccount = Subaccount::new(Environment::Production, 0);
+    /// assert_eq!(subaccount.nonce_id(), "0");
+    ///
+    /// let subaccount = Subaccount::new(Environment::Development, 123456789);
+    /// assert_eq!(subaccount.nonce_id(), "123456789");
+    /// ```
+    pub fn nonce_id(&self) -> String {
+        self.nonce().to_string()
+    }
+
     /// returns the account name of the subaccount
     ///
     /// # Example
@@ -175,9 +193,7 @@ impl Subaccount {
             return "Default".to_string();
         }
 
-        let next_index = self.nonce();
-
-        self.environment().to_name(next_index)
+        self.environment().to_name(self.nonce())
     }
 
     /// returns the nonce of the subaccount
@@ -372,9 +388,9 @@ impl Subaccount {
     /// Returns the hex representation of the subaccount
     /// with leading zeros removed
     /// e.g. 0000000
-    /// will be returned as 0
+    /// will be returned as ""
     /// e.g. 0000001
-    /// will be returned as 1
+    /// will be returned as "1"
     ///
     /// # Example
     ///
@@ -384,6 +400,9 @@ impl Subaccount {
     ///
     /// let subaccount = Subaccount::new(Environment::Production, 0);
     /// assert_eq!(subaccount.to_hex(), "".to_string());
+    ///
+    /// let subaccount = Subaccount::new(Environment::Production, 01);
+    /// assert_eq!(subaccount.to_hex(), "1".to_string());
     ///
     /// let subaccount = Subaccount::from_principal("2chl6-4hpzw-vqaaa-aaaaa-c".parse().unwrap());
     /// assert_eq!(subaccount.to_hex(), "9efcdab00000000000100000000000000000000000000000000000000000000".to_string());
