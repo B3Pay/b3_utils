@@ -72,12 +72,6 @@ pub struct AppAccountsNonce {
     pub staging: Nonce,
 }
 
-pub enum CallCycles {
-    NoPay,
-    Pay(u64),
-    Pay128(u128),
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

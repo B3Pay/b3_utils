@@ -1,7 +1,7 @@
 mod error;
 mod traits;
 
-use crate::{api::types::CallCycles, types::CanisterId};
+use crate::{api::CallCycles, types::CanisterId};
 use candid::CandidType;
 pub use error::*;
 use ic_cdk::api::call::{call, call_with_payment, call_with_payment128, CallResult};

@@ -1,4 +1,5 @@
 use candid::CandidType;
+use ic_cdk::api::management_canister::ecdsa::{EcdsaCurve, EcdsaKeyId};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
@@ -55,6 +56,27 @@ impl From<u8> for Environment {
             STAGING_PREFIX_NUMBER => Environment::Staging,
             DEVELOPMENT_PREFIX_NUMBER => Environment::Development,
             _ => Environment::Production,
+        }
+    }
+}
+
+impl From<Environment> for EcdsaKeyId {
+    fn from(env: Environment) -> Self {
+        if env == Environment::Production {
+            EcdsaKeyId {
+                curve: EcdsaCurve::Secp256k1,
+                name: "key_1".to_string(),
+            }
+        } else if env == Environment::Staging {
+            EcdsaKeyId {
+                curve: EcdsaCurve::Secp256k1,
+                name: "test_key_1".to_string(),
+            }
+        } else {
+            EcdsaKeyId {
+                curve: EcdsaCurve::Secp256k1,
+                name: "dfx_test_key".to_string(),
+            }
         }
     }
 }

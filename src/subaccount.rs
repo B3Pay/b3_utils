@@ -3,6 +3,7 @@ use std::ops::Add;
 use crate::constants::{DEFAULT_SUBACCOUNT, DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
 use crate::environment::Environment;
 use candid::{CandidType, Principal};
+use ic_cdk::api::management_canister::ecdsa::EcdsaKeyId;
 use serde::{Deserialize, Serialize};
 
 pub mod error;
@@ -448,5 +449,9 @@ impl Subaccount {
 
     pub fn derivation_path(&self) -> Vec<Vec<u8>> {
         vec![self.0.to_vec()]
+    }
+
+    pub fn ecdsa_key_id(&self) -> EcdsaKeyId {
+        self.environment().into()
     }
 }
