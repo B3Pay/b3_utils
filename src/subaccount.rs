@@ -155,16 +155,16 @@ impl Subaccount {
     /// use b3_utils::{Environment, Subaccount};
     ///
     /// let subaccount = Subaccount::new(Environment::Production, 123456789);
-    /// assert_eq!(subaccount.name(), "Account 123456790");
+    /// assert_eq!(subaccount.name(), "Account 123456789");
     ///
     /// let subaccount = Subaccount::new(Environment::Production, 0);
     /// assert_eq!(subaccount.name(), "Default");
     ///
     /// let subaccount = Subaccount::new(Environment::Production, 1);
-    /// assert_eq!(subaccount.name(), "Account 2");
+    /// assert_eq!(subaccount.name(), "Account 1");
     ///
     /// let subaccount = Subaccount::new(Environment::Production, 2);
-    /// assert_eq!(subaccount.name(), "Account 3");
+    /// assert_eq!(subaccount.name(), "Account 2");
     /// ```
     pub fn name(&self) -> String {
         if self.is_principal() {
