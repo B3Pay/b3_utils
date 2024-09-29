@@ -1,5 +1,3 @@
-use std::ops::Add;
-
 use crate::constants::{DEFAULT_SUBACCOUNT, DEVELOPMENT_PREFIX_NUMBER, STAGING_PREFIX_NUMBER};
 use crate::environment::Environment;
 use candid::{CandidType, Principal};
@@ -40,7 +38,8 @@ impl Subaccount {
         // This leaves the first 24 bytes of the subaccount array as 0 (or the environment prefix at the 24th byte),
         // and the rest of the array as the nonce in big-endian order
         // with this we get smallest ICRCAccount ids
-        subaccount[24..].copy_from_slice(&nonce_bytes);
+        let start_index = 32 - nonce_bytes.len();
+        subaccount[start_index..].copy_from_slice(&nonce_bytes);
 
         Subaccount(subaccount)
     }
@@ -176,7 +175,7 @@ impl Subaccount {
             return "Default".to_string();
         }
 
-        let next_index = self.nonce().add(1);
+        let next_index = self.nonce();
 
         self.environment().to_name(next_index)
     }
@@ -374,7 +373,7 @@ impl Subaccount {
     /// with leading zeros removed
     /// e.g. 0000000
     /// will be returned as 0
-    /// 0000001
+    /// e.g. 0000001
     /// will be returned as 1
     ///
     /// # Example

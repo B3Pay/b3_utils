@@ -1,4 +1,4 @@
-use std::{cmp, fmt, hash, mem::size_of, str::FromStr};
+use std::{cmp, fmt, hash, str::FromStr};
 
 use candid::Principal;
 
@@ -32,9 +32,29 @@ impl hash::Hash for Subaccount {
     }
 }
 
+impl From<i32> for Subaccount {
+    fn from(nonce: i32) -> Self {
+        let mut subaccount = [0; 32];
+        let nonce_bytes = nonce.to_be_bytes();
+        let start_index = 32 - nonce_bytes.len();
+        subaccount[start_index..].copy_from_slice(&nonce_bytes);
+        Subaccount(subaccount)
+    }
+}
+
+impl From<u64> for Subaccount {
+    fn from(nonce: u64) -> Self {
+        let mut subaccount = [0; 32];
+        let nonce_bytes = nonce.to_be_bytes();
+        let start_index = 32 - nonce_bytes.len();
+        subaccount[start_index..].copy_from_slice(&nonce_bytes);
+        Subaccount(subaccount)
+    }
+}
+
 impl From<Principal> for Subaccount {
     fn from(principal: Principal) -> Self {
-        let mut subaccount = [0; size_of::<Subaccount>()];
+        let mut subaccount = [0; 32];
         let principal_id = principal.as_slice();
 
         subaccount[0] = principal_id.len().try_into().unwrap();
