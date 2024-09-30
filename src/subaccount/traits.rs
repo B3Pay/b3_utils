@@ -54,8 +54,11 @@ impl From<u64> for Subaccount {
 
 impl From<String> for Subaccount {
     fn from(nonce: String) -> Self {
-        let nonce = nonce.parse::<u64>().expect("Invalid nonce");
-        nonce.into()
+        let mut subaccount = [0; 32];
+        let nonce_bytes = nonce.as_bytes();
+        let start_index = 32 - nonce_bytes.len();
+        subaccount[start_index..].copy_from_slice(nonce_bytes);
+        Subaccount(subaccount)
     }
 }
 

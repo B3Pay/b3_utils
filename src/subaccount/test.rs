@@ -180,4 +180,40 @@ mod test {
         assert_eq!("ffffffffffffffff", subaccount.to_hex());
         assert_eq!("18446744073709551615", subaccount.nonce_id());
     }
+
+    #[test]
+    fn test_subaccount_from_string() {
+        // Test with a short string
+        let nonce = String::from("test");
+        let subaccount = Subaccount::from(nonce);
+        assert_eq!(
+            subaccount,
+            Subaccount([
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                116, 101, 115, 116
+            ])
+        );
+
+        // Test with a string of exactly 32 characters
+        let nonce = String::from("12345678901234567890123456789012");
+        let subaccount = Subaccount::from(nonce);
+        assert_eq!(
+            subaccount,
+            Subaccount([
+                49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49,
+                50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50
+            ])
+        );
+
+        // Test with a string longer than 32 characters (should truncate)
+        let nonce = String::from("123456789012345678901234567890123456");
+        let subaccount = Subaccount::from(nonce);
+        assert_eq!(
+            subaccount,
+            Subaccount([
+                53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53,
+                54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54
+            ])
+        );
+    }
 }
