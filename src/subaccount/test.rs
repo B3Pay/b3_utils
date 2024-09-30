@@ -182,8 +182,17 @@ mod test {
     }
 
     #[test]
-    fn test_subaccount_from_string() {
+    fn test_subaccount_from_hex_string() {
         // Test with a short string
+        let subaccount = Subaccount::from_hex("").unwrap();
+        assert_eq!(
+            subaccount,
+            Subaccount([
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0
+            ])
+        );
+
         let subaccount = Subaccount::from_hex("ff0000000000000000").unwrap();
         assert_eq!(
             subaccount,
@@ -192,8 +201,6 @@ mod test {
                 0, 0, 0, 0, 0
             ])
         );
-
-        println!("{}", subaccount.to_hex());
 
         // Test with a string of exactly 32 characters
         let subaccount = Subaccount::from_hex("12345678901234567890123456789012").unwrap();
