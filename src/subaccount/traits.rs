@@ -52,6 +52,13 @@ impl From<u64> for Subaccount {
     }
 }
 
+impl From<String> for Subaccount {
+    fn from(nonce: String) -> Self {
+        let nonce = nonce.parse::<u64>().expect("Invalid nonce");
+        nonce.into()
+    }
+}
+
 impl From<Principal> for Subaccount {
     fn from(principal: Principal) -> Self {
         let mut subaccount = [0; 32];

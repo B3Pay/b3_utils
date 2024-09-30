@@ -178,5 +178,6 @@ mod test {
         let subaccount = Subaccount::from(u64::MAX);
 
         assert_eq!("ffffffffffffffff", subaccount.to_hex());
+        assert_eq!("18446744073709551615", subaccount.nonce_id());
     }
 }
