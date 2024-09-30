@@ -60,6 +60,17 @@ impl From<u8> for Environment {
     }
 }
 
+impl From<String> for Environment {
+    fn from(value: String) -> Self {
+        match value.to_lowercase().as_str() {
+            "development" => Environment::Development,
+            "staging" => Environment::Staging,
+            "production" => Environment::Production,
+            _ => Environment::Production,
+        }
+    }
+}
+
 impl From<Environment> for EcdsaKeyId {
     fn from(env: Environment) -> Self {
         if env == Environment::Production {

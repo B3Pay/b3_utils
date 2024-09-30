@@ -52,16 +52,6 @@ impl From<u64> for Subaccount {
     }
 }
 
-impl From<String> for Subaccount {
-    fn from(nonce: String) -> Self {
-        let mut subaccount = [0; 32];
-        let nonce_bytes = nonce.as_bytes();
-        let start_index = 32 - nonce_bytes.len();
-        subaccount[start_index..].copy_from_slice(nonce_bytes);
-        Subaccount(subaccount)
-    }
-}
-
 impl From<Principal> for Subaccount {
     fn from(principal: Principal) -> Self {
         let mut subaccount = [0; 32];

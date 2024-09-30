@@ -184,35 +184,34 @@ mod test {
     #[test]
     fn test_subaccount_from_string() {
         // Test with a short string
-        let nonce = String::from("test");
-        let subaccount = Subaccount::from(nonce);
+        let subaccount = Subaccount::from_hex("ff0000000000000000").unwrap();
         assert_eq!(
             subaccount,
             Subaccount([
-                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                116, 101, 115, 116
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 0, 0, 0,
+                0, 0, 0, 0, 0
             ])
         );
 
+        println!("{}", subaccount.to_hex());
+
         // Test with a string of exactly 32 characters
-        let nonce = String::from("12345678901234567890123456789012");
-        let subaccount = Subaccount::from(nonce);
+        let subaccount = Subaccount::from_hex("12345678901234567890123456789012").unwrap();
         assert_eq!(
             subaccount,
             Subaccount([
-                49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49,
-                50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 52, 86, 120, 144, 18, 52, 86,
+                120, 144, 18, 52, 86, 120, 144, 18
             ])
         );
 
         // Test with a string longer than 32 characters (should truncate)
-        let nonce = String::from("123456789012345678901234567890123456");
-        let subaccount = Subaccount::from(nonce);
+        let subaccount = Subaccount::from_hex("123456789012345678901234567890123456").unwrap();
         assert_eq!(
             subaccount,
             Subaccount([
-                53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53,
-                54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 52, 86, 120, 144, 18, 52, 86, 120,
+                144, 18, 52, 86, 120, 144, 18, 52, 86
             ])
         );
     }

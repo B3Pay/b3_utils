@@ -156,7 +156,7 @@ impl Subaccount {
     /// use b3_utils::{Environment, Subaccount};
     ///
     /// let subaccount = Subaccount::new(Environment::Production, 0);
-    /// assert_eq!(subaccount.nonce_id(), "0");
+    /// assert_eq!(subaccount.nonce_id(), "");
     ///
     /// let subaccount = Subaccount::new(Environment::Development, 123456789);
     /// assert_eq!(subaccount.nonce_id(), "123456789");
