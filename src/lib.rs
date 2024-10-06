@@ -75,6 +75,9 @@ pub use utils::*;
 
 pub mod owner;
 
+#[cfg(feature = "metadata")]
+pub mod metadata;
+
 #[cfg(feature = "sha2")]
 pub mod sha2;
 

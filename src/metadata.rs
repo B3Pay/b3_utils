@@ -1,9 +1,14 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
-use super::{Metadata, Value};
+mod test;
+mod value;
+pub use value::*;
+
 use candid::{Int, Nat};
 use serde_bytes::ByteBuf;
 use sha2::{Digest, Sha256};
+
+pub type Metadata = HashMap<String, Value>;
 
 pub struct MetadataHelper;
 

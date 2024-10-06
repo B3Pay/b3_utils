@@ -1,9 +1,9 @@
 use candid::{CandidType, Nat};
 use serde::{Deserialize, Serialize};
 
-use crate::{ledger::icrc::ICRCAccount, Subaccount};
+use crate::{ledger::icrc::ICRCAccount, metadata::Value, Subaccount};
 
-use super::{error::ICRC1TransferError, ICRC2ApproveError, ICRC2TransferFromError, Value};
+use super::{error::ICRC1TransferError, ICRC2ApproveError, ICRC2TransferFromError};
 
 pub type TxIndex = Nat;
 
